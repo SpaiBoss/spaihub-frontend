@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
-import { Button } from '../ui';
+import api from '../services/api';
+import { Button } from './ui';
 
 function defaultRange() {
   const to = new Date();
