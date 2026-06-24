@@ -227,3 +227,41 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
     </div>
   );
 }
+
+export function Pagination({ page = 1, totalPages = 1, total = 0, limit = 20, onPageChange, className = '' }) {
+  if (!total) return null;
+
+  const start = (page - 1) * limit + 1;
+  const end = Math.min(page * limit, total);
+
+  return (
+    <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 ${className}`}>
+      <p className="text-sm text-navy/50">
+        Showing {start.toLocaleString()}–{end.toLocaleString()} of {total.toLocaleString()}
+      </p>
+      {totalPages > 1 && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-navy/60 font-medium px-1">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

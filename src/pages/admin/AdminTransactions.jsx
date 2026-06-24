@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 import api from '../../services/api';
-import { StatusBadge, Button } from '../../components/ui';
+import { Pagination, StatusBadge, Button } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 const STATUS_OPTIONS = ['', 'SUCCESS', 'PENDING', 'FAILED'];
@@ -102,29 +102,14 @@ export default function AdminTransactions() {
           </table>
         </div>
 
-        {data.pagination.totalPages > 1 && (
-          <div className="flex justify-center gap-4 mt-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={filters.page <= 1}
-              onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-navy/50 self-center">
-              Page {filters.page} of {data.pagination.totalPages}
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={filters.page >= data.pagination.totalPages}
-              onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        <Pagination
+          className="mt-4"
+          page={filters.page}
+          totalPages={data.pagination.totalPages}
+          total={data.pagination.total}
+          limit={data.pagination.limit}
+          onPageChange={(p) => setFilters({ ...filters, page: p })}
+        />
       </AdminLayout>
     </AdminGuard>
   );

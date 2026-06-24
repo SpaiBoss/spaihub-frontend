@@ -1,20 +1,34 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { Modal, StatusBadge } from '../../components/ui';
+import { Modal, Pagination, StatusBadge } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminWithdrawals() {
-  const [withdrawals, setWithdrawals] = useState([]);
+  const [pending, setPending] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [historyPagination, setHistoryPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [historyPage, setHistoryPage] = useState(1);
   const [rejecting, setRejecting] = useState(null);
   const [note, setNote] = useState('');
 
-  async function load() {
-    const { data } = await api.get('/api/admin/withdrawals');
-    setWithdrawals(data);
+  async function loadPending() {
+    const { data } = await api.get('/api/admin/withdrawals?status=PENDING');
+    setPending(data.withdrawals);
   }
 
-  useEffect(() => { load(); }, []);
+  async function loadHistory(currentPage = historyPage) {
+    const { data } = await api.get(`/api/admin/withdrawals?history=true&page=${currentPage}`);
+    setHistory(data.withdrawals);
+    setHistoryPagination(data.pagination);
+  }
+
+  async function load() {
+    await Promise.all([loadPending(), loadHistory(historyPage)]);
+  }
+
+  useEffect(() => { loadPending(); }, []);
+  useEffect(() => { loadHistory(historyPage); }, [historyPage]);
 
   async function process(id, action, adminNote) {
     await api.post(`/api/admin/withdrawals/${id}/process`, { action, adminNote });
@@ -23,9 +37,6 @@ export default function AdminWithdrawals() {
     setNote('');
     load();
   }
-
-  const pending = withdrawals.filter((w) => w.status === 'PENDING');
-  const history = withdrawals.filter((w) => w.status !== 'PENDING');
 
   return (
     <AdminGuard>
@@ -77,20 +88,32 @@ export default function AdminWithdrawals() {
               </tr>
             </thead>
             <tbody>
-              {history.map((w) => (
-                <tr key={w.id} className="border-b">
-                  <td className="p-3">{w.owner.name}</td>
-                  <td className="p-3">{w.amountXaf.toLocaleString()} XAF</td>
-                  <td className="p-3">
-                    <StatusBadge status={w.status} />
-                    {w.adminNote && <p className="text-xs text-gray-400">{w.adminNote}</p>}
-                  </td>
-                  <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
-                </tr>
-              ))}
+              {history.length === 0 ? (
+                <tr><td colSpan={4} className="p-6 text-center text-gray-400">No withdrawal history</td></tr>
+              ) : (
+                history.map((w) => (
+                  <tr key={w.id} className="border-b">
+                    <td className="p-3">{w.owner.name}</td>
+                    <td className="p-3">{w.amountXaf.toLocaleString()} XAF</td>
+                    <td className="p-3">
+                      <StatusBadge status={w.status} />
+                      {w.adminNote && <p className="text-xs text-gray-400">{w.adminNote}</p>}
+                    </td>
+                    <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+        <Pagination
+          className="mt-4"
+          page={historyPagination.page}
+          totalPages={historyPagination.totalPages}
+          total={historyPagination.total}
+          limit={historyPagination.limit}
+          onPageChange={setHistoryPage}
+        />
 
         <Modal open={!!rejecting} onClose={() => setRejecting(null)} title="Reject Withdrawal">
           <textarea

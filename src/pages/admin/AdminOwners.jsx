@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { StatusBadge } from '../../components/ui';
+import { Pagination, StatusBadge } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminOwners() {
   const [owners, setOwners] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [page, setPage] = useState(1);
 
-  async function load() {
-    const { data } = await api.get('/api/admin/owners');
+  async function load(currentPage = page) {
+    const { data } = await api.get(`/api/admin/owners?page=${currentPage}`);
     setOwners(data.owners);
+    setPagination(data.pagination);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(page); }, [page]);
 
   async function toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     await api.patch(`/api/admin/owners/${id}/status`, { status: newStatus });
     toast.success(`Owner ${newStatus.toLowerCase()}`);
-    load();
+    load(page);
   }
 
   return (
@@ -63,6 +66,14 @@ export default function AdminOwners() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          className="mt-4"
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          limit={pagination.limit}
+          onPageChange={setPage}
+        />
       </AdminLayout>
     </AdminGuard>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 import api from '../../services/api';
-import { StatusBadge } from '../../components/ui';
+import { Pagination, StatusBadge } from '../../components/ui';
 
 export default function Transactions() {
   const [data, setData] = useState({ transactions: [], pagination: {} });
@@ -107,27 +107,14 @@ export default function Transactions() {
         </table>
       </div>
 
-      {data.pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <button
-            disabled={filters.page <= 1}
-            onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-            className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-500">
-            Page {filters.page} of {data.pagination.totalPages}
-          </span>
-          <button
-            disabled={filters.page >= data.pagination.totalPages}
-            onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-            className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination
+        className="mt-4"
+        page={filters.page}
+        totalPages={data.pagination.totalPages}
+        total={data.pagination.total}
+        limit={data.pagination.limit}
+        onPageChange={(p) => setFilters({ ...filters, page: p })}
+      />
     </div>
   );
 }

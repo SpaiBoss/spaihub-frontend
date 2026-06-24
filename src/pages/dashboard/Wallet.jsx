@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { Modal, StatusBadge } from '../../components/ui';
+import { Modal, Pagination, StatusBadge } from '../../components/ui';
 
 export default function Wallet() {
   const [wallet, setWallet] = useState(null);
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [form, setForm] = useState({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
 
-  async function loadWallet() {
-    const { data } = await api.get('/api/owner/wallet');
+  async function loadWallet(currentPage = page) {
+    const { data } = await api.get(`/api/owner/wallet?page=${currentPage}`);
     setWallet(data);
+    setPagination(data.pagination);
   }
 
   useEffect(() => {
-    loadWallet().finally(() => setLoading(false));
-  }, []);
+    loadWallet(page).finally(() => setLoading(false));
+  }, [page]);
 
   async function handleWithdraw(e) {
     e.preventDefault();
@@ -29,7 +32,7 @@ export default function Wallet() {
       toast.success('Withdrawal requested');
       setShowWithdraw(false);
       setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
-      loadWallet();
+      loadWallet(page);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Withdrawal failed');
     }
@@ -83,6 +86,14 @@ export default function Wallet() {
             )}
           </tbody>
         </table>
+        <Pagination
+          className="p-4 border-t"
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          limit={pagination.limit}
+          onPageChange={setPage}
+        />
       </div>
 
       <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal">

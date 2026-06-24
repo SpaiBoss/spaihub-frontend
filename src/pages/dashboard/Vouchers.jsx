@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Download, Copy, Ban, Ticket, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { StatusBadge, Button, Card, EmptyState, TableShell } from '../../components/ui';
+import { StatusBadge, Button, Card, EmptyState, Pagination, TableShell } from '../../components/ui';
 import VoucherFormModal from '../../components/VoucherFormModal';
 import VoucherPdfModal from '../../components/VoucherPdfModal';
 import { formatPackageSummary } from '../../utils/packages';
@@ -214,29 +214,14 @@ export default function Vouchers() {
         </table>
       </TableShell>
 
-      {data.pagination.totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-6">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={filters.page <= 1}
-            onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-navy/50 font-medium">
-            Page {filters.page} of {data.pagination.totalPages}
-          </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={filters.page >= data.pagination.totalPages}
-            onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      <Pagination
+        className="mt-6"
+        page={filters.page}
+        totalPages={data.pagination.totalPages}
+        total={data.pagination.total}
+        limit={data.pagination.limit}
+        onPageChange={(p) => setFilters({ ...filters, page: p })}
+      />
 
       <VoucherFormModal
         open={showCreate}

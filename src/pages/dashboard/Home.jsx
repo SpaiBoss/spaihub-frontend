@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { TrendingUp, Users, Wifi, Wallet, BarChart3, Ticket, Smartphone } from 'lucide-react';
 import {
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   XAxis,
@@ -14,19 +16,15 @@ import {
 } from 'recharts';
 import api from '../../services/api';
 import { Card, EmptyState, Skeleton, StatCard, StatusBadge } from '../../components/ui';
-
-function formatXaf(amount) {
-  return `${Number(amount).toLocaleString()} XAF`;
-}
-
-const chartTooltipStyle = {
-  borderRadius: '12px',
-  border: '1px solid #e5e7eb',
-  boxShadow: '0 4px 12px rgb(26 60 94 / 0.08)',
-  fontSize: '13px',
-};
-
-const PAYMENT_COLORS = ['#5463FF', '#1A3C5E'];
+import AccountingExportBar from '../../components/AccountingExportBar';
+import {
+  ChartTooltip,
+  ChartGradientDefs,
+  CHART_AXIS,
+  PAYMENT_COLORS,
+  formatXaf,
+  formatChartDate,
+} from '../../components/charts/ChartPrimitives';
 
 export default function Home() {
   const [stats, setStats] = useState(null);
@@ -64,12 +62,30 @@ export default function Home() {
         ? 100
         : 0;
 
-  const paymentMix = analytics
-    ? [
-        { name: 'Mobile Money', value: analytics.paymentMix.momo },
-        { name: 'Vouchers', value: analytics.paymentMix.voucher },
-      ].filter((item) => item.value > 0)
-    : [];
+  const paymentMix = useMemo(
+    () =>
+      analytics
+        ? [
+            { name: 'Mobile Money', value: analytics.paymentMix.momo },
+            { name: 'Vouchers', value: analytics.paymentMix.voucher },
+          ].filter((item) => item.value > 0)
+        : [],
+    [analytics]
+  );
+
+  const locationChart = useMemo(
+    () => (analytics?.revenueByLocation || []).slice(0, 6).map((loc) => ({ name: loc.name, revenue: loc.revenue })),
+    [analytics]
+  );
+
+  const voucherChart = useMemo(() => {
+    if (!analytics?.vouchers) return [];
+    return [
+      { name: 'Unused', value: analytics.vouchers.unused },
+      { name: 'Redeemed', value: analytics.vouchers.redeemed },
+      { name: 'Expired', value: analytics.vouchers.expired },
+    ].filter((v) => v.value > 0);
+  }, [analytics]);
 
   if (loading) {
     return (
@@ -94,15 +110,11 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
+      <AccountingExportBar mode="owner" />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard title="Today's Revenue" value={formatXaf(stats.todayRevenue)} icon={TrendingUp} trend={trend} accent="green" />
-        <StatCard
-          title="This Month"
-          value={formatXaf(stats.monthRevenue)}
-          icon={BarChart3}
-          trend={stats.monthChangePercent}
-          accent="brand"
-        />
+        <StatCard title="This Month" value={formatXaf(stats.monthRevenue)} icon={BarChart3} trend={stats.monthChangePercent} accent="brand" />
         <StatCard title="Active Sessions" value={stats.activeSessions} icon={Users} accent="navy" />
         <StatCard title="Wallet Balance" value={formatXaf(stats.walletBalance)} icon={Wallet} accent="amber" />
       </div>
@@ -128,38 +140,61 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <Card className="xl:col-span-2">
-          <h3 className="font-semibold text-navy mb-1">Revenue — Last 30 Days</h3>
-          <p className="text-xs text-navy/50 mb-5">Daily earnings across all locations</p>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(d) => d.slice(5)} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v) => formatXaf(v)} contentStyle={chartTooltipStyle} />
-              <Bar dataKey="amount" fill="#5463FF" radius={[6, 6, 0, 0]} maxBarSize={32} />
-            </BarChart>
+        <Card className="xl:col-span-2 overflow-hidden">
+          <div className="flex items-start justify-between gap-4 mb-5">
+            <div>
+              <h3 className="font-semibold text-navy">Revenue trend</h3>
+              <p className="text-xs text-navy/50 mt-1">Daily net earnings — last 30 days</p>
+            </div>
+            <span className="text-xs font-semibold text-brand bg-brand/10 px-2.5 py-1 rounded-full">Live</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={chart} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <ChartGradientDefs />
+              <CartesianGrid strokeDasharray="4 4" stroke="#eef2f6" vertical={false} />
+              <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(d) => d.slice(5)} />
+              <YAxis {...CHART_AXIS} width={56} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+              <Tooltip content={<ChartTooltip />} labelFormatter={formatChartDate} />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                name="Net earnings"
+                stroke="#5463FF"
+                strokeWidth={2.5}
+                fill="url(#brandArea)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#5463FF', stroke: '#fff', strokeWidth: 2 }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </Card>
 
         <Card>
-          <h3 className="font-semibold text-navy mb-1">Payment mix</h3>
-          <p className="text-xs text-navy/50 mb-4">Last 30 days by source</p>
+          <h3 className="font-semibold text-navy">Payment mix</h3>
+          <p className="text-xs text-navy/50 mt-1 mb-4">Last 30 days by source</p>
           {paymentMix.length === 0 ? (
             <p className="text-sm text-navy/50 text-center py-16">No revenue in this period</p>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={180}>
+              <ResponsiveContainer width="100%" height={190}>
                 <PieChart>
-                  <Pie data={paymentMix} dataKey="value" nameKey="name" innerRadius={50} outerRadius={72} paddingAngle={3}>
+                  <Pie
+                    data={paymentMix}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={52}
+                    outerRadius={78}
+                    paddingAngle={4}
+                    stroke="none"
+                  >
                     {paymentMix.map((_, i) => (
                       <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v) => formatXaf(v)} contentStyle={chartTooltipStyle} />
+                  <Tooltip content={<ChartTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2.5 mt-1">
                 {paymentMix.map((item, i) => (
                   <div key={item.name} className="flex items-center justify-between text-sm">
                     <span className="flex items-center gap-2 text-navy/70">
@@ -177,37 +212,44 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
-          <h3 className="font-semibold text-navy mb-5">Revenue by location</h3>
-          {!analytics?.revenueByLocation?.length ? (
+          <h3 className="font-semibold text-navy mb-1">Revenue by location</h3>
+          <p className="text-xs text-navy/50 mb-5">Top locations — last 30 days</p>
+          {locationChart.length === 0 ? (
             <p className="text-sm text-navy/50 text-center py-8">No location revenue in the last 30 days</p>
           ) : (
-            <div className="space-y-3">
-              {analytics.revenueByLocation.slice(0, 6).map((loc) => {
-                const max = analytics.revenueByLocation[0]?.revenue || 1;
-                const pct = Math.round((loc.revenue / max) * 100);
-                return (
-                  <div key={loc.locationId}>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="font-medium text-navy">{loc.name}</span>
-                      <span className="text-navy/60">{formatXaf(loc.revenue)}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={Math.max(220, locationChart.length * 42)}>
+              <BarChart data={locationChart} layout="vertical" margin={{ left: 8, right: 16 }}>
+                <ChartGradientDefs />
+                <CartesianGrid strokeDasharray="4 4" stroke="#eef2f6" horizontal={false} />
+                <XAxis type="number" {...CHART_AXIS} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+                <YAxis type="category" dataKey="name" {...CHART_AXIS} width={110} />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar dataKey="revenue" name="Net earnings" fill="url(#brandBar)" radius={[0, 8, 8, 0]} barSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </Card>
 
         <Card>
-          <div className="flex items-center gap-2 mb-5">
+          <div className="flex items-center gap-2 mb-1">
             <Ticket className="w-4 h-4 text-brand" />
             <h3 className="font-semibold text-navy">Voucher performance</h3>
           </div>
+          <p className="text-xs text-navy/50 mb-4">Inventory and redemption</p>
           {analytics?.vouchers ? (
             <div className="space-y-4">
+              {voucherChart.length > 0 && (
+                <ResponsiveContainer width="100%" height={150}>
+                  <PieChart>
+                    <Pie data={voucherChart} dataKey="value" nameKey="name" innerRadius={40} outerRadius={62} paddingAngle={3} stroke="none">
+                      <Cell fill="#5463FF" />
+                      <Cell fill="#10b981" />
+                      <Cell fill="#f59e0b" />
+                    </Pie>
+                    <Tooltip content={<ChartTooltip formatter={(v) => v} />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Unused', value: analytics.vouchers.unused, color: 'text-brand' },
@@ -221,12 +263,6 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              {(stats.pendingTransactions > 0 || stats.failedTransactionsMonth > 0) && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3 text-xs text-amber-800">
-                  <p className="font-semibold mb-1">Transaction health (this month)</p>
-                  <p>{stats.pendingTransactions} pending · {stats.failedTransactionsMonth} failed</p>
-                </div>
-              )}
             </div>
           ) : (
             <p className="text-sm text-navy/50">No voucher data yet</p>
@@ -272,17 +308,15 @@ export default function Home() {
           {stats.topPackages.length === 0 ? (
             <p className="text-sm text-navy/50 text-center py-6">No sales today yet</p>
           ) : (
-            <div className="space-y-1">
-              {stats.topPackages.map((pkg, i) => (
-                <div key={pkg.packageId} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                  <span className="font-medium text-sm text-navy">
-                    <span className="text-brand mr-2">{i + 1}.</span>
-                    {pkg.name}
-                  </span>
-                  <span className="text-sm text-navy/60 font-medium">{pkg.count} sales</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={Math.max(180, stats.topPackages.length * 48)}>
+              <BarChart data={stats.topPackages.map((p) => ({ name: p.name, sales: p.count }))} layout="vertical" margin={{ left: 8, right: 16 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#eef2f6" horizontal={false} />
+                <XAxis type="number" {...CHART_AXIS} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" {...CHART_AXIS} width={100} />
+                <Tooltip content={<ChartTooltip formatter={(v) => `${v} sales`} />} />
+                <Bar dataKey="sales" name="Sales" fill="#1A3C5E" radius={[0, 8, 8, 0]} barSize={16} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </Card>
       </div>
