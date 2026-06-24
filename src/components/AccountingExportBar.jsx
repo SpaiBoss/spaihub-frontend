@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, FileSpreadsheet } from 'lucide-react';
+import { Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { Button } from './ui';
@@ -31,49 +31,32 @@ export default function AccountingExportBar({ mode = 'owner' }) {
       a.download = `accounting-${range.dateFrom}-${range.dateTo}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Accounting report downloaded');
+      toast.success('CSV downloaded');
     } catch {
-      toast.error('Failed to export accounting report');
+      toast.error('Export failed');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <FileSpreadsheet className="w-4 h-4 text-brand" />
-          <h3 className="font-semibold text-navy">Accounting export</h3>
-        </div>
-        <p className="text-sm text-navy/55 max-w-2xl">
-          Download a CSV with summary totals, daily breakdown, location or owner totals, and full transaction detail for your accountant.
-        </p>
-      </div>
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="label-field">From</label>
-          <input
-            type="date"
-            value={range.dateFrom}
-            onChange={(e) => setRange({ ...range, dateFrom: e.target.value })}
-            className="input-field py-2 w-auto"
-          />
-        </div>
-        <div>
-          <label className="label-field">To</label>
-          <input
-            type="date"
-            value={range.dateTo}
-            onChange={(e) => setRange({ ...range, dateTo: e.target.value })}
-            className="input-field py-2 w-auto"
-          />
-        </div>
-        <Button onClick={exportAccounting} disabled={loading} className="gap-2">
-          <Download className="w-4 h-4" />
-          {loading ? 'Exporting...' : 'Export CSV'}
-        </Button>
-      </div>
+    <div className="flex flex-wrap items-end gap-3">
+      <input
+        type="date"
+        value={range.dateFrom}
+        onChange={(e) => setRange({ ...range, dateFrom: e.target.value })}
+        className="input-field py-2 w-auto"
+      />
+      <input
+        type="date"
+        value={range.dateTo}
+        onChange={(e) => setRange({ ...range, dateTo: e.target.value })}
+        className="input-field py-2 w-auto"
+      />
+      <Button onClick={exportAccounting} disabled={loading} variant="secondary" className="gap-2">
+        <Download className="w-4 h-4" />
+        {loading ? 'Exporting...' : 'Export CSV'}
+      </Button>
     </div>
   );
 }
