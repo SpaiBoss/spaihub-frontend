@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Modal, StatusBadge, Button, Card, EmptyState } from '../../components/ui';
 import PackageFormModal from '../../components/PackageFormModal';
-import { formatPackageSummary, PACKAGE_TYPE_LABELS } from '../../utils/packages';
+import { formatOwnerPackageSummary, PACKAGE_TYPE_LABELS } from '../../utils/packages';
 
 export default function Locations() {
   const [locations, setLocations] = useState([]);
@@ -372,7 +372,7 @@ export default function Locations() {
                                 {PACKAGE_TYPE_LABELS[p.type] || 'Time-based'}
                               </span>
                             </td>
-                            <td className="py-2 text-navy/70">{formatPackageSummary(p)}</td>
+                            <td className="py-2 text-navy/70">{formatOwnerPackageSummary(p)}</td>
                             <td className="py-2">{p.priceXaf.toLocaleString()} XAF</td>
                             <td className="py-2"><StatusBadge status={p.isActive ? 'ACTIVE' : 'SUSPENDED'} /></td>
                             <td className="py-2 space-x-2">

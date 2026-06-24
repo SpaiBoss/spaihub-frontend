@@ -42,7 +42,7 @@ export function formatUploadSpeed(mbPerSec) {
   return `${speed} MB/s upload`;
 }
 
-export function formatPackageSummary(pkg, { includeSpeed = true } = {}) {
+export function formatPackageSummary(pkg, { includeSpeed = false } = {}) {
   const upload = includeSpeed ? ` · ${formatUploadSpeed(pkg.uploadSpeedMbPerSec)}` : '';
   if (pkg.type === 'DATA_BASED') {
     return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}`;
@@ -53,8 +53,12 @@ export function formatPackageSummary(pkg, { includeSpeed = true } = {}) {
   return `${browse} browse · ${data}${upload}`;
 }
 
-export function formatPortalPackageSummary(pkg) {
-  return formatPackageSummary(pkg, { includeSpeed: false });
+export function formatOwnerPackageSummary(pkg) {
+  return formatPackageSummary(pkg, { includeSpeed: true });
+}
+
+export function formatPortalPackageSummary(pkg, { showUploadSpeed = false } = {}) {
+  return formatPackageSummary(pkg, { includeSpeed: showUploadSpeed });
 }
 
 export const PACKAGE_TYPE_LABELS = {

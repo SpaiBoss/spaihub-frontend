@@ -11,6 +11,7 @@ const DEFAULT_FORM = {
   portalAccentColor: '',
   portalWelcomeText: '',
   showPlatformCredit: true,
+  portalShowUploadSpeed: false,
 };
 
 const PLATFORM_CREDIT_MESSAGE =
@@ -34,6 +35,7 @@ export default function PortalBrandingSettings() {
           portalAccentColor: data.portalAccentColor || '',
           portalWelcomeText: data.portalWelcomeText || '',
           showPlatformCredit: data.showPlatformCredit !== false,
+          portalShowUploadSpeed: data.portalShowUploadSpeed === true,
         });
         setResolved(data.resolved);
       })
@@ -189,6 +191,21 @@ export default function PortalBrandingSettings() {
               onChange={(e) => setForm({ ...form, portalLogoUrl: e.target.value })}
             />
           </div>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.portalShowUploadSpeed}
+              onChange={(e) => setForm({ ...form, portalShowUploadSpeed: e.target.checked })}
+              className="mt-1 rounded border-gray-300 text-brand focus:ring-brand"
+            />
+            <span>
+              <span className="font-medium text-navy block">Show upload speed on packages</span>
+              <span className="text-sm text-navy/50">
+                Off by default. Subscribers only see duration and data limits unless you enable this.
+              </span>
+            </span>
+          </label>
 
           <label className="flex items-start gap-3 cursor-pointer">
             <input

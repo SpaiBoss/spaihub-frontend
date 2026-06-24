@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { toMinutes, toMegabytes, formatDuration, formatDataCap, formatPackageSummary } from '../utils/packages.js';
+import { toMinutes, toMegabytes, formatDuration, formatOwnerPackageSummary } from '../utils/packages.js';
 
 function durationToParts(minutes) {
   if (minutes % 1440 === 0 && minutes >= 1440) {
@@ -122,7 +122,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
   const preview = (() => {
     const err = validateForm(form);
     if (err) return null;
-    return formatPackageSummary(buildPayload(form));
+    return formatOwnerPackageSummary(buildPayload(form));
   })();
 
   async function handleSubmit(e) {

@@ -435,7 +435,9 @@ export default function Portal() {
                     <span className="font-bold text-brand">{pkg.priceXaf.toLocaleString()} XAF</span>
                   </div>
                   <p className="text-sm text-navy/55 mt-1">
-                    {formatPortalPackageSummary(pkg)}
+                    {formatPortalPackageSummary(pkg, {
+                      showUploadSpeed: branding?.showUploadSpeed === true,
+                    })}
                   </p>
                 </button>
               ))}
