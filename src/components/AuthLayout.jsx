@@ -11,7 +11,7 @@ const highlights = [
 export default function AuthLayout({ children, title, subtitle }) {
   return (
     <div className="min-h-screen min-h-[100dvh] flex">
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-auth-gradient bg-auth-mesh relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-navy-dark bg-auth-panel relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{
@@ -21,8 +21,8 @@ export default function AuthLayout({ children, title, subtitle }) {
           }}
         />
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-16 -left-16 h-80 w-80 rounded-full bg-brand/25 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -top-16 -left-16 h-80 w-80 rounded-full bg-brand/20 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-brand-light/10 blur-3xl" />
         </div>
 
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">

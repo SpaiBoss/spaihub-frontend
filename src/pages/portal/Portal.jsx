@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Loader, Clock, Wifi, Ticket, KeyRound } from 'lucide-react';
 import api from '../../services/api';
-import { formatPackageSummary } from '../../utils/packages';
+import { formatPortalPackageSummary } from '../../utils/packages';
 import { getPortalDeviceId } from '../../utils/portalDevice';
 import PortalBrand, { PortalCredit } from '../../components/PortalBrand';
 
@@ -435,7 +435,7 @@ export default function Portal() {
                     <span className="font-bold text-brand">{pkg.priceXaf.toLocaleString()} XAF</span>
                   </div>
                   <p className="text-sm text-navy/55 mt-1">
-                    {formatPackageSummary(pkg, { includeSpeed: false })}
+                    {formatPortalPackageSummary(pkg)}
                   </p>
                 </button>
               ))}

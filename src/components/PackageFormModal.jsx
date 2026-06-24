@@ -146,7 +146,10 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
   if (!open) return null;
 
-  const inputClass = 'w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none';
+  const fieldClass =
+    'px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none text-sm text-navy min-w-0';
+  const inputClass = `w-full ${fieldClass}`;
+  const splitRowClass = 'grid grid-cols-[minmax(6rem,1fr)_9rem] gap-2';
   const labelClass = 'block text-sm font-medium text-navy mb-1';
   const hintClass = 'text-xs text-navy/60 mt-1';
 
@@ -238,18 +241,18 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
             <>
               <div>
                 <label className={labelClass}>Browse duration</label>
-                <div className="flex gap-2">
+                <div className={splitRowClass}>
                   <input
                     type="number"
                     min={1}
                     value={form.browseDurationValue}
                     onChange={(e) => setForm({ ...form, browseDurationValue: e.target.value })}
-                    className={`${inputClass} flex-1`}
+                    className={fieldClass}
                   />
                   <select
                     value={form.browseDurationUnit}
                     onChange={(e) => setForm({ ...form, browseDurationUnit: e.target.value })}
-                    className={`${inputClass} w-36`}
+                    className={fieldClass}
                   >
                     <option value="minutes">Minutes</option>
                     <option value="hours">Hours</option>
@@ -275,18 +278,18 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                   <span className="text-sm font-medium text-navy">Limit data during browse session</span>
                 </label>
                 {form.timeDataCapEnabled && (
-                  <div className="flex gap-2">
+                  <div className={splitRowClass}>
                     <input
                       type="number"
                       min={1}
                       value={form.timeDataCapValue}
                       onChange={(e) => setForm({ ...form, timeDataCapValue: e.target.value })}
-                      className={`${inputClass} flex-1`}
+                      className={fieldClass}
                     />
                     <select
                       value={form.timeDataCapUnit}
                       onChange={(e) => setForm({ ...form, timeDataCapUnit: e.target.value })}
-                      className={`${inputClass} w-28`}
+                      className={fieldClass}
                     >
                       <option value="MB">MB</option>
                       <option value="GB">GB</option>
@@ -304,18 +307,18 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
             <>
               <div>
                 <label className={labelClass}>Download allowance</label>
-                <div className="flex gap-2">
+                <div className={splitRowClass}>
                   <input
                     type="number"
                     min={1}
                     value={form.dataAllowanceValue}
                     onChange={(e) => setForm({ ...form, dataAllowanceValue: e.target.value })}
-                    className={`${inputClass} flex-1`}
+                    className={fieldClass}
                   />
                   <select
                     value={form.dataAllowanceUnit}
                     onChange={(e) => setForm({ ...form, dataAllowanceUnit: e.target.value })}
-                    className={`${inputClass} w-28`}
+                    className={fieldClass}
                   >
                     <option value="MB">MB</option>
                     <option value="GB">GB</option>
@@ -326,18 +329,18 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
               <div>
                 <label className={labelClass}>Expiry period</label>
-                <div className="flex gap-2">
+                <div className={splitRowClass}>
                   <input
                     type="number"
                     min={1}
                     value={form.expiryValue}
                     onChange={(e) => setForm({ ...form, expiryValue: e.target.value })}
-                    className={`${inputClass} flex-1`}
+                    className={fieldClass}
                   />
                   <select
                     value={form.expiryUnit}
                     onChange={(e) => setForm({ ...form, expiryUnit: e.target.value })}
-                    className={`${inputClass} w-36`}
+                    className={fieldClass}
                   >
                     <option value="minutes">Minutes</option>
                     <option value="hours">Hours</option>

@@ -53,6 +53,10 @@ export function formatPackageSummary(pkg, { includeSpeed = true } = {}) {
   return `${browse} browse · ${data}${upload}`;
 }
 
+export function formatPortalPackageSummary(pkg) {
+  return formatPackageSummary(pkg, { includeSpeed: false });
+}
+
 export const PACKAGE_TYPE_LABELS = {
   TIME_BASED: 'Time-based (Browse)',
   DATA_BASED: 'Data-based (Download)',

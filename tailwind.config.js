@@ -30,12 +30,10 @@ export default {
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #1A3C5E 0%, #111827 55%, #5463FF 100%)',
-        'auth-gradient':
-          'linear-gradient(160deg, #0f172a 0%, #1A3C5E 38%, #1e3a5f 72%, #2d4a7c 100%)',
+        'auth-panel':
+          'linear-gradient(160deg, #0f172a 0%, #111827 32%, #1A3C5E 68%, #243b5c 100%), radial-gradient(at 15% 15%, rgba(84, 99, 255, 0.22) 0, transparent 45%), radial-gradient(at 85% 85%, rgba(26, 60, 94, 0.35) 0, transparent 50%)',
         'sidebar-gradient': 'linear-gradient(180deg, #111827 0%, #1A3C5E 100%)',
         'portal-gradient': 'linear-gradient(180deg, #f4f7fb 0%, #e8eef6 100%)',
-        'auth-mesh':
-          'radial-gradient(at 20% 20%, rgba(84, 99, 255, 0.18) 0, transparent 50%), radial-gradient(at 80% 80%, rgba(26, 60, 94, 0.4) 0, transparent 55%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
