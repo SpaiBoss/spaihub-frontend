@@ -39,15 +39,19 @@ export default function Home() {
   useEffect(() => {
     Promise.all([
       api.get('/api/owner/stats'),
-      api.get('/api/owner/stats/analytics'),
       api.get('/api/owner/stats/revenue-chart'),
       api.get('/api/owner/stats/routers'),
     ])
-      .then(([statsRes, analyticsRes, chartRes, routersRes]) => {
+      .then(async ([statsRes, chartRes, routersRes]) => {
         setStats(statsRes.data);
-        setAnalytics(analyticsRes.data);
         setChart(chartRes.data);
         setRouters(routersRes.data);
+        try {
+          const analyticsRes = await api.get('/api/owner/stats/analytics');
+          setAnalytics(analyticsRes.data);
+        } catch {
+          setAnalytics({ revenueByLocation: [], paymentMix: { momo: 0, voucher: 0 }, vouchers: null });
+        }
       })
       .catch(() => setError('Failed to load dashboard data. Try signing in again.'))
       .finally(() => setLoading(false));
