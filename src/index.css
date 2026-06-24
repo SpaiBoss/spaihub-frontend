@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-muted text-navy font-normal antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-navy tracking-tight;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-3.5 py-2.5 text-sm text-navy bg-white border border-gray-200 rounded-xl
+      placeholder:text-gray-400 transition-all duration-150
+      focus:outline-none focus:ring-2 focus:ring-brand/25 focus:border-brand;
+  }
+
+  .select-field {
+    @apply input-field appearance-none bg-[length:16px] bg-[right_12px_center] bg-no-repeat
+      pr-10 cursor-pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  }
+
+  .label-field {
+    @apply block text-sm font-medium text-navy/80 mb-1.5;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-medium text-sm
+      transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-white px-4 py-2.5 shadow-sm hover:bg-brand-dark hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-navy border border-gray-200 px-4 py-2.5 hover:bg-gray-50 hover:border-gray-300;
+  }
+
+  .btn-ghost {
+    @apply btn text-navy/70 px-3 py-2 hover:text-navy hover:bg-gray-100;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100/80 shadow-card;
+  }
+
+  .card-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .table-shell {
+    @apply card overflow-hidden;
+  }
+
+  .table-shell table {
+    @apply w-full text-sm;
+  }
+
+  .table-shell thead tr {
+    @apply text-left text-xs font-semibold uppercase tracking-wide text-navy/50 bg-gray-50/80 border-b border-gray-100;
+  }
+
+  .table-shell th {
+    @apply px-4 py-3.5;
+  }
+
+  .table-shell td {
+    @apply px-4 py-3.5 border-b border-gray-50;
+  }
+
+  .table-shell tbody tr {
+    @apply transition-colors hover:bg-brand/[0.02];
+  }
+
+  .table-shell tbody tr:last-child td {
+    @apply border-b-0;
+  }
+}
