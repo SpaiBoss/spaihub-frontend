@@ -17,6 +17,7 @@ export default function Vouchers() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showPdfExport, setShowPdfExport] = useState(false);
+  const [branding, setBranding] = useState(null);
   const [filters, setFilters] = useState({ locationId: '', status: '', page: 1 });
 
   async function loadLocations() {
@@ -48,6 +49,7 @@ export default function Vouchers() {
 
   useEffect(() => {
     loadLocations();
+    api.get('/api/owner/branding').then((res) => setBranding(res.data.resolved)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -249,6 +251,7 @@ export default function Vouchers() {
         onClose={() => setShowPdfExport(false)}
         onExport={exportPdf}
         filters={filters}
+        branding={branding}
         loading={loading}
       />
     </div>

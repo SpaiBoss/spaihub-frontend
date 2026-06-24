@@ -10,7 +10,7 @@ const LAYOUT_OPTIONS = [
   { value: 12, label: '12 per page', hint: '3 × 4 grid — most compact' },
 ];
 
-export default function VoucherPdfModal({ open, onClose, onExport, filters, loading: externalLoading }) {
+export default function VoucherPdfModal({ open, onClose, onExport, filters, branding, loading: externalLoading }) {
   const [perPage, setPerPage] = useState(6);
   const [loading, setLoading] = useState(false);
 
@@ -29,14 +29,32 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, load
     filters.locationId ? 'selected location' : 'all locations',
   ];
 
+  const brandLabel = branding?.brandName || 'Your hotspot brand';
+  const accent = branding?.accentColor || '#5463FF';
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       title="Export print-ready PDF"
-      description="Branded A4 voucher sheets with cut guides. Uses your current filters."
+      description="Owner-branded A4 voucher sheets with cut guides and WiFi PINs."
     >
       <div className="space-y-5">
+        <div
+          className="rounded-xl border p-4 text-sm"
+          style={{ borderColor: `${accent}33`, backgroundColor: `${accent}08` }}
+        >
+          <p className="font-semibold text-navy mb-1">Branding preview</p>
+          <p className="text-navy/70">
+            Tickets will use <span className="font-semibold text-navy">{brandLabel}</span>
+            {branding?.logoUrl ? ' with your uploaded logo' : ''}
+            {branding?.accentColor ? ' and your accent color' : ''}.
+          </p>
+          <p className="text-xs text-navy/50 mt-2">
+            Customize branding in Settings → Portal branding.
+          </p>
+        </div>
+
         <div className="rounded-xl bg-surface-muted border border-gray-100 p-4 text-sm text-navy/70">
           <p className="font-medium text-navy mb-1">Included vouchers</p>
           <p>
@@ -71,7 +89,8 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, load
 
         <div className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-navy/60 space-y-1">
           <p className="font-semibold text-navy">Each ticket includes</p>
-          <p>Spai-Hub branding · location · package · voucher code · redeem instructions</p>
+          <p>Your logo or brand name · location · package · voucher code · WiFi PIN · redeem instructions</p>
+          <p className="text-navy/45">Footer: Powered by spaitrace.com</p>
         </div>
 
         <div className="flex gap-3 pt-1">
