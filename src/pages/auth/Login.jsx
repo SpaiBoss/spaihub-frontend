@@ -52,7 +52,7 @@ export default function Login() {
             <AuthLink to="/forgot-password">Forgot password?</AuthLink>
           </div>
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button type="submit" disabled={loading} className="w-full py-3" size="lg">
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
         <p className="text-center text-sm text-navy/60">

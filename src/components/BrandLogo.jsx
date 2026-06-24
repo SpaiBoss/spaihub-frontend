@@ -6,7 +6,7 @@ export function TextWordmark({ theme = 'light', className = 'text-2xl', as: Tag 
     <Tag className={`font-bold tracking-tight leading-none ${className}`} aria-label="Spai-Hub">
       <span className={spaiColor}>Spai</span>
       <span className={hyphenColor}>-</span>
-      <span className="text-brand">Hub</span>
+      <span className={theme === 'dark' ? 'text-brand-light' : 'text-brand'}>Hub</span>
     </Tag>
   );
 }
@@ -22,9 +22,7 @@ export default function BrandLogo({
   const compact = variant === 'icon';
 
   return (
-    <div
-      className={`flex items-center justify-center ${compact ? '' : ''} ${className}`}
-    >
+    <div className={`flex items-center ${compact ? 'justify-center' : ''} ${className}`}>
       <TextWordmark theme={theme} className={compact ? 'text-xl' : sizeClass} />
     </div>
   );

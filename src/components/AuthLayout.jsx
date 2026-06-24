@@ -10,49 +10,74 @@ const highlights = [
 
 export default function AuthLayout({ children, title, subtitle }) {
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-brand-gradient relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 -left-10 w-72 h-72 rounded-full bg-white blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-brand blur-3xl" />
+    <div className="min-h-screen min-h-[100dvh] flex">
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-auth-gradient bg-auth-mesh relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-16 -left-16 h-80 w-80 rounded-full bg-brand/25 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
         </div>
+
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
-          <BrandLogo theme="dark" textClassName="text-3xl" />
-          <div>
-            <h2 className="text-3xl xl:text-4xl font-bold leading-tight">
+          <BrandLogo theme="dark" textClassName="text-3xl" className="justify-start" />
+
+          <div className="max-w-md">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-light/90 mb-4">
+              ISP SaaS Platform
+            </p>
+            <h2 className="text-3xl xl:text-[2.35rem] font-bold leading-[1.15] text-white tracking-tight">
               Professional hotspot management for ISPs
             </h2>
-            <p className="text-white/70 mt-4 text-lg leading-relaxed max-w-md">
+            <p className="text-white/65 mt-5 text-[15px] leading-relaxed">
               Deploy, monetize, and monitor WiFi networks across Cameroon with one unified platform.
             </p>
-            <ul className="mt-10 space-y-4">
+
+            <ul className="mt-11 space-y-3.5">
               {highlights.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-center gap-3 text-white/85">
-                  <span className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4" />
+                <li
+                  key={text}
+                  className="flex items-center gap-3.5 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 backdrop-blur-sm"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/20 text-brand-light">
+                    <Icon className="h-4 w-4" strokeWidth={2.25} />
                   </span>
-                  <span className="text-sm font-medium">{text}</span>
+                  <span className="text-sm font-medium text-white/90">{text}</span>
                 </li>
               ))}
             </ul>
           </div>
-          <p className="text-white/40 text-sm">Trusted by hotspot operators across Cameroon</p>
+
+          <p className="text-white/35 text-xs tracking-wide">
+            Trusted by hotspot operators across Cameroon
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-surface-muted px-4 py-10 sm:px-8">
-        <div className="w-full max-w-md animate-slide-up">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-surface-muted via-white to-[#eef2f8] px-4 py-10 sm:px-8">
+        <div className="w-full max-w-[420px] animate-slide-up">
           <div className="lg:hidden text-center mb-8">
             <BrandLogo className="mb-4" textClassName="text-3xl" />
           </div>
-          <div className="text-center lg:text-left mb-8">
-            <h1 className="text-2xl font-bold text-navy">{title}</h1>
-            {subtitle && <p className="text-navy/60 mt-1.5 text-sm">{subtitle}</p>}
+
+          <div className="text-center lg:text-left mb-7">
+            <h1 className="text-[1.65rem] font-bold text-navy tracking-tight">{title}</h1>
+            {subtitle && (
+              <p className="text-navy/55 mt-2 text-sm leading-relaxed">{subtitle}</p>
+            )}
           </div>
-          <div className="card card-body shadow-card-hover">{children}</div>
-          <p className="text-center text-xs text-navy/40 mt-6">
-          Spai-Hub · Hotspot management for Cameroon
-        </p>
+
+          <div className="auth-card">{children}</div>
+
+          <p className="text-center text-[11px] text-navy/35 mt-7 tracking-wide">
+            Spai-Hub · Hotspot management for Cameroon
+          </p>
         </div>
       </div>
     </div>
@@ -61,7 +86,10 @@ export default function AuthLayout({ children, title, subtitle }) {
 
 export function AuthLink({ to, children }) {
   return (
-    <Link to={to} className="text-brand hover:text-brand-dark text-sm font-semibold transition-colors">
+    <Link
+      to={to}
+      className="text-brand hover:text-brand-dark text-sm font-semibold transition-colors hover:underline underline-offset-2"
+    >
       {children}
     </Link>
   );
