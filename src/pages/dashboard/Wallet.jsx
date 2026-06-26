@@ -138,14 +138,15 @@ export default function Wallet() {
             <select
               value={form.method}
               onChange={(e) => setForm({ ...form, method: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border rounded-lg bg-gray-50"
+              disabled={Boolean(detectCameroonOperator(form.phoneNumber))}
             >
               <option value="MTN_MOMO">MTN MoMo</option>
               <option value="ORANGE_MONEY">Orange Money</option>
             </select>
           </div>
-          <p className="text-xs text-brand bg-brand/5 p-3 rounded-lg">
-            Withdrawals are sent automatically to your MoMo number via Campay. On Campay demo, the number must be added as an authorized test number in your app settings.
+          <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+            Withdrawals are sent automatically to your MoMo number via Campay.
           </p>
           <button type="submit" className="w-full bg-brand text-white py-2.5 rounded-lg font-medium">
             Submit Withdrawal
