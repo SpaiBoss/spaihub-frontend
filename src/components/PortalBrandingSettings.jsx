@@ -24,6 +24,7 @@ export default function PortalBrandingSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [logoPreviewKey, setLogoPreviewKey] = useState(0);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function PortalBrandingSettings() {
       const { data } = await api.post('/api/owner/branding/logo', { dataUrl });
       setForm((prev) => ({ ...prev, portalLogoUrl: data.portalLogoUrl || '' }));
       setResolved(data.resolved);
+      setLogoPreviewKey(Date.now());
       toast.success('Logo uploaded');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to upload logo');
@@ -95,6 +97,7 @@ export default function PortalBrandingSettings() {
       const { data } = await api.delete('/api/owner/branding/logo');
       setForm((prev) => ({ ...prev, portalLogoUrl: '' }));
       setResolved(data.resolved);
+      setLogoPreviewKey(Date.now());
       toast.success('Logo removed');
     } catch {
       toast.error('Failed to remove logo');
@@ -103,13 +106,14 @@ export default function PortalBrandingSettings() {
 
   const previewBranding = {
     brandName: form.portalBrandName || null,
-    logoUrl:
-      resolveMediaUrl(resolved?.logoUrl)
-      || resolveMediaUrl(form.portalLogoUrl?.startsWith('/uploads/') ? form.portalLogoUrl : null)
-      || (form.portalLogoUrl?.startsWith('http') ? form.portalLogoUrl : null),
+    logoUrl: resolveMediaUrl(resolved?.logoUrl) || resolveMediaUrl(form.portalLogoUrl),
     accentColor: form.portalAccentColor || null,
     welcomeText: form.portalWelcomeText || null,
   };
+
+  const currentLogoSrc = previewBranding.logoUrl
+    ? `${previewBranding.logoUrl}${previewBranding.logoUrl.includes('?') ? '&' : '?'}v=${logoPreviewKey}`
+    : null;
 
   if (loading) {
     return <div className="animate-pulse bg-gray-200/80 rounded-2xl h-64" />;
@@ -194,9 +198,10 @@ export default function PortalBrandingSettings() {
               value={form.portalLogoUrl.startsWith('/uploads/') || form.portalLogoUrl.startsWith('http') ? '' : form.portalLogoUrl}
               onChange={(e) => setForm({ ...form, portalLogoUrl: e.target.value })}
             />
-            {(resolved?.logoUrl || form.portalLogoUrl) && (
+            {currentLogoSrc && (
               <img
-                src={resolveMediaUrl(resolved?.logoUrl || form.portalLogoUrl)}
+                key={currentLogoSrc}
+                src={currentLogoSrc}
                 alt="Current logo"
                 className="mt-3 max-h-16 max-w-[200px] object-contain rounded border border-gray-100 p-2"
               />
@@ -253,7 +258,7 @@ export default function PortalBrandingSettings() {
                 : undefined
             }
           >
-            <PortalBrand branding={previewBranding} theme="dark" textClassName="text-2xl" />
+            <PortalBrand branding={{ ...previewBranding, logoUrl: currentLogoSrc }} theme="dark" textClassName="text-2xl" />
           </div>
           <div className="bg-white p-4 -mt-6 mx-3 mb-3 rounded-xl shadow-sm border border-gray-100">
             <p className="text-xs text-brand font-semibold uppercase tracking-wide">WiFi Hotspot</p>
