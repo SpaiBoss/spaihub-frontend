@@ -196,7 +196,16 @@ export default function AdminWithdrawals() {
               {campayCheck.apiWithdrawalHint && (
                 <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded">{campayCheck.apiWithdrawalHint}</p>
               )}
-              <p className="text-xs text-gray-400">API base: {campayCheck.campayBaseUrl}</p>
+              <p className="text-xs text-gray-400">
+                API: {campayCheck.campayBaseUrl}
+                {campayCheck.isDemo && ' (DEMO — whitelist numbers in Campay app settings)'}
+                {campayCheck.usesPermanentToken && ' · permanent token'}
+              </p>
+              {campayCheck.rawBalance && (
+                <p className="text-xs text-gray-400 font-mono break-all">
+                  Raw balance: {JSON.stringify(campayCheck.rawBalance)}
+                </p>
+              )}
             </div>
           )}
         </Modal>
