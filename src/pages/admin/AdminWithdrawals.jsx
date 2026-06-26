@@ -9,6 +9,7 @@ export default function AdminWithdrawals() {
   const [history, setHistory] = useState([]);
   const [historyPagination, setHistoryPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [historyPage, setHistoryPage] = useState(1);
+  const [processingId, setProcessingId] = useState(null);
   const [rejecting, setRejecting] = useState(null);
   const [note, setNote] = useState('');
 
@@ -31,11 +32,18 @@ export default function AdminWithdrawals() {
   useEffect(() => { loadHistory(historyPage); }, [historyPage]);
 
   async function process(id, action, adminNote) {
-    await api.post(`/api/admin/withdrawals/${id}/process`, { action, adminNote });
-    toast.success(`Withdrawal ${action.toLowerCase()}`);
-    setRejecting(null);
-    setNote('');
-    load();
+    setProcessingId(id);
+    try {
+      await api.post(`/api/admin/withdrawals/${id}/process`, { action, adminNote });
+      toast.success(action === 'APPROVED' ? 'MoMo transfer sent' : 'Withdrawal rejected');
+      setRejecting(null);
+      setNote('');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Withdrawal processing failed');
+    } finally {
+      setProcessingId(null);
+    }
   }
 
   return (
@@ -66,7 +74,13 @@ export default function AdminWithdrawals() {
                     <td className="p-3">{w.method.replace('_', ' ')}</td>
                     <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
                     <td className="p-3 flex gap-2">
-                      <button onClick={() => process(w.id, 'APPROVED')} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs">Approve</button>
+                      <button
+                        onClick={() => process(w.id, 'APPROVED')}
+                        disabled={processingId === w.id}
+                        className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs disabled:opacity-50"
+                      >
+                        {processingId === w.id ? 'Sending...' : 'Send MoMo'}
+                      </button>
                       <button onClick={() => setRejecting(w)} className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs">Reject</button>
                     </td>
                   </tr>

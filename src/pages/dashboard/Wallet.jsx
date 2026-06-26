@@ -29,7 +29,7 @@ export default function Wallet() {
         phoneNumber: form.phoneNumber,
         method: form.method,
       });
-      toast.success('Withdrawal requested');
+      toast.success('Withdrawal sent to your MoMo');
       setShowWithdraw(false);
       setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
       loadWallet(page);
@@ -133,8 +133,8 @@ export default function Wallet() {
               <option value="ORANGE_MONEY">Orange Money</option>
             </select>
           </div>
-          <p className="text-xs text-yellow-600 bg-yellow-50 p-3 rounded-lg">
-            Withdrawals are processed within 24 hours.
+          <p className="text-xs text-brand bg-brand/5 p-3 rounded-lg">
+            Withdrawals are sent automatically to your MoMo number via Campay.
           </p>
           <button type="submit" className="w-full bg-brand text-white py-2.5 rounded-lg font-medium">
             Submit Withdrawal
