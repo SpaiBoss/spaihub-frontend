@@ -165,10 +165,13 @@ export default function AdminWithdrawals() {
               {campayCheck.balance && (
                 <>
                   <p>
-                    <strong>Total:</strong> {campayCheck.balance.total.toLocaleString()} {campayCheck.balance.currency}
+                    <strong>App wallet:</strong> {campayCheck.balance.total.toLocaleString()} {campayCheck.balance.currency}
+                    {campayCheck.balance.usesTotalFallback && (
+                      <span className="text-gray-500"> (operator splits not reported by API)</span>
+                    )}
                   </p>
                   <p>
-                    <strong>Payout wallets:</strong>{' '}
+                    <strong>API payout pools:</strong>{' '}
                     MTN {campayCheck.balance.mtn.toLocaleString()} / Orange {campayCheck.balance.orange.toLocaleString()} {campayCheck.balance.currency}
                   </p>
                 </>
