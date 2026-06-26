@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Modal, Pagination, StatusBadge } from '../../components/ui';
+import { detectCameroonOperator, paymentMethodForOperator } from '../../utils/phone';
 
 export default function Wallet() {
   const [wallet, setWallet] = useState(null);
@@ -117,10 +118,20 @@ export default function Wallet() {
               type="tel"
               placeholder="6XXXXXXXX"
               value={form.phoneNumber}
-              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+              onChange={(e) => {
+                const phoneNumber = e.target.value.replace(/\D/g, '').slice(0, 9);
+                const operator = detectCameroonOperator(phoneNumber);
+                const method = paymentMethodForOperator(operator) || form.method;
+                setForm({ ...form, phoneNumber, method });
+              }}
               required
               className="w-full px-3 py-2 border rounded-lg"
             />
+            {detectCameroonOperator(form.phoneNumber) && (
+              <p className="text-xs text-navy/50 mt-1">
+                Detected: {detectCameroonOperator(form.phoneNumber)} — must match payment method below
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Payment Method</label>
@@ -134,7 +145,7 @@ export default function Wallet() {
             </select>
           </div>
           <p className="text-xs text-brand bg-brand/5 p-3 rounded-lg">
-            Withdrawals are sent automatically to your MoMo number via Campay.
+            Withdrawals are sent automatically to your MoMo number via Campay. On Campay demo, the number must be added as an authorized test number in your app settings.
           </p>
           <button type="submit" className="w-full bg-brand text-white py-2.5 rounded-lg font-medium">
             Submit Withdrawal
