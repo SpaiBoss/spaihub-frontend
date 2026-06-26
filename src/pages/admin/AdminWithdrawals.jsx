@@ -163,10 +163,18 @@ export default function AdminWithdrawals() {
               <p><strong>Network:</strong> {campayCheck.operator || '—'}</p>
               <p><strong>MoMo name:</strong> {campayCheck.holderName || campayCheck.holderError || '—'}</p>
               {campayCheck.balance && (
-                <p>
-                  <strong>Campay balance:</strong>{' '}
-                  MTN {campayCheck.balance.mtn.toLocaleString()} / Orange {campayCheck.balance.orange.toLocaleString()} {campayCheck.balance.currency}
-                </p>
+                <>
+                  <p>
+                    <strong>Total:</strong> {campayCheck.balance.total.toLocaleString()} {campayCheck.balance.currency}
+                  </p>
+                  <p>
+                    <strong>Payout wallets:</strong>{' '}
+                    MTN {campayCheck.balance.mtn.toLocaleString()} / Orange {campayCheck.balance.orange.toLocaleString()} {campayCheck.balance.currency}
+                  </p>
+                </>
+              )}
+              {campayCheck.balanceDiagnosis && (
+                <p className="text-amber-700 bg-amber-50 p-2 rounded">{campayCheck.balanceDiagnosis}</p>
               )}
               {campayCheck.balanceError && <p className="text-red-600">{campayCheck.balanceError}</p>}
             </div>
