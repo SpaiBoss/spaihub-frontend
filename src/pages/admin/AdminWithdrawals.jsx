@@ -50,7 +50,12 @@ export default function AdminWithdrawals() {
     setProcessingId(id);
     try {
       await api.post(`/api/admin/withdrawals/${id}/process`, { action, adminNote });
-      toast.success(action === 'APPROVED' ? 'MoMo transfer sent' : 'Withdrawal rejected');
+      const messages = {
+        APPROVED: 'MoMo transfer sent',
+        MANUAL_APPROVED: 'Marked as paid',
+        REJECTED: 'Withdrawal rejected',
+      };
+      toast.success(messages[action] || 'Done');
       setRejecting(null);
       setNote('');
       load();
@@ -107,6 +112,14 @@ export default function AdminWithdrawals() {
                         className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs disabled:opacity-50"
                       >
                         {processingId === w.id ? 'Sending...' : 'Send MoMo'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => process(w.id, 'MANUAL_APPROVED', 'Paid via Campay dashboard Withdraw')}
+                        disabled={processingId === w.id}
+                        className="px-3 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs disabled:opacity-50"
+                      >
+                        Mark paid manually
                       </button>
                       <button onClick={() => setRejecting(w)} className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs">Reject</button>
                     </td>
@@ -180,6 +193,10 @@ export default function AdminWithdrawals() {
                 <p className="text-amber-700 bg-amber-50 p-2 rounded">{campayCheck.balanceDiagnosis}</p>
               )}
               {campayCheck.balanceError && <p className="text-red-600">{campayCheck.balanceError}</p>}
+              {campayCheck.apiWithdrawalHint && (
+                <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded">{campayCheck.apiWithdrawalHint}</p>
+              )}
+              <p className="text-xs text-gray-400">API base: {campayCheck.campayBaseUrl}</p>
             </div>
           )}
         </Modal>
