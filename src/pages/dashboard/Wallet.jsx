@@ -25,17 +25,25 @@ export default function Wallet() {
   async function handleWithdraw(e) {
     e.preventDefault();
     try {
-      await api.post('/api/owner/wallet/withdraw', {
+      const { data } = await api.post('/api/owner/wallet/withdraw', {
         amountXaf: Number(form.amountXaf),
         phoneNumber: form.phoneNumber,
         method: form.method,
       });
-      toast.success('Withdrawal sent to your MoMo');
+      toast.success(data.pendingAdminRetry ? data.message : 'Withdrawal sent to your MoMo');
       setShowWithdraw(false);
       setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
       loadWallet(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Withdrawal failed');
+      const data = err.response?.data;
+      if (data?.pendingAdminRetry) {
+        toast.success(data.message || 'Withdrawal queued for processing');
+        setShowWithdraw(false);
+        setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
+        loadWallet(page);
+        return;
+      }
+      toast.error(data?.error || 'Withdrawal failed');
     }
   }
 

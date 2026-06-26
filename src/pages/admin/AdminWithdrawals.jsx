@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import { detectCameroonOperator } from '../../utils/phone';
 import { Modal, Pagination, StatusBadge } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
@@ -57,22 +58,26 @@ export default function AdminWithdrawals() {
                 <th className="p-3">Owner</th>
                 <th className="p-3">Amount</th>
                 <th className="p-3">Phone</th>
+                <th className="p-3">Network</th>
                 <th className="p-3">Method</th>
                 <th className="p-3">Date</th>
+                <th className="p-3">Last error</th>
                 <th className="p-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {pending.length === 0 ? (
-                <tr><td colSpan={6} className="p-6 text-center text-gray-400">No pending withdrawals</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-gray-400">No pending withdrawals</td></tr>
               ) : (
                 pending.map((w) => (
                   <tr key={w.id} className="border-b">
                     <td className="p-3">{w.owner.name}</td>
                     <td className="p-3">{w.amountXaf.toLocaleString()} XAF</td>
                     <td className="p-3">{w.phoneNumber}</td>
+                    <td className="p-3">{detectCameroonOperator(w.phoneNumber) || '—'}</td>
                     <td className="p-3">{w.method.replace('_', ' ')}</td>
                     <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
+                    <td className="p-3 text-xs text-red-600 max-w-xs">{w.adminNote || '—'}</td>
                     <td className="p-3 flex gap-2">
                       <button
                         onClick={() => process(w.id, 'APPROVED')}
