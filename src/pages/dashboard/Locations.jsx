@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Shield } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Shield, Pencil, Trash2, UserX } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Modal, StatusBadge, Button, Card, EmptyState } from '../../components/ui';
@@ -20,6 +20,10 @@ export default function Locations() {
   const [routers, setRouters] = useState([]);
   const [packages, setPackages] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [expandLoading, setExpandLoading] = useState(false);
+  const [showEditLocation, setShowEditLocation] = useState(false);
+  const [editLocForm, setEditLocForm] = useState({ name: '', address: '' });
+  const [sessions, setSessions] = useState([]);
 
   const [locForm, setLocForm] = useState({ name: '', address: '' });
   const [routerForm, setRouterForm] = useState({ name: '' });
@@ -31,8 +35,12 @@ export default function Locations() {
   const [savingPolicy, setSavingPolicy] = useState(false);
 
   async function loadLocations() {
-    const { data } = await api.get('/api/owner/locations');
-    setLocations(data);
+    try {
+      const { data } = await api.get('/api/owner/locations');
+      setLocations(data);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to load locations');
+    }
   }
 
   useEffect(() => {
@@ -45,6 +53,7 @@ export default function Locations() {
       return;
     }
     setExpanded(id);
+    setExpandLoading(true);
     const loc = locations.find((l) => l.id === id);
     if (loc) {
       setAccessPolicy({
@@ -52,13 +61,22 @@ export default function Locations() {
         maxHotspotDevices: loc.maxHotspotDevices ?? 0,
         maxDevicesPerAccessCode: loc.maxDevicesPerAccessCode ?? 0,
       });
+      setEditLocForm({ name: loc.name, address: loc.address });
     }
-    const [r, p] = await Promise.all([
-      api.get(`/api/owner/locations/${id}/routers`),
-      api.get(`/api/owner/locations/${id}/packages`),
-    ]);
-    setRouters(r.data);
-    setPackages(p.data);
+    try {
+      const [r, p, s] = await Promise.all([
+        api.get(`/api/owner/locations/${id}/routers`),
+        api.get(`/api/owner/locations/${id}/packages`),
+        api.get('/api/owner/sessions'),
+      ]);
+      setRouters(r.data);
+      setPackages(p.data);
+      setSessions(s.data.filter((session) => session.location.id === id));
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to load location details');
+    } finally {
+      setExpandLoading(false);
+    }
   }
 
   async function saveAccessPolicy() {
@@ -76,39 +94,104 @@ export default function Locations() {
 
   async function createLocation(e) {
     e.preventDefault();
-    await api.post('/api/owner/locations', locForm);
-    toast.success('Location created');
-    setShowAddLocation(false);
-    setLocForm({ name: '', address: '' });
-    loadLocations();
+    try {
+      await api.post('/api/owner/locations', locForm);
+      toast.success('Location created');
+      setShowAddLocation(false);
+      setLocForm({ name: '', address: '' });
+      loadLocations();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to create location');
+    }
+  }
+
+  async function updateLocation(e) {
+    e.preventDefault();
+    try {
+      const { data } = await api.patch(`/api/owner/locations/${expanded}`, editLocForm);
+      toast.success('Location updated');
+      setShowEditLocation(false);
+      setLocations((prev) => prev.map((loc) => (loc.id === expanded ? { ...loc, ...data } : loc)));
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to update location');
+    }
+  }
+
+  async function toggleLocationActive(loc) {
+    try {
+      const { data } = await api.patch(`/api/owner/locations/${loc.id}`, {
+        isActive: !loc.isActive,
+      });
+      toast.success(data.isActive ? 'Location activated' : 'Location suspended');
+      setLocations((prev) => prev.map((l) => (l.id === loc.id ? { ...l, ...data } : l)));
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to update location status');
+    }
+  }
+
+  async function deleteRouter(routerId) {
+    if (!window.confirm('Remove this router? Subscribers will no longer reach the portal through it.')) return;
+    try {
+      await api.delete(`/api/owner/locations/${expanded}/routers/${routerId}`);
+      toast.success('Router removed');
+      expandLocation(expanded);
+      loadLocations();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to remove router');
+    }
+  }
+
+  async function kickSession(transactionId) {
+    try {
+      await api.post(`/api/owner/sessions/${transactionId}/kick`);
+      toast.success('Session ended');
+      expandLocation(expanded);
+      loadLocations();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to end session');
+    }
   }
 
   async function createRouter(e) {
     e.preventDefault();
-    const { data } = await api.post(`/api/owner/locations/${expanded}/routers`, routerForm);
-    toast.success('Router added');
-    setShowAddRouter(false);
-    setShowScript(data);
-    setScriptTab('hotspot');
-    setRouterForm({ name: '' });
-    expandLocation(expanded);
+    try {
+      const { data } = await api.post(`/api/owner/locations/${expanded}/routers`, routerForm);
+      toast.success('Router added');
+      setShowAddRouter(false);
+      setShowScript(data);
+      setScriptTab('hotspot');
+      setRouterForm({ name: '' });
+      expandLocation(expanded);
+      loadLocations();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to add router');
+    }
   }
 
   async function savePackage(payload) {
-    if (editingPackage) {
-      await api.patch(`/api/owner/locations/${expanded}/packages/${editingPackage.id}`, payload);
-      toast.success('Package updated');
-    } else {
-      await api.post(`/api/owner/locations/${expanded}/packages`, payload);
-      toast.success('Package created');
+    try {
+      if (editingPackage) {
+        await api.patch(`/api/owner/locations/${expanded}/packages/${editingPackage.id}`, payload);
+        toast.success('Package updated');
+      } else {
+        await api.post(`/api/owner/locations/${expanded}/packages`, payload);
+        toast.success('Package created');
+      }
+      expandLocation(expanded);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to save package');
+      throw err;
     }
-    expandLocation(expanded);
   }
 
   async function deactivatePackage(packageId) {
-    await api.delete(`/api/owner/locations/${expanded}/packages/${packageId}`);
-    toast.success('Package deactivated');
-    expandLocation(expanded);
+    try {
+      await api.delete(`/api/owner/locations/${expanded}/packages/${packageId}`);
+      toast.success('Package deactivated');
+      expandLocation(expanded);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to deactivate package');
+    }
   }
 
   function copyScript(text) {
@@ -175,16 +258,28 @@ export default function Locations() {
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge status={loc.isActive ? 'ACTIVE' : 'SUSPENDED'} />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLocationActive(loc);
+                  }}
+                  className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-navy/70 hover:bg-gray-200"
+                >
+                  {loc.isActive ? 'Suspend' : 'Activate'}
+                </button>
                 {expanded === loc.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </div>
             </button>
 
             {expanded === loc.id && (
               <div className="border-t border-gray-100 p-5">
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                  <div className="flex gap-2">
                   {[
                     { id: 'routers', label: 'Routers' },
                     { id: 'packages', label: 'Packages' },
+                    { id: 'sessions', label: 'Sessions' },
                     { id: 'access', label: 'Access policy' },
                   ].map((t) => (
                     <button
@@ -197,8 +292,20 @@ export default function Locations() {
                       {t.label}
                     </button>
                   ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditLocation(true)}
+                    className="text-xs text-navy/60 hover:text-navy inline-flex items-center gap-1"
+                  >
+                    <Pencil className="w-3.5 h-3.5" /> Edit location
+                  </button>
                 </div>
 
+                {expandLoading ? (
+                  <div className="animate-pulse bg-gray-200/80 rounded-xl h-32" />
+                ) : (
+                <>
                 {tab === 'routers' && (
                   <div>
                     <div className="flex justify-end mb-3">
@@ -247,6 +354,13 @@ export default function Locations() {
                                 className="text-navy/60 text-xs font-medium hover:text-navy inline-flex items-center gap-1"
                               >
                                 <Router className="w-3.5 h-3.5" /> Setup script
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteRouter(r.id)}
+                                className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Remove
                               </button>
                             </td>
                           </tr>
@@ -339,6 +453,48 @@ export default function Locations() {
                   </div>
                 )}
 
+                {tab === 'sessions' && (
+                  <div>
+                    {sessions.length === 0 ? (
+                      <p className="text-sm text-navy/50 text-center py-8">No active sessions at this location.</p>
+                    ) : (
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-gray-500 border-b">
+                            <th className="pb-2">Device</th>
+                            <th className="pb-2">Package</th>
+                            <th className="pb-2">Router</th>
+                            <th className="pb-2">Ends</th>
+                            <th className="pb-2"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sessions.map((s) => (
+                            <tr key={s.id} className="border-b border-gray-50">
+                              <td className="py-2">
+                                <p className="font-medium">{s.subscriberPhone}</p>
+                                <p className="text-xs text-navy/45">{s.paymentSource}</p>
+                              </td>
+                              <td className="py-2">{s.packageName}</td>
+                              <td className="py-2">{s.router?.name || '—'}</td>
+                              <td className="py-2 text-gray-400">{new Date(s.sessionEnd).toLocaleString()}</td>
+                              <td className="py-2 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => kickSession(s.id)}
+                                  className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center gap-1"
+                                >
+                                  <UserX className="w-3.5 h-3.5" /> Kick
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+
                 {tab === 'packages' && (
                   <div>
                     <div className="flex justify-end mb-3">
@@ -364,7 +520,14 @@ export default function Locations() {
                         </tr>
                       </thead>
                       <tbody>
-                        {packages.map((p) => (
+                        {packages.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-navy/50 text-sm">
+                              No packages yet. Add one so subscribers can buy internet on your portal.
+                            </td>
+                          </tr>
+                        ) : (
+                        packages.map((p) => (
                           <tr key={p.id} className="border-b border-gray-50">
                             <td className="py-2 font-medium">{p.name}</td>
                             <td className="py-2">
@@ -397,10 +560,13 @@ export default function Locations() {
                               )}
                             </td>
                           </tr>
-                        ))}
+                        ))
+                        )}
                       </tbody>
                     </table>
                   </div>
+                )}
+                </>
                 )}
               </div>
             )}
@@ -408,6 +574,26 @@ export default function Locations() {
         ))}
       </div>
       )}
+
+      <Modal open={showEditLocation} onClose={() => setShowEditLocation(false)} title="Edit location">
+        <form onSubmit={updateLocation} className="space-y-4">
+          <input
+            placeholder="Location name"
+            value={editLocForm.name}
+            onChange={(e) => setEditLocForm({ ...editLocForm, name: e.target.value })}
+            required
+            className="w-full px-3 py-2 border rounded-lg"
+          />
+          <input
+            placeholder="Address"
+            value={editLocForm.address}
+            onChange={(e) => setEditLocForm({ ...editLocForm, address: e.target.value })}
+            required
+            className="w-full px-3 py-2 border rounded-lg"
+          />
+          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">Save changes</button>
+        </form>
+      </Modal>
 
       <Modal open={showAddLocation} onClose={() => setShowAddLocation(false)} title="Add Location">
         <form onSubmit={createLocation} className="space-y-4">

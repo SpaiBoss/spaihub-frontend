@@ -15,36 +15,48 @@ export default function Vouchers() {
   const [stats, setStats] = useState(null);
   const [data, setData] = useState({ vouchers: [], pagination: {} });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showPdfExport, setShowPdfExport] = useState(false);
   const [branding, setBranding] = useState(null);
   const [filters, setFilters] = useState({ locationId: '', status: '', page: 1 });
 
   async function loadLocations() {
-    const { data: locs } = await api.get('/api/owner/locations');
-    setLocations(locs);
+    try {
+      const { data: locs } = await api.get('/api/owner/locations');
+      setLocations(locs);
 
-    const pkgMap = {};
-    await Promise.all(
-      locs.map(async (loc) => {
-        const { data: pkgs } = await api.get(`/api/owner/locations/${loc.id}/packages`);
-        pkgMap[loc.id] = pkgs;
-      })
-    );
-    setPackagesByLocation(pkgMap);
+      const pkgMap = {};
+      await Promise.all(
+        locs.map(async (loc) => {
+          const { data: pkgs } = await api.get(`/api/owner/locations/${loc.id}/packages`);
+          pkgMap[loc.id] = pkgs;
+        })
+      );
+      setPackagesByLocation(pkgMap);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to load locations');
+    }
   }
 
   async function loadVouchers() {
     setLoading(true);
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v); });
-    const [listRes, statsRes] = await Promise.all([
-      api.get(`/api/owner/vouchers?${params}`),
-      api.get('/api/owner/vouchers/stats'),
-    ]);
-    setData(listRes.data);
-    setStats(statsRes.data);
-    setLoading(false);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v); });
+      const [listRes, statsRes] = await Promise.all([
+        api.get(`/api/owner/vouchers?${params}`),
+        api.get('/api/owner/vouchers/stats'),
+      ]);
+      setData(listRes.data);
+      setStats(statsRes.data);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load vouchers');
+      setData({ vouchers: [], pagination: {} });
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -63,36 +75,49 @@ export default function Vouchers() {
   }
 
   async function revokeVoucher(id) {
-    await api.post(`/api/owner/vouchers/${id}/revoke`);
-    toast.success('Voucher revoked');
-    loadVouchers();
+    try {
+      await api.post(`/api/owner/vouchers/${id}/revoke`);
+      toast.success('Voucher revoked');
+      loadVouchers();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to revoke voucher');
+    }
   }
 
   async function exportPdf(perPage) {
-    const params = new URLSearchParams({ perPage: String(perPage) });
-    if (filters.locationId) params.set('locationId', filters.locationId);
-    if (filters.status) params.set('status', filters.status);
-    const response = await api.get(`/api/owner/vouchers/export/pdf?${params}`, { responseType: 'blob' });
-    const url = URL.createObjectURL(response.data);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `spaihub-vouchers-${perPage}up.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('PDF ready to print');
+    try {
+      const params = new URLSearchParams({ perPage: String(perPage) });
+      if (filters.locationId) params.set('locationId', filters.locationId);
+      if (filters.status) params.set('status', filters.status);
+      const response = await api.get(`/api/owner/vouchers/export/pdf?${params}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(response.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `spaihub-vouchers-${perPage}up.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF ready to print');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'PDF export failed');
+    }
   }
 
   async function exportCsv() {
-    const params = new URLSearchParams();
-    if (filters.locationId) params.set('locationId', filters.locationId);
-    if (filters.status) params.set('status', filters.status);
-    const response = await api.get(`/api/owner/vouchers/export?${params}`, { responseType: 'blob' });
-    const url = URL.createObjectURL(response.data);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'vouchers.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const params = new URLSearchParams();
+      if (filters.locationId) params.set('locationId', filters.locationId);
+      if (filters.status) params.set('status', filters.status);
+      const response = await api.get(`/api/owner/vouchers/export?${params}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(response.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vouchers.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV exported');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'CSV export failed');
+    }
   }
 
   function copyCode(code) {
@@ -147,6 +172,16 @@ export default function Vouchers() {
           <Download className="w-4 h-4" /> Export CSV
         </Button>
       </div>
+
+      {error && (
+        <Card className="mb-6">
+          <EmptyState
+            title="Could not load vouchers"
+            description={error}
+            action={<Button onClick={loadVouchers}>Retry</Button>}
+          />
+        </Card>
+      )}
 
       <TableShell>
         <table>

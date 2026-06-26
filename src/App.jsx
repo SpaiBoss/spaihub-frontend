@@ -24,6 +24,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOwners from './pages/admin/AdminOwners';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminWithdrawals from './pages/admin/AdminWithdrawals';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -76,6 +77,8 @@ export default function App() {
           <Route path="/admin/owners" element={<AdminOwners />} />
           <Route path="/admin/transactions" element={<AdminTransactions />} />
           <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

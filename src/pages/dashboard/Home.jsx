@@ -14,6 +14,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Card, EmptyState, Skeleton, StatCard, StatusBadge } from '../../components/ui';
 import AccountingExportBar from '../../components/AccountingExportBar';
@@ -49,6 +50,7 @@ export default function Home() {
           setAnalytics(analyticsRes.data);
         } catch {
           setAnalytics({ revenueByLocation: [], paymentMix: { momo: 0, voucher: 0 }, vouchers: null });
+          toast.error('Some analytics could not be loaded');
         }
       })
       .catch(() => setError('Failed to load dashboard data. Try signing in again.'))

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { Modal, Pagination, StatusBadge } from '../../components/ui';
+import { Modal, Pagination, StatusBadge, Button, Input, Skeleton, EmptyState } from '../../components/ui';
 import { detectCameroonOperator, paymentMethodForOperator } from '../../utils/phone';
 
 export default function Wallet() {
@@ -9,16 +9,24 @@ export default function Wallet() {
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [form, setForm] = useState({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
 
   async function loadWallet(currentPage = page) {
-    const { data } = await api.get(`/api/owner/wallet?page=${currentPage}`);
-    setWallet(data);
-    setPagination(data.pagination);
+    try {
+      setError(null);
+      const { data } = await api.get(`/api/owner/wallet?page=${currentPage}`);
+      setWallet(data);
+      setPagination(data.pagination);
+    } catch (err) {
+      setWallet(null);
+      setError(err.response?.data?.error || 'Failed to load wallet');
+    }
   }
 
   useEffect(() => {
+    setLoading(true);
     loadWallet(page).finally(() => setLoading(false));
   }, [page]);
 
@@ -47,7 +55,17 @@ export default function Wallet() {
     }
   }
 
-  if (loading) return <div className="animate-pulse bg-gray-200 rounded-xl h-48" />;
+  if (loading) return <Skeleton className="h-48 rounded-xl" />;
+
+  if (error || !wallet) {
+    return (
+      <EmptyState
+        title="Could not load wallet"
+        description={error || 'Something went wrong'}
+        action={<Button onClick={() => loadWallet(page)}>Retry</Button>}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -56,12 +74,9 @@ export default function Wallet() {
         <p className="text-4xl font-bold text-navy mt-2">
           {wallet.walletBalance.toLocaleString()} XAF
         </p>
-        <button
-          onClick={() => setShowWithdraw(true)}
-          className="mt-4 bg-brand text-white px-6 py-2.5 rounded-lg font-medium hover:bg-brand/90"
-        >
+        <Button onClick={() => setShowWithdraw(true)} className="mt-4">
           Withdraw
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
@@ -108,21 +123,20 @@ export default function Wallet() {
       <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal">
         <form onSubmit={handleWithdraw} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Amount (XAF)</label>
-            <input
+            <Input
+              label="Amount (XAF)"
               type="number"
               min={1000}
               max={wallet.walletBalance}
               value={form.amountXaf}
               onChange={(e) => setForm({ ...form, amountXaf: e.target.value })}
               required
-              className="w-full px-3 py-2 border rounded-lg"
             />
             <p className="text-xs text-gray-400 mt-1">Minimum 1,000 XAF</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
+            <Input
+              label="Phone Number"
               type="tel"
               placeholder="6XXXXXXXX"
               value={form.phoneNumber}
@@ -133,11 +147,10 @@ export default function Wallet() {
                 setForm({ ...form, phoneNumber, method });
               }}
               required
-              className="w-full px-3 py-2 border rounded-lg"
             />
             {detectCameroonOperator(form.phoneNumber) && (
               <p className="text-xs text-navy/50 mt-1">
-                Detected: {detectCameroonOperator(form.phoneNumber)} — must match payment method below
+                Detected: {detectCameroonOperator(form.phoneNumber)}
               </p>
             )}
           </div>
@@ -156,9 +169,9 @@ export default function Wallet() {
           <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
             Withdrawals are sent automatically to your MoMo number via Campay.
           </p>
-          <button type="submit" className="w-full bg-brand text-white py-2.5 rounded-lg font-medium">
+          <Button type="submit" className="w-full">
             Submit Withdrawal
-          </button>
+          </Button>
         </form>
       </Modal>
     </div>

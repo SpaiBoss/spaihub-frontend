@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import api from '../../services/api';
 import { AdminGuard, AdminLayout } from './AdminLogin';
-import { Card, Skeleton } from '../../components/ui';
+import { Card, Skeleton, EmptyState, Button } from '../../components/ui';
 import AccountingExportBar from '../../components/AccountingExportBar';
 import {
   ChartTooltip,
@@ -27,14 +27,23 @@ import {
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [chart, setChart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     Promise.all([api.get('/api/admin/stats'), api.get('/api/admin/stats/revenue-chart')])
       .then(([statsRes, chartRes]) => {
         setStats(statsRes.data);
         setChart(chartRes.data);
       })
-      .catch(() => {});
+      .catch((err) => {
+        setStats(null);
+        setChart([]);
+        setError(err.response?.data?.error || 'Failed to load platform stats');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const cards = stats
@@ -58,8 +67,34 @@ export default function AdminDashboard() {
         <div className="space-y-6">
           <AccountingExportBar mode="admin" />
 
+          {error && (
+            <EmptyState
+              title="Could not load dashboard"
+              description={error}
+              action={
+                <Button
+                  onClick={() => {
+                    setLoading(true);
+                    setError(null);
+                    Promise.all([api.get('/api/admin/stats'), api.get('/api/admin/stats/revenue-chart')])
+                      .then(([statsRes, chartRes]) => {
+                        setStats(statsRes.data);
+                        setChart(chartRes.data);
+                      })
+                      .catch((err) => setError(err.response?.data?.error || 'Failed to load platform stats'))
+                      .finally(() => setLoading(false));
+                  }}
+                >
+                  Retry
+                </Button>
+              }
+            />
+          )}
+
+          {!error && (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {cards.length === 0
+            {loading || cards.length === 0
               ? [...Array(6)].map((_, i) => <Skeleton key={i} className="h-28" />)
               : cards.map((c) => (
                   <Card key={c.label} bodyClassName="p-5">
@@ -78,7 +113,9 @@ export default function AdminDashboard() {
               </div>
             </div>
             {chart.length === 0 ? (
-              <Skeleton className="h-80" />
+              loading ? <Skeleton className="h-80" /> : (
+                <p className="text-sm text-navy/50 text-center py-16">No revenue data for the last 30 days</p>
+              )
             ) : (
               <ResponsiveContainer width="100%" height={320}>
                 <ComposedChart data={chart} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -118,6 +155,8 @@ export default function AdminDashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
+          )}
+          </>
           )}
         </div>
       </AdminLayout>

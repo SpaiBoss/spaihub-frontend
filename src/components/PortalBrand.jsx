@@ -1,8 +1,9 @@
 import BrandLogo from './BrandLogo';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 
 export default function PortalBrand({ branding, theme = 'dark', textClassName = 'text-3xl', className = '' }) {
   const name = branding?.brandName;
-  const logoUrl = branding?.logoUrl;
+  const logoUrl = resolveMediaUrl(branding?.logoUrl);
 
   if (logoUrl) {
     return (
@@ -11,6 +12,7 @@ export default function PortalBrand({ branding, theme = 'dark', textClassName = 
           src={logoUrl}
           alt={name || 'Hotspot logo'}
           className="max-h-14 max-w-[220px] object-contain"
+          referrerPolicy="no-referrer"
         />
         {name && (
           <p className={`font-semibold ${theme === 'dark' ? 'text-white/90' : 'text-navy'} text-sm`}>

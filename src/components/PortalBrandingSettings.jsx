@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Palette, Upload, Trash2, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import { Button, Card, Input } from './ui';
 import PortalBrand, { PortalCredit } from './PortalBrand';
 
@@ -102,7 +103,10 @@ export default function PortalBrandingSettings() {
 
   const previewBranding = {
     brandName: form.portalBrandName || null,
-    logoUrl: resolved?.logoUrl || (form.portalLogoUrl?.startsWith('http') ? form.portalLogoUrl : null),
+    logoUrl:
+      resolveMediaUrl(resolved?.logoUrl)
+      || resolveMediaUrl(form.portalLogoUrl?.startsWith('/uploads/') ? form.portalLogoUrl : null)
+      || (form.portalLogoUrl?.startsWith('http') ? form.portalLogoUrl : null),
     accentColor: form.portalAccentColor || null,
     welcomeText: form.portalWelcomeText || null,
   };
@@ -187,9 +191,16 @@ export default function PortalBrandingSettings() {
             </div>
             <Input
               placeholder="Or paste logo URL (https://...)"
-              value={form.portalLogoUrl.startsWith('/uploads/') ? '' : form.portalLogoUrl}
+              value={form.portalLogoUrl.startsWith('/uploads/') || form.portalLogoUrl.startsWith('http') ? '' : form.portalLogoUrl}
               onChange={(e) => setForm({ ...form, portalLogoUrl: e.target.value })}
             />
+            {(resolved?.logoUrl || form.portalLogoUrl) && (
+              <img
+                src={resolveMediaUrl(resolved?.logoUrl || form.portalLogoUrl)}
+                alt="Current logo"
+                className="mt-3 max-h-16 max-w-[200px] object-contain rounded border border-gray-100 p-2"
+              />
+            )}
           </div>
 
           <label className="flex items-start gap-3 cursor-pointer">

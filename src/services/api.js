@@ -29,6 +29,13 @@ api.interceptors.response.use(
       }
     }
 
+    if (status === 401 && localStorage.getItem('adminToken') && url.startsWith('/api/admin')) {
+      localStorage.removeItem('adminToken');
+      if (!window.location.pathname.startsWith('/admin/login')) {
+        window.location.href = '/admin/login';
+      }
+    }
+
     return Promise.reject(error);
   }
 );

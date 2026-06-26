@@ -151,6 +151,7 @@ export default function Portal() {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherPin, setVoucherPin] = useState('');
   const [redeeming, setRedeeming] = useState(false);
+  const [paymentTimedOut, setPaymentTimedOut] = useState(false);
 
   const checkSession = useCallback(async () => {
     if (!deviceId) return null;
@@ -168,7 +169,7 @@ export default function Portal() {
         setPortal(data);
         await checkSession();
       } catch {
-        setError('Router not found');
+        setError('Router not found or unavailable');
       } finally {
         setLoading(false);
       }
@@ -202,6 +203,7 @@ export default function Portal() {
         }
         if (data.status === 'FAILED') {
           setWaiting(false);
+          setPaymentTimedOut(false);
           setError(data.error || 'Payment failed. Please try again.');
           return true;
         }
@@ -209,8 +211,8 @@ export default function Portal() {
         // fall through to session check
       }
       if (attempts >= maxAttempts) {
-        setWaiting(false);
-        setError('Payment not confirmed. Please try again or contact support.');
+        setPaymentTimedOut(true);
+        setError('Payment not confirmed. Approve MoMo on your phone or try again.');
         return true;
       }
       return false;
@@ -271,6 +273,7 @@ export default function Portal() {
       });
       setPaymentReference(data.reference);
       setWaiting(true);
+      setPaymentTimedOut(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Payment failed');
     } finally {
@@ -288,7 +291,7 @@ export default function Portal() {
 
   if (error && !portal) {
     return (
-      <PortalShell>
+      <PortalShell branding={null}>
         <PortalCard className="text-center">
           <p className="text-red-600 font-medium">{error}</p>
         </PortalCard>
@@ -298,6 +301,7 @@ export default function Portal() {
 
   const branding = portal?.branding;
   const welcomeText = branding?.welcomeText || 'Pay with Mobile Money to get online instantly';
+  const accentStyle = branding?.accentColor ? { backgroundColor: branding.accentColor } : undefined;
 
   if (session?.active) {
     return (
@@ -341,6 +345,38 @@ export default function Portal() {
             Your WiFi username and PIN appear here instantly once Campay confirms payment.
           </p>
           <p className="text-xs text-navy/40 mt-3 font-mono">Username will be {phone || 'your number'}</p>
+          {paymentTimedOut && (
+            <>
+              <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>
+              <button
+              type="button"
+              onClick={() => {
+                setWaiting(false);
+                setPaymentTimedOut(false);
+                setPaymentReference('');
+                setError('');
+              }}
+              className="btn-primary mt-6 px-6 py-2.5 text-sm"
+              style={accentStyle}
+            >
+              Try again
+            </button>
+            </>
+          )}
+        </PortalCard>
+      </PortalShell>
+    );
+  }
+
+  if (!portal?.packages?.length) {
+    return (
+      <PortalShell branding={branding}>
+        <PortalCard className="text-center py-10">
+          <Wifi className="w-10 h-10 text-brand mx-auto mb-4" />
+          <h1 className="text-lg font-bold text-navy">{portal?.locationName}</h1>
+          <p className="text-navy/60 mt-2 text-sm">
+            No internet packages are available at this location yet. Check back soon or ask the staff.
+          </p>
         </PortalCard>
       </PortalShell>
     );
@@ -348,7 +384,6 @@ export default function Portal() {
 
   const selected = portal?.packages.find((p) => p.id === selectedPkg);
   const operator = detectOperator(phone);
-  const accentStyle = branding?.accentColor ? { backgroundColor: branding.accentColor } : undefined;
 
   return (
     <PortalShell branding={branding}>
