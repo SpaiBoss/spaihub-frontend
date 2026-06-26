@@ -11,6 +11,8 @@ export default function AdminWithdrawals() {
   const [historyPagination, setHistoryPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [historyPage, setHistoryPage] = useState(1);
   const [processingId, setProcessingId] = useState(null);
+  const [checkingId, setCheckingId] = useState(null);
+  const [campayCheck, setCampayCheck] = useState(null);
   const [rejecting, setRejecting] = useState(null);
   const [note, setNote] = useState('');
 
@@ -31,6 +33,18 @@ export default function AdminWithdrawals() {
 
   useEffect(() => { loadPending(); }, []);
   useEffect(() => { loadHistory(historyPage); }, [historyPage]);
+
+  async function checkCampay(id) {
+    setCheckingId(id);
+    try {
+      const { data } = await api.get(`/api/admin/withdrawals/${id}/campay-check`);
+      setCampayCheck(data);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Campay check failed');
+    } finally {
+      setCheckingId(null);
+    }
+  }
 
   async function process(id, action, adminNote) {
     setProcessingId(id);
@@ -78,7 +92,15 @@ export default function AdminWithdrawals() {
                     <td className="p-3">{w.method.replace('_', ' ')}</td>
                     <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
                     <td className="p-3 text-xs text-red-600 max-w-xs">{w.adminNote || '—'}</td>
-                    <td className="p-3 flex gap-2">
+                    <td className="p-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => checkCampay(w.id)}
+                        disabled={checkingId === w.id}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs disabled:opacity-50"
+                      >
+                        {checkingId === w.id ? 'Checking...' : 'Check Campay'}
+                      </button>
                       <button
                         onClick={() => process(w.id, 'APPROVED')}
                         disabled={processingId === w.id}
@@ -133,6 +155,23 @@ export default function AdminWithdrawals() {
           limit={historyPagination.limit}
           onPageChange={setHistoryPage}
         />
+
+        <Modal open={!!campayCheck} onClose={() => setCampayCheck(null)} title="Campay check">
+          {campayCheck && (
+            <div className="space-y-2 text-sm">
+              <p><strong>API phone:</strong> {campayCheck.campayPhone}</p>
+              <p><strong>Network:</strong> {campayCheck.operator || '—'}</p>
+              <p><strong>MoMo name:</strong> {campayCheck.holderName || campayCheck.holderError || '—'}</p>
+              {campayCheck.balance && (
+                <p>
+                  <strong>Campay balance:</strong>{' '}
+                  MTN {campayCheck.balance.mtn.toLocaleString()} / Orange {campayCheck.balance.orange.toLocaleString()} {campayCheck.balance.currency}
+                </p>
+              )}
+              {campayCheck.balanceError && <p className="text-red-600">{campayCheck.balanceError}</p>}
+            </div>
+          )}
+        </Modal>
 
         <Modal open={!!rejecting} onClose={() => setRejecting(null)} title="Reject Withdrawal">
           <textarea
