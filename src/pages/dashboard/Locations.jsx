@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Shield, Pencil, Trash2, UserX } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Shield, Pencil, Trash2, UserX, Cloud } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Modal, StatusBadge, Button, Card, EmptyState } from '../../components/ui';
 import PackageFormModal from '../../components/PackageFormModal';
+import ChrOnboardingWizard, { DEFAULT_CHR_CONFIG } from '../../components/ChrOnboardingWizard';
 import { formatOwnerPackageSummary, PACKAGE_TYPE_LABELS } from '../../utils/packages';
 
 export default function Locations() {
@@ -16,6 +17,7 @@ export default function Locations() {
   const [showAddPackage, setShowAddPackage] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
   const [showScript, setShowScript] = useState(null);
+  const [chrWizardRouter, setChrWizardRouter] = useState(null);
   const [scriptTab, setScriptTab] = useState('hotspot');
   const [routers, setRouters] = useState([]);
   const [packages, setPackages] = useState([]);
@@ -26,7 +28,7 @@ export default function Locations() {
   const [sessions, setSessions] = useState([]);
 
   const [locForm, setLocForm] = useState({ name: '', address: '' });
-  const [routerForm, setRouterForm] = useState({ name: '' });
+  const [routerForm, setRouterForm] = useState({ name: '', deploymentType: 'PHYSICAL' });
   const [accessPolicy, setAccessPolicy] = useState({
     allowHotspotSharing: false,
     maxHotspotDevices: 0,
@@ -155,14 +157,25 @@ export default function Locations() {
   async function createRouter(e) {
     e.preventDefault();
     try {
-      const { data } = await api.post(`/api/owner/locations/${expanded}/routers`, routerForm);
+      const payload = {
+        name: routerForm.name,
+        deploymentType: routerForm.deploymentType,
+      };
+      if (routerForm.deploymentType === 'CHR') {
+        payload.chrConfig = DEFAULT_CHR_CONFIG;
+      }
+      const { data } = await api.post(`/api/owner/locations/${expanded}/routers`, payload);
       toast.success('Router added');
       setShowAddRouter(false);
-      setShowScript(data);
-      setScriptTab('hotspot');
-      setRouterForm({ name: '' });
+      setRouterForm({ name: '', deploymentType: 'PHYSICAL' });
       expandLocation(expanded);
       loadLocations();
+      if (data.deploymentType === 'CHR') {
+        setChrWizardRouter(data);
+      } else {
+        setShowScript(data);
+        setScriptTab('hotspot');
+      }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to add router');
     }
@@ -201,7 +214,16 @@ export default function Locations() {
     toast.success('Copied to clipboard');
   }
 
+  function openChrWizard(router) {
+    setChrWizardRouter(router);
+  }
+
   async function openRouterSetup(routerId) {
+    const router = routers.find((r) => r.id === routerId);
+    if (router?.deploymentType === 'CHR') {
+      openChrWizard(router);
+      return;
+    }
     const { data } = await api.get(`/api/owner/locations/${expanded}/routers/${routerId}/setup`);
     setScriptTab('hotspot');
     setShowScript(data);
@@ -335,25 +357,42 @@ export default function Locations() {
                         ) : (
                         routers.map((r) => (
                           <tr key={r.id} className="border-b border-gray-50">
-                            <td className="py-2 font-medium">{r.name}</td>
+                            <td className="py-2 font-medium">
+                              {r.name}
+                              {r.deploymentType === 'CHR' && (
+                                <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-sky-100 text-sky-700">
+                                  <Cloud className="w-3 h-3" /> CHR
+                                </span>
+                              )}
+                            </td>
                             <td className="py-2"><StatusBadge status={r.status} /></td>
                             <td className="py-2 text-gray-400">
                               {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : 'Never (normal without MikroTik)'}
                             </td>
                             <td className="py-2 whitespace-nowrap space-x-2 text-right">
+                              {r.deploymentType === 'CHR' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => openChrWizard(r)}
+                                  className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center gap-1"
+                                >
+                                  <Cloud className="w-3.5 h-3.5" /> Setup CHR
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openRouterSetup(r.id)}
+                                  className="text-navy/60 text-xs font-medium hover:text-navy inline-flex items-center gap-1"
+                                >
+                                  <Router className="w-3.5 h-3.5" /> Setup script
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => openPreviewPortal(r)}
                                 className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center gap-1"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" /> Preview portal
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => openRouterSetup(r.id)}
-                                className="text-navy/60 text-xs font-medium hover:text-navy inline-flex items-center gap-1"
-                              >
-                                <Router className="w-3.5 h-3.5" /> Setup script
                               </button>
                               <button
                                 type="button"
@@ -620,11 +659,45 @@ export default function Locations() {
           <input
             placeholder="Router name"
             value={routerForm.name}
-            onChange={(e) => setRouterForm({ name: e.target.value })}
+            onChange={(e) => setRouterForm({ ...routerForm, name: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
-          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">Add Router</button>
+          <div>
+            <p className="text-sm font-medium text-navy mb-2">Router type</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { id: 'PHYSICAL', label: 'Physical MikroTik', hint: 'Existing hotspot router' },
+                { id: 'CHR', label: 'MikroTik CHR', hint: 'Cloud VM — guided setup wizard' },
+              ].map((type) => (
+                <label
+                  key={type.id}
+                  className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-colors ${
+                    routerForm.deploymentType === type.id
+                      ? 'border-brand bg-brand/5 ring-1 ring-brand/20'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 font-medium text-sm text-navy">
+                    <input
+                      type="radio"
+                      name="deploymentType"
+                      value={type.id}
+                      checked={routerForm.deploymentType === type.id}
+                      onChange={() => setRouterForm({ ...routerForm, deploymentType: type.id })}
+                      className="text-brand"
+                    />
+                    {type.id === 'CHR' ? <Cloud className="w-4 h-4 text-sky-600" /> : <Router className="w-4 h-4" />}
+                    {type.label}
+                  </span>
+                  <span className="text-xs text-navy/50 mt-1 ml-6">{type.hint}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">
+            {routerForm.deploymentType === 'CHR' ? 'Add CHR & open wizard' : 'Add Router'}
+          </button>
         </form>
       </Modal>
 
@@ -690,6 +763,18 @@ export default function Locations() {
           </button>
         </div>
       </Modal>
+
+      <ChrOnboardingWizard
+        open={!!chrWizardRouter}
+        onClose={() => setChrWizardRouter(null)}
+        locationId={expanded}
+        router={chrWizardRouter}
+        onComplete={() => {
+          setChrWizardRouter(null);
+          expandLocation(expanded);
+          loadLocations();
+        }}
+      />
     </div>
   );
 }
