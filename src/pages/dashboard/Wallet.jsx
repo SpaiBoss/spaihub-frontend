@@ -126,13 +126,13 @@ export default function Wallet() {
             <Input
               label="Amount (XAF)"
               type="number"
-              min={1000}
+              min={100}
               max={wallet.walletBalance}
               value={form.amountXaf}
               onChange={(e) => setForm({ ...form, amountXaf: e.target.value })}
               required
             />
-            <p className="text-xs text-gray-400 mt-1">Minimum 1,000 XAF</p>
+            <p className="text-xs text-gray-400 mt-1">Minimum 100 XAF</p>
           </div>
           <div>
             <Input
