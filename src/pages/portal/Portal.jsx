@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Loader, Clock, Wifi, Ticket, KeyRound } from 'lucide-react';
+import { CheckCircle, Loader, Clock, Ticket, KeyRound } from 'lucide-react';
 import api from '../../services/api';
 import { formatPortalPackageSummary } from '../../utils/packages';
 import { getPortalDeviceId } from '../../utils/portalDevice';
@@ -50,26 +50,23 @@ function Countdown({ endTime }) {
 
 function PortalShell({ children, branding }) {
   const headerStyle = branding?.accentColor
-    ? { background: `linear-gradient(135deg, ${branding.accentColor}, #1A3C5E)` }
+    ? { backgroundColor: branding.accentColor }
     : undefined;
 
   return (
-    <div className="min-h-[100dvh] bg-portal-gradient flex flex-col">
+    <div className="min-h-[100dvh] bg-surface-muted flex flex-col">
       <header
-        className={`relative shrink-0 px-4 pt-[max(1.75rem,env(safe-area-inset-top))] pb-24 text-center text-white ${
-          branding?.accentColor ? '' : 'bg-brand-gradient'
+        className={`shrink-0 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-20 text-center text-white ${
+          branding?.accentColor ? '' : 'bg-navy'
         }`}
         style={headerStyle}
       >
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white/20 blur-3xl" />
-        </div>
-        <div className="relative z-10 flex min-h-[5.5rem] items-center justify-center">
-          <PortalBrand branding={branding} theme="dark" className="mx-auto" textClassName="text-3xl" />
+        <div className="relative z-10 flex min-h-[5rem] items-center justify-center">
+          <PortalBrand branding={branding} theme="dark" className="mx-auto" textClassName="text-2xl" />
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 -mt-16 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 -mt-14 pb-[max(2rem,env(safe-area-inset-bottom))]">
         {children}
         <PortalCredit />
       </main>
@@ -79,7 +76,7 @@ function PortalShell({ children, branding }) {
 
 function PortalCard({ children, className = '' }) {
   return (
-    <div className={`card shadow-elevated card-body animate-slide-up overflow-hidden ${className}`}>
+    <div className={`card card-body animate-slide-up overflow-hidden ${className}`}>
       {children}
     </div>
   );
@@ -90,15 +87,15 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor }) {
   const accentStyle = accentColor ? { backgroundColor: accentColor } : undefined;
 
   return (
-    <div className="mt-5 p-4 rounded-xl bg-navy/[0.04] border border-navy/10 text-left">
+    <div className="mt-5 p-4 rounded-lg bg-surface-muted border border-gray-200 text-left">
       <div className="flex items-center gap-2 mb-3">
         <KeyRound className="w-4 h-4 text-brand" style={accentColor ? { color: accentColor } : undefined} />
-        <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">WiFi login</p>
+        <p className="text-xs font-medium text-navy/50 tracking-wide">WiFi login</p>
       </div>
       <div className="space-y-2">
         <div>
           <p className="text-xs text-navy/45">Username</p>
-          <p className="font-mono font-semibold text-navy break-all">{username}</p>
+          <p className="font-mono font-semibold text-navy break-all text-sm">{username}</p>
         </div>
         <div>
           <p className="text-xs text-navy/45">PIN</p>
@@ -307,14 +304,12 @@ export default function Portal() {
     return (
       <PortalShell branding={branding}>
         <PortalCard className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto">
-            <CheckCircle className="w-9 h-9 text-emerald-500" />
-          </div>
-          <h1 className="text-xl font-bold text-navy mt-5">You&apos;re connected</h1>
-          <p className="text-navy/60 mt-1 text-sm">{session.packageName}</p>
-          <div className="mt-6 p-4 rounded-xl bg-brand/5 border border-brand/10">
-            <p className="text-xs text-navy/50 uppercase tracking-wide font-semibold">Time remaining</p>
-            <div className="flex items-center justify-center gap-2 mt-1 text-brand text-lg">
+          <CheckCircle className="w-8 h-8 text-signal mx-auto" strokeWidth={1.75} />
+          <h1 className="text-xl font-semibold text-navy mt-4">You&apos;re connected</h1>
+          <p className="text-navy/55 mt-1 text-sm">{session.packageName}</p>
+          <div className="mt-6 p-4 rounded-lg bg-surface-muted border border-gray-200">
+            <p className="text-xs text-navy/50 tracking-wide font-medium">Time remaining</p>
+            <div className="flex items-center justify-center gap-2 mt-1 text-brand text-lg font-mono">
               <Clock className="w-4 h-4" />
               <Countdown endTime={session.sessionEnd} />
             </div>
@@ -340,7 +335,7 @@ export default function Portal() {
       <PortalShell branding={branding}>
         <PortalCard className="text-center py-8">
           <Loader className="w-10 h-10 animate-spin text-brand mx-auto" />
-          <h1 className="text-lg font-bold text-navy mt-5">Approve MoMo on your phone</h1>
+          <h1 className="text-lg font-semibold text-navy mt-5">Approve MoMo on your phone</h1>
           <p className="text-navy/60 mt-2 text-sm">
             Your WiFi username and PIN appear here instantly once Campay confirms payment.
           </p>
@@ -372,9 +367,8 @@ export default function Portal() {
     return (
       <PortalShell branding={branding}>
         <PortalCard className="text-center py-10">
-          <Wifi className="w-10 h-10 text-brand mx-auto mb-4" />
-          <h1 className="text-lg font-bold text-navy">{portal?.locationName}</h1>
-          <p className="text-navy/60 mt-2 text-sm">
+          <h1 className="text-lg font-semibold text-navy">{portal?.locationName}</h1>
+          <p className="text-navy/55 mt-2 text-sm">
             No internet packages are available at this location yet. Check back soon or ask the staff.
           </p>
         </PortalCard>
@@ -389,24 +383,12 @@ export default function Portal() {
     <PortalShell branding={branding}>
       <PortalCard>
         <div className="text-center mb-6">
-          <div
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3 ${
-              branding?.accentColor ? '' : 'bg-brand/10 text-brand'
-            }`}
-            style={
-              branding?.accentColor
-                ? { backgroundColor: `${branding.accentColor}18`, color: branding.accentColor }
-                : undefined
-            }
-          >
-            <Wifi className="w-3 h-3" />
-            WiFi Hotspot
-          </div>
-          <h1 className="text-xl font-bold text-navy">{portal?.locationName}</h1>
-          <p className="text-navy/60 text-sm mt-1">{welcomeText}</p>
+          <p className="text-xs font-medium text-navy/45 tracking-wide mb-2">WiFi hotspot</p>
+          <h1 className="text-xl font-semibold text-navy">{portal?.locationName}</h1>
+          <p className="text-navy/55 text-sm mt-1">{welcomeText}</p>
         </div>
 
-        <div className="flex rounded-xl bg-gray-100 p-1 mb-6">
+        <div className="flex rounded-lg bg-surface-muted border border-gray-200 p-0.5 mb-6">
           {[
             { id: 'pay', label: 'Pay with MoMo', icon: null },
             { id: 'voucher', label: 'I have a voucher', icon: Ticket },
@@ -415,8 +397,8 @@ export default function Portal() {
               key={tab.id}
               type="button"
               onClick={() => { setMode(tab.id); setError(''); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                mode === tab.id ? 'bg-white text-navy shadow-sm' : 'text-navy/50 hover:text-navy/70'
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                mode === tab.id ? 'bg-white text-navy border border-gray-200' : 'text-navy/50 hover:text-navy/70'
               }`}
             >
               {tab.icon && <tab.icon className="w-3.5 h-3.5" />}

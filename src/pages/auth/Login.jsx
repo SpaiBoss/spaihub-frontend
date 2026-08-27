@@ -23,7 +23,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/api/auth/login', { email, password });
       login(data.token, data.owner);
-      toast.success('Welcome back!');
+      toast.success('Signed in');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
@@ -33,7 +33,7 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout title="Sign in" subtitle="Access your hotspot management dashboard">
+    <AuthLayout title="Sign in" subtitle="Access your operations dashboard">
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
           label="Email address"

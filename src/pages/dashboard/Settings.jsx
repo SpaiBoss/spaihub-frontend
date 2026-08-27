@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Shield, Lock } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -71,20 +71,14 @@ export default function Settings() {
         <p className="text-sm text-navy/50 mb-6">Your profile information</p>
         <div className="space-y-5 mb-8">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Mail className="w-4 h-4 text-brand" />
-            </div>
             <div>
-              <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">Email address</p>
+              <p className="text-xs font-medium text-navy/50 tracking-wide">Email address</p>
               <p className="font-medium text-navy mt-0.5">{currentOwner?.email || '—'}</p>
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Shield className="w-4 h-4 text-brand" />
-            </div>
             <div>
-              <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">Account status</p>
+              <p className="text-xs font-medium text-navy/50 tracking-wide">Account status</p>
               <div className="mt-1">
                 <StatusBadge status={currentOwner?.status || 'PENDING'} />
               </div>

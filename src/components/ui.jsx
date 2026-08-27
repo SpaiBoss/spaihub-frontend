@@ -16,20 +16,20 @@ const STATUS_LABELS = {
   REVOKED: 'Revoked',
 };
 
-const STATUS_COLORS = {
-  SUCCESS: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10',
-  PENDING: 'bg-amber-50 text-amber-700 ring-amber-600/10',
-  FAILED: 'bg-red-50 text-red-700 ring-red-600/10',
-  APPROVED: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10',
-  REJECTED: 'bg-red-50 text-red-700 ring-red-600/10',
-  ONLINE: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10',
-  OFFLINE: 'bg-red-50 text-red-700 ring-red-600/10',
-  ACTIVE: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10',
-  SUSPENDED: 'bg-red-50 text-red-700 ring-red-600/10',
-  UNUSED: 'bg-brand/10 text-brand ring-brand/10',
-  REDEEMED: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10',
-  EXPIRED: 'bg-amber-50 text-amber-700 ring-amber-600/10',
-  REVOKED: 'bg-red-50 text-red-700 ring-red-600/10',
+const STATUS_DOT = {
+  SUCCESS: 'bg-signal',
+  PENDING: 'bg-amber-500',
+  FAILED: 'bg-red-600',
+  APPROVED: 'bg-signal',
+  REJECTED: 'bg-red-600',
+  ONLINE: 'bg-signal',
+  OFFLINE: 'bg-red-600',
+  ACTIVE: 'bg-signal',
+  SUSPENDED: 'bg-red-600',
+  UNUSED: 'bg-brand',
+  REDEEMED: 'bg-signal',
+  EXPIRED: 'bg-amber-500',
+  REVOKED: 'bg-red-600',
 };
 
 function formatDuration(minutes) {
@@ -51,11 +51,11 @@ export { formatDuration };
 
 export function StatusBadge({ status }) {
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ${
-        STATUS_COLORS[status] || 'bg-gray-100 text-gray-600 ring-gray-500/10'
-      }`}
-    >
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium text-navy bg-surface-muted border border-gray-200">
+      <span
+        className={`w-1.5 h-1.5 rounded-sm shrink-0 ${STATUS_DOT[status] || 'bg-gray-400'}`}
+        aria-hidden
+      />
       {STATUS_LABELS[status] || status}
     </span>
   );
@@ -71,14 +71,14 @@ export function Button({
 }) {
   const sizes = {
     sm: 'px-3 py-1.5 text-xs rounded-lg',
-    md: 'px-4 py-2.5 text-sm rounded-xl',
-    lg: 'px-5 py-3 text-base rounded-xl',
+    md: 'px-4 py-2.5 text-sm rounded-lg',
+    lg: 'px-5 py-3 text-base rounded-lg',
   };
   const variants = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     ghost: 'btn-ghost',
-    danger: 'btn bg-red-600 text-white px-4 py-2.5 hover:bg-red-700 shadow-sm',
+    danger: 'btn bg-red-700 text-white px-4 py-2.5 hover:bg-red-800',
   };
 
   return (
@@ -124,8 +124,8 @@ export function PageHeader({ title, description, actions }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
       <div>
-        <h2 className="text-xl font-bold text-navy">{title}</h2>
-        {description && <p className="text-sm text-navy/60 mt-1 max-w-2xl">{description}</p>}
+        <h2 className="text-xl font-semibold text-navy">{title}</h2>
+        {description && <p className="text-sm text-navy/55 mt-1 max-w-2xl">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
     </div>
@@ -134,43 +134,25 @@ export function PageHeader({ title, description, actions }) {
 
 export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-fade-in">
-      {Icon && (
-        <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center mb-4">
-          <Icon className="w-7 h-7 text-brand" />
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center py-14 px-6 text-center animate-fade-in">
       <h3 className="text-base font-semibold text-navy">{title}</h3>
-      {description && <p className="text-sm text-navy/60 mt-1 max-w-sm">{description}</p>}
+      {description && <p className="text-sm text-navy/55 mt-1.5 max-w-sm">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
 }
 
 export function StatCard({ title, value, icon: Icon, trend, accent = 'brand' }) {
-  const accents = {
-    brand: 'bg-brand/10 text-brand',
-    green: 'bg-emerald-50 text-emerald-600',
-    navy: 'bg-navy/10 text-navy',
-    amber: 'bg-amber-50 text-amber-600',
-  };
-
   return (
     <Card className="hover:shadow-card-hover transition-shadow duration-200">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-navy/60">{title}</p>
-          <p className="text-2xl font-bold text-navy mt-2 tracking-tight">{value}</p>
-          {trend !== undefined && (
-            <p className={`text-xs font-medium mt-2 ${trend >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}% vs yesterday
-            </p>
-          )}
-        </div>
-        {Icon && (
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${accents[accent]}`}>
-            <Icon className="w-5 h-5" />
-          </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium tracking-wide text-navy/55 uppercase">{title}</p>
+        <p className="text-2xl font-semibold text-navy mt-2 tracking-tight tabular-nums">{value}</p>
+        {trend !== undefined && (
+          <p className={`text-xs font-medium mt-2 ${trend >= 0 ? 'text-signal' : 'text-red-600'}`}>
+            {trend >= 0 ? '+' : ''}
+            {trend}% vs yesterday
+          </p>
         )}
       </div>
     </Card>
@@ -178,7 +160,7 @@ export function StatCard({ title, value, icon: Icon, trend, accent = 'brand' }) 
 }
 
 export function Skeleton({ className = '' }) {
-  return <div className={`animate-pulse bg-gray-200/80 rounded-xl ${className}`} />;
+  return <div className={`animate-pulse bg-gray-200/80 rounded-lg ${className}`} />;
 }
 
 export function TableShell({ children, className = '' }) {
@@ -200,22 +182,22 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="absolute inset-0 bg-navy-dark/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-navy-dark/55" onClick={onClose} />
       <div
-        className={`relative bg-white rounded-2xl shadow-elevated w-full ${sizes[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
+        className={`relative bg-white rounded-lg border border-gray-200 shadow-elevated w-full ${sizes[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-start justify-between gap-4 p-6 border-b border-gray-100">
+        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200">
           <div>
-            <h3 className="text-lg font-bold text-navy">{title}</h3>
-            {description && <p className="text-sm text-navy/60 mt-0.5">{description}</p>}
+            <h3 className="text-lg font-semibold text-navy">{title}</h3>
+            {description && <p className="text-sm text-navy/55 mt-0.5">{description}</p>}
           </div>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-navy/40 hover:text-navy hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-lg text-navy/40 hover:text-navy hover:bg-navy/[0.04] transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -249,7 +231,7 @@ export function Pagination({ page = 1, totalPages = 1, total = 0, limit = 20, on
           >
             Previous
           </Button>
-          <span className="text-sm text-navy/60 font-medium px-1">
+          <span className="text-sm text-navy/60 font-medium px-1 tabular-nums">
             Page {page} of {totalPages}
           </span>
           <Button

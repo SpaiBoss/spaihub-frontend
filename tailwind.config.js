@@ -4,40 +4,50 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Remapped to graphite ink (call sites keep `navy-*` class names)
         navy: {
-          DEFAULT: '#1A3C5E',
-          dark: '#111827',
-          light: '#2a5280',
+          DEFAULT: '#0E141B',
+          dark: '#0A0F14',
+          light: '#161D27',
         },
         brand: {
-          DEFAULT: '#5463FF',
-          light: '#6b77ff',
-          dark: '#3d4fd9',
+          DEFAULT: '#0F766E',
+          light: '#148F86',
+          dark: '#0B5F59',
+        },
+        signal: {
+          DEFAULT: '#1F7A4C',
+          muted: '#E8F5EE',
         },
         surface: {
           DEFAULT: '#ffffff',
-          muted: '#f4f7fb',
+          muted: '#F3F4F6',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['"IBM Plex Sans"', 'Segoe UI', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      borderRadius: {
+        lg: '0.5rem',
+        xl: '0.5rem',
+        '2xl': '0.5rem',
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
-        'card-hover': '0 8px 24px -6px rgb(26 60 94 / 0.12), 0 2px 8px -2px rgb(0 0 0 / 0.04)',
-        elevated: '0 20px 50px -12px rgb(26 60 94 / 0.18)',
-        sidebar: '4px 0 24px -4px rgb(17 24 39 / 0.15)',
+        card: '0 1px 2px 0 rgb(14 20 27 / 0.04)',
+        'card-hover': '0 4px 12px -2px rgb(14 20 27 / 0.08)',
+        elevated: '0 12px 32px -8px rgb(14 20 27 / 0.14)',
+        sidebar: '1px 0 0 0 rgb(255 255 255 / 0.06)',
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #1A3C5E 0%, #111827 55%, #5463FF 100%)',
-        'auth-panel':
-          'linear-gradient(160deg, #0f172a 0%, #111827 32%, #1A3C5E 68%, #243b5c 100%), radial-gradient(at 15% 15%, rgba(84, 99, 255, 0.22) 0, transparent 45%), radial-gradient(at 85% 85%, rgba(26, 60, 94, 0.35) 0, transparent 50%)',
-        'sidebar-gradient': 'linear-gradient(180deg, #111827 0%, #1A3C5E 100%)',
-        'portal-gradient': 'linear-gradient(180deg, #f4f7fb 0%, #e8eef6 100%)',
+        'brand-gradient': 'linear-gradient(180deg, #0E141B 0%, #161D27 100%)',
+        'auth-panel': 'linear-gradient(180deg, #0E141B 0%, #161D27 100%)',
+        'sidebar-gradient': 'linear-gradient(180deg, #0E141B 0%, #0E141B 100%)',
+        'portal-gradient': 'linear-gradient(180deg, #F3F4F6 0%, #EEF0F3 100%)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.3s ease-out',
-        'slide-up': 'slideUp 0.35s ease-out',
+        'fade-in': 'fadeIn 0.25s ease-out',
+        'slide-up': 'slideUp 0.28s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -45,7 +55,7 @@ export default {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },

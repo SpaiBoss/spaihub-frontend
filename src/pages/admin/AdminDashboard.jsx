@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                     type="monotone"
                     dataKey="gross"
                     name="Gross revenue"
-                    stroke="#1A3C5E"
+                    stroke="#0E141B"
                     strokeWidth={2}
                     fill="url(#navyArea)"
                     dot={false}
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                   <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(d) => d.slice(5)} />
                   <YAxis {...CHART_AXIS} width={56} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                   <Tooltip content={<ChartTooltip />} labelFormatter={formatChartDate} />
-                  <Area type="monotone" dataKey="fees" name="Platform fees" stroke="#5463FF" strokeWidth={2.5} fill="url(#brandArea)" dot={false} />
+                  <Area type="monotone" dataKey="fees" name="Platform fees" stroke="#0F766E" strokeWidth={2} fill="url(#brandArea)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>

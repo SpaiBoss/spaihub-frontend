@@ -30,7 +30,7 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, bran
   ];
 
   const brandLabel = branding?.brandName || 'Your hotspot brand';
-  const accent = branding?.accentColor || '#5463FF';
+  const accent = branding?.accentColor || '#0F766E';
 
   return (
     <Modal

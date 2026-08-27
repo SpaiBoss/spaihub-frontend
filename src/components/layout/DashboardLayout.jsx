@@ -9,7 +9,6 @@ import {
   LogOut,
   Menu,
   Ticket,
-  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../BrandLogo';
@@ -26,34 +25,34 @@ const navItems = [
 const pageMeta = {
   '/dashboard': {
     title: 'Dashboard',
-    description: 'Overview of revenue, sessions, and network health.',
+    description: 'Revenue, sessions, and network health.',
   },
   '/dashboard/locations': {
     title: 'Locations',
-    description: 'Manage hotspots, routers, and internet packages.',
+    description: 'Hotspots, routers, and packages.',
   },
   '/dashboard/vouchers': {
     title: 'Vouchers',
-    description: 'Generate and track prepaid access codes.',
+    description: 'Prepaid access codes.',
   },
   '/dashboard/transactions': {
     title: 'Transactions',
-    description: 'Payment history across all your locations.',
+    description: 'Payment history across locations.',
   },
   '/dashboard/wallet': {
     title: 'Wallet',
-    description: 'Balance, earnings, and withdrawal requests.',
+    description: 'Balance and withdrawals.',
   },
   '/dashboard/settings': {
     title: 'Settings',
-    description: 'Account details and preferences.',
+    description: 'Account and portal branding.',
   },
 };
 
 function UserAvatar({ name }) {
   const initial = (name || 'O').charAt(0).toUpperCase();
   return (
-    <div className="w-9 h-9 rounded-xl bg-brand/20 text-brand font-bold text-sm flex items-center justify-center shrink-0">
+    <div className="w-8 h-8 rounded-lg bg-white/10 text-white/90 font-medium text-sm flex items-center justify-center shrink-0">
       {initial}
     </div>
   );
@@ -73,15 +72,15 @@ export default function DashboardLayout() {
   }
 
   const sidebar = (
-    <div className="flex flex-col h-full w-full bg-sidebar-gradient">
-      <div className="p-6 pb-8">
-        <BrandLogo theme="dark" textClassName="text-2xl" />
-        <p className="text-white/40 text-xs mt-3 font-medium tracking-wide uppercase">
-          Hotspot management
+    <div className="flex flex-col h-full w-full bg-navy">
+      <div className="px-5 py-6 border-b border-white/10">
+        <BrandLogo theme="dark" textClassName="text-xl" />
+        <p className="text-white/40 text-xs mt-2.5 font-medium tracking-wide">
+          Operations
         </p>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-2 py-4 space-y-0.5">
         {navItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -89,31 +88,31 @@ export default function DashboardLayout() {
             end={end}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+              `group flex items-center gap-3 pl-3 pr-3 py-2.5 text-sm transition-colors duration-150 border-l-2 ${
                 isActive
-                  ? 'bg-white/15 text-white shadow-sm backdrop-blur-sm'
-                  : 'text-white/65 hover:text-white hover:bg-white/8'
+                  ? 'border-brand text-white bg-white/[0.06] font-medium'
+                  : 'border-transparent text-white/60 hover:text-white hover:bg-white/[0.04]'
               }`
             }
           >
-            <Icon className="w-[18px] h-[18px] shrink-0" />
+            <Icon className="w-[17px] h-[17px] shrink-0 opacity-80" strokeWidth={1.75} />
             {label}
-            <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 m-3 rounded-2xl bg-white/8 border border-white/10 backdrop-blur-sm">
+      <div className="p-3 m-3 border border-white/10 rounded-lg">
         <div className="flex items-center gap-3">
           <UserAvatar name={currentOwner?.name} />
           <div className="min-w-0 flex-1">
-            <p className="text-white text-sm font-semibold truncate">{currentOwner?.name || 'Owner'}</p>
-            <p className="text-white/50 text-xs truncate">{currentOwner?.email}</p>
+            <p className="text-white text-sm font-medium truncate">{currentOwner?.name || 'Owner'}</p>
+            <p className="text-white/45 text-xs truncate">{currentOwner?.email}</p>
           </div>
         </div>
         <button
+          type="button"
           onClick={handleLogout}
-          className="flex items-center justify-center gap-2 w-full mt-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 text-sm font-medium transition-colors"
+          className="flex items-center justify-center gap-2 w-full mt-3 py-2 rounded-lg text-white/65 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sign out
@@ -124,35 +123,36 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen flex bg-surface-muted">
-      <aside className="hidden lg:flex w-64 flex-shrink-0 sticky top-0 h-screen shadow-sidebar z-20">
+      <aside className="hidden lg:flex w-60 flex-shrink-0 sticky top-0 h-screen z-20 border-r border-navy-dark">
         {sidebar}
       </aside>
 
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-in">
-          <div className="absolute inset-0 bg-navy-dark/70 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-72 h-full animate-slide-up shadow-sidebar">{sidebar}</aside>
+          <div className="absolute inset-0 bg-navy-dark/60" onClick={() => setMobileOpen(false)} />
+          <aside className="relative w-72 h-full animate-slide-up">{sidebar}</aside>
         </div>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <header className="bg-white border-b border-gray-200 px-5 py-3.5 flex items-center justify-between sticky top-0 z-10">
           <div className="flex items-center gap-3 min-w-0">
             <button
-              className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-gray-100 transition-colors"
+              type="button"
+              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-navy/[0.04] transition-colors"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5 text-navy" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg font-bold text-navy truncate">{meta.title}</h1>
+              <h1 className="text-base font-semibold text-navy truncate">{meta.title}</h1>
               <p className="text-xs text-navy/50 hidden sm:block truncate">{meta.description}</p>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-6 animate-fade-in">
+        <main className="flex-1 p-5 sm:p-6 animate-fade-in">
           <Outlet />
         </main>
       </div>

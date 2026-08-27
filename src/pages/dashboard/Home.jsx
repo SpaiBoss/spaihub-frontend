@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { TrendingUp, Users, Wifi, Wallet, BarChart3, Ticket, Smartphone } from 'lucide-react';
+import { TrendingUp, Users, Wallet, BarChart3, Ticket } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -148,7 +148,7 @@ export default function Home() {
               <h3 className="font-semibold text-navy">Revenue trend</h3>
               <p className="text-xs text-navy/50 mt-1">Daily net earnings — last 30 days</p>
             </div>
-            <span className="text-xs font-semibold text-brand bg-brand/10 px-2.5 py-1 rounded-full">Live</span>
+            <span className="text-xs font-medium text-brand border border-brand/25 px-2 py-0.5 rounded">Live</span>
           </div>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={chart} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -161,11 +161,11 @@ export default function Home() {
                 type="monotone"
                 dataKey="amount"
                 name="Net earnings"
-                stroke="#5463FF"
-                strokeWidth={2.5}
+                stroke="#0F766E"
+                strokeWidth={2}
                 fill="url(#brandArea)"
                 dot={false}
-                activeDot={{ r: 5, fill: '#5463FF', stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: '#0F766E', stroke: '#fff', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -244,9 +244,9 @@ export default function Home() {
                 <ResponsiveContainer width="100%" height={150}>
                   <PieChart>
                     <Pie data={voucherChart} dataKey="value" nameKey="name" innerRadius={40} outerRadius={62} paddingAngle={3} stroke="none">
-                      <Cell fill="#5463FF" />
-                      <Cell fill="#10b981" />
-                      <Cell fill="#f59e0b" />
+                      <Cell fill="#0F766E" />
+                      <Cell fill="#1F7A4C" />
+                      <Cell fill="#d97706" />
                     </Pie>
                     <Tooltip content={<ChartTooltip formatter={(v) => v} />} />
                   </PieChart>
@@ -274,11 +274,9 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center">
-              <Wifi className="w-4 h-4 text-brand" />
-            </div>
+          <div className="mb-5">
             <h3 className="font-semibold text-navy">Router status</h3>
+            <p className="text-xs text-navy/50 mt-1">By location</p>
           </div>
           {routers.length === 0 ? (
             <p className="text-sm text-navy/50 text-center py-6">No routers configured yet</p>
@@ -303,8 +301,7 @@ export default function Home() {
         </Card>
 
         <Card>
-          <div className="flex items-center gap-2 mb-5">
-            <Smartphone className="w-4 h-4 text-brand" />
+          <div className="mb-5">
             <h3 className="font-semibold text-navy">Top packages today</h3>
           </div>
           {stats.topPackages.length === 0 ? (
@@ -316,7 +313,7 @@ export default function Home() {
                 <XAxis type="number" {...CHART_AXIS} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" {...CHART_AXIS} width={100} />
                 <Tooltip content={<ChartTooltip formatter={(v) => `${v} sales`} />} />
-                <Bar dataKey="sales" name="Sales" fill="#1A3C5E" radius={[0, 8, 8, 0]} barSize={16} />
+                <Bar dataKey="sales" name="Sales" fill="#0E141B" radius={[0, 4, 4, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           )}

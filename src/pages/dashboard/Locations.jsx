@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Shield, Pencil, Trash2, UserX, Cloud } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Pencil, Trash2, UserX, Cloud } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Modal, StatusBadge, Button, Card, EmptyState } from '../../components/ui';
@@ -360,7 +360,7 @@ export default function Locations() {
                             <td className="py-2 font-medium">
                               {r.name}
                               {r.deploymentType === 'CHR' && (
-                                <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-sky-100 text-sky-700">
+                                <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-surface-muted text-navy/70 border border-gray-200">
                                   <Cloud className="w-3 h-3" /> CHR
                                 </span>
                               )}
@@ -412,16 +412,11 @@ export default function Locations() {
 
                 {tab === 'access' && (
                   <div className="max-w-md">
-                    <div className="flex items-start gap-3 mb-6">
-                      <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-                        <Shield className="w-4 h-4 text-brand" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-navy">Access policy</h4>
-                        <p className="text-sm text-navy/50 mt-0.5">
-                          Control how many devices can use each voucher or access code, and whether hotspot sharing is allowed.
-                        </p>
-                      </div>
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-navy">Access policy</h4>
+                      <p className="text-sm text-navy/50 mt-0.5">
+                        Devices per voucher or access code, and whether hotspot sharing is allowed.
+                      </p>
                     </div>
 
                     <div className="space-y-5">
@@ -570,7 +565,7 @@ export default function Locations() {
                           <tr key={p.id} className="border-b border-gray-50">
                             <td className="py-2 font-medium">{p.name}</td>
                             <td className="py-2">
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-navy font-medium">
+                              <span className="text-xs px-2 py-0.5 rounded bg-surface-muted border border-gray-200 text-navy font-medium">
                                 {PACKAGE_TYPE_LABELS[p.type] || 'Time-based'}
                               </span>
                             </td>
@@ -630,7 +625,7 @@ export default function Locations() {
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
-          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">Save changes</button>
+          <Button type="submit" className="w-full">Save changes</Button>
         </form>
       </Modal>
 
@@ -650,7 +645,7 @@ export default function Locations() {
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
-          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">Create</button>
+          <Button type="submit" className="w-full">Create</Button>
         </form>
       </Modal>
 
@@ -687,7 +682,7 @@ export default function Locations() {
                       onChange={() => setRouterForm({ ...routerForm, deploymentType: type.id })}
                       className="text-brand"
                     />
-                    {type.id === 'CHR' ? <Cloud className="w-4 h-4 text-sky-600" /> : <Router className="w-4 h-4" />}
+                    {type.id === 'CHR' ? <Cloud className="w-4 h-4 text-brand" /> : <Router className="w-4 h-4" />}
                     {type.label}
                   </span>
                   <span className="text-xs text-navy/50 mt-1 ml-6">{type.hint}</span>
@@ -695,9 +690,9 @@ export default function Locations() {
               ))}
             </div>
           </div>
-          <button type="submit" className="w-full bg-brand text-white py-2 rounded-lg">
+          <Button type="submit" className="w-full">
             {routerForm.deploymentType === 'CHR' ? 'Add CHR & open wizard' : 'Add Router'}
-          </button>
+          </Button>
         </form>
       </Modal>
 

@@ -152,8 +152,8 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
           {STEPS.map((s, i) => (
             <span
               key={s.id}
-              className={`text-xs px-2 py-1 rounded-full ${
-                i === step ? 'bg-brand text-white' : i < step ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-navy/50'
+              className={`text-xs px-2 py-1 rounded ${
+                i === step ? 'bg-brand text-white' : i < step ? 'bg-signal-muted text-signal' : 'bg-surface-muted text-navy/50 border border-gray-200'
               }`}
             >
               {i + 1}. {s.title}

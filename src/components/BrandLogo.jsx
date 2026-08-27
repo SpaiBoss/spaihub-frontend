@@ -1,12 +1,9 @@
 export function TextWordmark({ theme = 'light', className = 'text-2xl', as: Tag = 'span' }) {
-  const spaiColor = theme === 'dark' ? 'text-white' : 'text-navy';
-  const hyphenColor = theme === 'dark' ? 'text-white/45' : 'text-navy/35';
+  const color = theme === 'dark' ? 'text-white' : 'text-navy';
 
   return (
-    <Tag className={`font-bold tracking-tight leading-none ${className}`} aria-label="Spai-Hub">
-      <span className={spaiColor}>Spai</span>
-      <span className={hyphenColor}>-</span>
-      <span className={theme === 'dark' ? 'text-brand-light' : 'text-brand'}>Hub</span>
+    <Tag className={`font-semibold tracking-tight leading-none ${color} ${className}`} aria-label="Spai-Hub">
+      Spai-Hub
     </Tag>
   );
 }

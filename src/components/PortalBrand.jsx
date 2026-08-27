@@ -46,7 +46,7 @@ export function PortalCredit() {
         href="https://spaitrace.com"
         target="_blank"
         rel="noreferrer"
-        className="font-semibold text-brand hover:underline"
+        className="font-medium text-navy/55 hover:text-brand"
       >
         spaitrace.com
       </a>

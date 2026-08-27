@@ -35,15 +35,16 @@ export default function App() {
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#111827',
+              background: '#0E141B',
               color: '#fff',
-              borderRadius: '12px',
-              fontSize: '14px',
+              borderRadius: '8px',
+              fontSize: '13px',
               fontWeight: '500',
               padding: '12px 16px',
+              fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
             },
-            success: { iconTheme: { primary: '#5463FF', secondary: '#fff' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+            success: { iconTheme: { primary: '#0F766E', secondary: '#fff' } },
+            error: { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
           }}
         />
         <Routes>

@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { Palette, Upload, Trash2, Eye } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { Button, Card, Input } from './ui';
 import PortalBrand, { PortalCredit } from './PortalBrand';
+
+const DEFAULT_ACCENT = '#0F766E';
 
 const DEFAULT_FORM = {
   portalBrandName: '',
@@ -116,22 +118,17 @@ export default function PortalBrandingSettings() {
     : null;
 
   if (loading) {
-    return <div className="animate-pulse bg-gray-200/80 rounded-2xl h-64" />;
+    return <div className="animate-pulse bg-gray-200/80 rounded-lg h-64" />;
   }
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
-        <div className="flex items-start gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-            <Palette className="w-4 h-4 text-brand" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-navy">Captive portal branding</h3>
-            <p className="text-sm text-navy/50 mt-0.5">
-              Customize what subscribers see when they connect. Leave blank to use Spai-Hub defaults.
-            </p>
-          </div>
+        <div className="mb-6">
+          <h3 className="font-semibold text-navy">Captive portal branding</h3>
+          <p className="text-sm text-navy/50 mt-0.5">
+            What subscribers see when they connect. Leave blank for Spai-Hub defaults.
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -144,7 +141,7 @@ export default function PortalBrandingSettings() {
 
           <Input
             label="Welcome message"
-            placeholder="Pay with MoMo to get online instantly"
+            placeholder="Pay with MoMo to get online"
             value={form.portalWelcomeText}
             onChange={(e) => setForm({ ...form, portalWelcomeText: e.target.value.slice(0, 160) })}
           />
@@ -154,14 +151,14 @@ export default function PortalBrandingSettings() {
             <div className="flex gap-2">
               <input
                 type="color"
-                value={form.portalAccentColor || '#5463FF'}
+                value={form.portalAccentColor || DEFAULT_ACCENT}
                 onChange={(e) => setForm({ ...form, portalAccentColor: e.target.value })}
-                className="h-11 w-14 rounded-lg border border-gray-200 cursor-pointer"
+                className="h-11 w-14 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 value={form.portalAccentColor}
                 onChange={(e) => setForm({ ...form, portalAccentColor: e.target.value })}
-                placeholder="#5463FF"
+                placeholder={DEFAULT_ACCENT}
                 className="input-field flex-1 font-mono"
               />
             </div>
@@ -203,7 +200,7 @@ export default function PortalBrandingSettings() {
                 key={currentLogoSrc}
                 src={currentLogoSrc}
                 alt="Current logo"
-                className="mt-3 max-h-16 max-w-[200px] object-contain rounded border border-gray-100 p-2"
+                className="mt-3 max-h-16 max-w-[200px] object-contain rounded border border-gray-200 p-2"
               />
             )}
           </div>
@@ -218,7 +215,7 @@ export default function PortalBrandingSettings() {
             <span>
               <span className="font-medium text-navy block">Show upload speed on packages</span>
               <span className="text-sm text-navy/50">
-                Off by default. Subscribers only see duration and data limits unless you enable this.
+                Off by default. Subscribers only see duration and data limits unless enabled.
               </span>
             </span>
           </label>
@@ -227,13 +224,13 @@ export default function PortalBrandingSettings() {
             <input
               type="checkbox"
               checked
-              onChange={() => toast(PLATFORM_CREDIT_MESSAGE, { icon: 'ℹ️', duration: 6000 })}
+              onChange={() => toast(PLATFORM_CREDIT_MESSAGE, { duration: 6000 })}
               className="mt-1 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer"
             />
             <span>
               <span className="font-medium text-navy block">Show &quot;Powered by spaitrace.com&quot;</span>
               <span className="text-sm text-navy/50">
-                Always shown on the captive portal. Uncheck to contact us about white-label options.
+                Always shown on the captive portal. Contact us about white-label options.
               </span>
             </span>
           </label>
@@ -245,30 +242,27 @@ export default function PortalBrandingSettings() {
       </Card>
 
       <Card>
-        <div className="flex items-center gap-2 mb-4">
-          <Eye className="w-4 h-4 text-brand" />
-          <h3 className="font-semibold text-navy">Preview</h3>
-        </div>
-        <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+        <h3 className="font-semibold text-navy mb-4">Preview</h3>
+        <div className="rounded-lg overflow-hidden border border-gray-200">
           <div
-            className={previewBranding.accentColor ? 'px-4 pt-6 pb-12 text-center text-white' : 'bg-brand-gradient px-4 pt-6 pb-12 text-center text-white'}
+            className={previewBranding.accentColor ? 'px-4 pt-6 pb-12 text-center text-white' : 'bg-navy px-4 pt-6 pb-12 text-center text-white'}
             style={
               previewBranding.accentColor
-                ? { background: `linear-gradient(135deg, ${previewBranding.accentColor}, #1A3C5E)` }
+                ? { backgroundColor: previewBranding.accentColor }
                 : undefined
             }
           >
             <PortalBrand branding={{ ...previewBranding, logoUrl: currentLogoSrc }} theme="dark" textClassName="text-2xl" />
           </div>
-          <div className="bg-white p-4 -mt-6 mx-3 mb-3 rounded-xl shadow-sm border border-gray-100">
-            <p className="text-xs text-brand font-semibold uppercase tracking-wide">WiFi Hotspot</p>
-            <p className="font-bold text-navy mt-1">Sample Location</p>
+          <div className="bg-white p-4 -mt-6 mx-3 mb-3 rounded-lg border border-gray-200">
+            <p className="text-xs text-navy/45 font-medium tracking-wide">WiFi hotspot</p>
+            <p className="font-semibold text-navy mt-1">Sample Location</p>
             <p className="text-sm text-navy/55 mt-1">
-              {previewBranding.welcomeText || 'Pay with Mobile Money to get online instantly'}
+              {previewBranding.welcomeText || 'Pay with Mobile Money to get online'}
             </p>
             <div
-              className="mt-4 py-2.5 rounded-lg text-center text-white text-sm font-semibold"
-              style={{ backgroundColor: previewBranding.accentColor || '#5463FF' }}
+              className="mt-4 py-2.5 rounded-lg text-center text-white text-sm font-medium"
+              style={{ backgroundColor: previewBranding.accentColor || DEFAULT_ACCENT }}
             >
               Pay with MoMo
             </div>
