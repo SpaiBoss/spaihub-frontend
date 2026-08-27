@@ -252,7 +252,7 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       {step === 3 && (
         <div className="space-y-3">
           <p className="text-sm text-navy/60">
-            Run after bootstrap. Adds walled garden, SpaiHub profiles, and captive portal redirect.
+            Run after bootstrap. Adds walled garden, SpaiHub profiles, and downloads <code className="text-xs">hotspot/login.html</code> to redirect clients to the captive portal.
           </p>
           <ScriptBlock script={setup?.hotspotSetupScript} onCopy={copyScript} copied={copied} />
         </div>
