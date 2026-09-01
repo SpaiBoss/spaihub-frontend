@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Loader, Clock, Ticket, KeyRound } from 'lucide-react';
 import api from '../../services/api';
-import { formatPortalPackageSummary } from '../../utils/packages';
+import { formatPortalPackageSummary, formatDataCap } from '../../utils/packages';
 import { getPortalDeviceId } from '../../utils/portalDevice';
 import PortalBrand, { PortalCredit } from '../../components/PortalBrand';
 
@@ -191,6 +191,7 @@ export default function Portal() {
             active: true,
             sessionEnd: data.sessionEnd,
             packageName: data.packageName,
+            packageType: data.packageType,
             dataCapMb: data.dataCapMb,
             hotspotUsername: data.hotspotUsername,
             hotspotPin: data.hotspotPin,
@@ -314,9 +315,14 @@ export default function Portal() {
               <Countdown endTime={session.sessionEnd} />
             </div>
           </div>
-          {session.dataCapMb && (
-            <p className="text-sm text-navy/50 mt-4">Data allowance: {session.dataCapMb} MB</p>
-          )}
+          {session.dataCapMb ? (
+            <p className="text-sm text-navy/50 mt-4">
+              {session.packageType === 'DATA_BASED' ? 'Download allowance' : 'Fair-use data cap'}:{' '}
+              {formatDataCap(session.dataCapMb)}
+            </p>
+          ) : session.packageType === 'TIME_BASED' ? (
+            <p className="text-sm text-navy/50 mt-4">Unlimited data for this browse period</p>
+          ) : null}
           {session.hotspotUsername && session.hotspotPin && (
             <CredentialsPanel
               username={session.hotspotUsername}
