@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Loader } from 'lucide-react';
 import api from '../../services/api';
 import { Modal, Pagination, StatusBadge, Button, Input, Skeleton, EmptyState } from '../../components/ui';
 import { detectCameroonOperator, paymentMethodForOperator } from '../../utils/phone';
@@ -11,7 +12,9 @@ export default function Wallet() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
+  const idempotencyKeyRef = useRef(null);
 
   async function loadWallet(currentPage = page) {
     try {
@@ -30,17 +33,42 @@ export default function Wallet() {
     loadWallet(page).finally(() => setLoading(false));
   }, [page]);
 
+  function openWithdrawModal() {
+    idempotencyKeyRef.current = crypto.randomUUID();
+    setShowWithdraw(true);
+  }
+
+  function closeWithdrawModal() {
+    if (submitting) return;
+    setShowWithdraw(false);
+  }
+
   async function handleWithdraw(e) {
     e.preventDefault();
+    if (submitting) return;
+
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = crypto.randomUUID();
+    }
+
+    setSubmitting(true);
     try {
-      const { data } = await api.post('/api/owner/wallet/withdraw', {
-        amountXaf: Number(form.amountXaf),
-        phoneNumber: form.phoneNumber,
-        method: form.method,
-      });
+      const { data } = await api.post(
+        '/api/owner/wallet/withdraw',
+        {
+          amountXaf: Number(form.amountXaf),
+          phoneNumber: form.phoneNumber,
+          method: form.method,
+          idempotencyKey: idempotencyKeyRef.current,
+        },
+        {
+          headers: { 'Idempotency-Key': idempotencyKeyRef.current },
+        }
+      );
       toast.success(data.pendingAdminRetry ? data.message : 'Withdrawal sent to your MoMo');
       setShowWithdraw(false);
       setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
+      idempotencyKeyRef.current = null;
       loadWallet(page);
     } catch (err) {
       const data = err.response?.data;
@@ -48,10 +76,13 @@ export default function Wallet() {
         toast.success(data.message || 'Withdrawal queued for processing');
         setShowWithdraw(false);
         setForm({ amountXaf: '', phoneNumber: '', method: 'MTN_MOMO' });
+        idempotencyKeyRef.current = null;
         loadWallet(page);
         return;
       }
       toast.error(data?.error || 'Withdrawal failed');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -74,7 +105,7 @@ export default function Wallet() {
         <p className="text-4xl font-bold text-navy mt-2">
           {wallet.walletBalance.toLocaleString()} XAF
         </p>
-        <Button onClick={() => setShowWithdraw(true)} className="mt-4">
+        <Button onClick={openWithdrawModal} className="mt-4">
           Withdraw
         </Button>
       </div>
@@ -120,7 +151,7 @@ export default function Wallet() {
         />
       </div>
 
-      <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal">
+      <Modal open={showWithdraw} onClose={closeWithdrawModal} title="Request Withdrawal">
         <form onSubmit={handleWithdraw} className="space-y-4">
           <div>
             <Input
@@ -131,6 +162,7 @@ export default function Wallet() {
               value={form.amountXaf}
               onChange={(e) => setForm({ ...form, amountXaf: e.target.value })}
               required
+              disabled={submitting}
             />
             <p className="text-xs text-gray-400 mt-1">Minimum 100 XAF</p>
           </div>
@@ -147,6 +179,7 @@ export default function Wallet() {
                 setForm({ ...form, phoneNumber, method });
               }}
               required
+              disabled={submitting}
             />
             {detectCameroonOperator(form.phoneNumber) && (
               <p className="text-xs text-navy/50 mt-1">
@@ -159,8 +192,8 @@ export default function Wallet() {
             <select
               value={form.method}
               onChange={(e) => setForm({ ...form, method: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg bg-gray-50"
-              disabled={Boolean(detectCameroonOperator(form.phoneNumber))}
+              className="w-full px-3 py-2 border rounded-lg bg-gray-50 disabled:opacity-60"
+              disabled={submitting || Boolean(detectCameroonOperator(form.phoneNumber))}
             >
               <option value="MTN_MOMO">MTN MoMo</option>
               <option value="ORANGE_MONEY">Orange Money</option>
@@ -169,8 +202,14 @@ export default function Wallet() {
           <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
             Withdrawals are sent automatically to your MoMo number via Campay.
           </p>
-          <Button type="submit" className="w-full">
-            Submit Withdrawal
+          {submitting && (
+            <div className="flex items-center justify-center gap-2 text-sm text-navy/60 py-2">
+              <Loader className="w-4 h-4 animate-spin text-brand" />
+              Sending withdrawal to your MoMo — please wait…
+            </div>
+          )}
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? 'Processing withdrawal…' : 'Submit Withdrawal'}
           </Button>
         </form>
       </Modal>
