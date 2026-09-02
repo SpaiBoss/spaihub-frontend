@@ -339,10 +339,9 @@ export default function Portal() {
               <Countdown endTime={session.sessionEnd} />
             </div>
           </div>
-          {session.dataCapMb ? (
+          {session.packageType === 'DATA_BASED' && session.dataCapMb ? (
             <p className="text-sm text-navy/50 mt-4">
-              {session.packageType === 'DATA_BASED' ? 'Download allowance' : 'Fair-use data cap'}:{' '}
-              {formatDataCap(session.dataCapMb)}
+              Download allowance: {formatDataCap(session.dataCapMb)}
             </p>
           ) : session.packageType === 'TIME_BASED' ? (
             <p className="text-sm text-navy/50 mt-4">Unlimited data for this browse period</p>

@@ -302,7 +302,9 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                     onChange={(e) => setForm({ ...form, timeDataCapEnabled: e.target.checked })}
                     className="rounded border-gray-300 text-brand focus:ring-brand"
                   />
-                  <span className="text-sm font-medium text-navy">Limit data during browse session</span>
+                  <span className="text-sm font-medium text-navy">
+                    Fair use data limit (hidden from subscribers)
+                  </span>
                 </label>
                 {form.timeDataCapEnabled && (
                   <div className={splitRowClass}>
@@ -323,7 +325,11 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                     </select>
                   </div>
                 )}
-                {!form.timeDataCapEnabled && (
+                {form.timeDataCapEnabled ? (
+                  <p className={hintClass}>
+                    Enforced on the router for abuse prevention. Subscribers still see unlimited data.
+                  </p>
+                ) : (
                   <p className={hintClass}>Leave unchecked for unlimited data during the browse period.</p>
                 )}
               </div>

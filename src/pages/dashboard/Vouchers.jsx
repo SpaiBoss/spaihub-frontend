@@ -5,7 +5,7 @@ import api from '../../services/api';
 import { StatusBadge, Button, Card, EmptyState, Pagination, TableShell } from '../../components/ui';
 import VoucherFormModal from '../../components/VoucherFormModal';
 import VoucherPdfModal from '../../components/VoucherPdfModal';
-import { formatPortalPackageSummary } from '../../utils/packages';
+import { formatOwnerPackageSummary } from '../../utils/packages';
 
 const STATUS_OPTIONS = ['', 'UNUSED', 'REDEEMED', 'EXPIRED', 'REVOKED'];
 
@@ -222,7 +222,7 @@ export default function Vouchers() {
                   <td>{v.location.name}</td>
                   <td>
                     <p className="font-medium">{v.package.name}</p>
-                    <p className="text-xs text-navy/50">{formatPortalPackageSummary(v.package)}</p>
+                    <p className="text-xs text-navy/50">{formatOwnerPackageSummary(v.package)}</p>
                   </td>
                   <td className="text-navy/70">{v.batchLabel || '—'}</td>
                   <td><StatusBadge status={v.status} /></td>

@@ -61,7 +61,9 @@ export function formatPackageSummary(pkg, { includeSpeed = false, includeDevices
   }
 
   const browse = formatDuration(pkg.durationMinutes);
-  const data = pkg.dataCapMb ? formatDataCap(pkg.dataCapMb) : 'Unlimited data';
+  const data = pkg.dataCapMb
+    ? `${formatDataCap(pkg.dataCapMb)} fair-use cap`
+    : 'Unlimited data';
   return `${browse} browse · ${data}${upload}${devices}`;
 }
 
@@ -70,7 +72,12 @@ export function formatOwnerPackageSummary(pkg) {
 }
 
 export function formatPortalPackageSummary(pkg, { showUploadSpeed = false } = {}) {
-  return formatPackageSummary(pkg, { includeSpeed: showUploadSpeed });
+  const upload = showUploadSpeed ? ` · ${formatUploadSpeed(pkg.uploadSpeedMbPerSec)}` : '';
+  if (pkg.type === 'DATA_BASED') {
+    return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}`;
+  }
+  const browse = formatDuration(pkg.durationMinutes);
+  return `${browse} browse · Unlimited data${upload}`;
 }
 
 export const PACKAGE_TYPE_LABELS = {
