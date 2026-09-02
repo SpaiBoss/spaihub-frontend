@@ -4,6 +4,7 @@ import { CheckCircle, Loader, Clock, Ticket, KeyRound, LogOut } from 'lucide-rea
 import api from '../../services/api';
 import { formatPortalPackageSummary, formatDataCap } from '../../utils/packages';
 import { getPortalDeviceId } from '../../utils/portalDevice';
+import { savePendingPayment, loadPendingPayment, clearPendingPayment } from '../../utils/portalPayment';
 import PortalBrand, { PortalCredit } from '../../components/PortalBrand';
 
 function detectOperator(phone) {
@@ -146,6 +147,36 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor }) {
 }
 
 const DEV_TEST_MAC = 'AA:BB:CC:DD:EE:01';
+const PAYMENT_POLL_INTERVAL_MS = 2000;
+const PAYMENT_SOFT_TIMEOUT_ATTEMPTS = 90;
+
+function sessionFromPayment(data) {
+  return {
+    active: true,
+    sessionEnd: data.sessionEnd,
+    packageName: data.packageName,
+    packageType: data.packageType,
+    dataCapMb: data.dataCapMb,
+    hotspotUsername: data.hotspotUsername,
+    hotspotPin: data.hotspotPin,
+  };
+}
+
+function applyPaidSession(data, { linkLogin, routerToken, setSession, setWaiting, setPaymentTimedOut, setError }) {
+  const nextSession = sessionFromPayment(data);
+  setSession(nextSession);
+  setWaiting(false);
+  setPaymentTimedOut(false);
+  setError('');
+  clearPendingPayment(routerToken);
+  redirectToMikrotikLogin(
+    linkLogin,
+    nextSession.hotspotUsername,
+    nextSession.hotspotPin,
+    routerToken
+  );
+  return true;
+}
 
 export default function Portal() {
   const { routerToken } = useParams();
@@ -171,6 +202,8 @@ export default function Portal() {
   const [redeeming, setRedeeming] = useState(false);
   const [paymentTimedOut, setPaymentTimedOut] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [cancellingPayment, setCancellingPayment] = useState(false);
 
   const checkSession = useCallback(async () => {
     if (!deviceId) return null;
@@ -181,12 +214,125 @@ export default function Portal() {
     return data;
   }, [routerToken, deviceId, mac]);
 
+  const resumePendingPayment = useCallback(
+    ({ reference, phone: pendingPhone, packageId }) => {
+      setPaymentReference(reference);
+      setPhone(pendingPhone || '');
+      if (packageId) setSelectedPkg(packageId);
+      setWaiting(true);
+      setPaymentTimedOut(false);
+      setError('');
+      savePendingPayment(routerToken, {
+        reference,
+        phone: pendingPhone || '',
+        packageId: packageId || '',
+      });
+    },
+    [routerToken]
+  );
+
+  const checkPaymentOnce = useCallback(
+    async (reference) => {
+      if (!reference || !deviceId) return false;
+
+      try {
+        const params = new URLSearchParams({
+          reference,
+          deviceId,
+        });
+        const { data } = await api.get(`/portal/${routerToken}/payment-status?${params}`);
+
+        if (data.status === 'SUCCESS') {
+          applyPaidSession(data, {
+            linkLogin,
+            routerToken,
+            setSession,
+            setWaiting,
+            setPaymentTimedOut,
+            setError,
+          });
+          return true;
+        }
+
+        if (data.status === 'FAILED') {
+          setWaiting(false);
+          setPaymentTimedOut(false);
+          setError(data.error || 'Payment failed. Please try again.');
+          clearPendingPayment(routerToken);
+          return true;
+        }
+      } catch {
+        // Fall through to session check — webhook may have completed the session already.
+      }
+
+      try {
+        const sessionData = await checkSession();
+        if (sessionData?.active) {
+          setWaiting(false);
+          setPaymentTimedOut(false);
+          setError('');
+          clearPendingPayment(routerToken);
+          redirectToMikrotikLogin(
+            linkLogin,
+            sessionData.hotspotUsername,
+            sessionData.hotspotPin,
+            routerToken
+          );
+          return true;
+        }
+      } catch {
+        // Keep waiting.
+      }
+
+      return false;
+    },
+    [deviceId, routerToken, linkLogin, checkSession]
+  );
+
   useEffect(() => {
     async function init() {
       try {
         const { data } = await api.get(`/portal/${routerToken}`);
         setPortal(data);
-        await checkSession();
+
+        const sessionData = await checkSession();
+        if (sessionData?.active) {
+          clearPendingPayment(routerToken);
+          return;
+        }
+
+        const storedPending = loadPendingPayment(routerToken);
+        if (storedPending?.reference) {
+          resumePendingPayment(storedPending);
+          return;
+        }
+
+        if (!deviceId) return;
+
+        const params = new URLSearchParams({ deviceId });
+        const { data: pendingData } = await api.get(
+          `/portal/${routerToken}/pending-payment?${params}`
+        );
+
+        if (pendingData.session?.active) {
+          setSession(pendingData.session);
+          clearPendingPayment(routerToken);
+          redirectToMikrotikLogin(
+            linkLogin,
+            pendingData.session.hotspotUsername,
+            pendingData.session.hotspotPin,
+            routerToken
+          );
+          return;
+        }
+
+        if (pendingData.pending && pendingData.reference) {
+          resumePendingPayment({
+            reference: pendingData.reference,
+            phone: pendingData.phone,
+            packageId: pendingData.packageId,
+          });
+        }
       } catch {
         setError('Router not found or unavailable');
       } finally {
@@ -194,63 +340,38 @@ export default function Portal() {
       }
     }
     init();
-  }, [routerToken, checkSession]);
+  }, [routerToken, checkSession, deviceId, linkLogin, resumePendingPayment]);
 
   useEffect(() => {
     if (!waiting || !paymentReference) return;
+
     let attempts = 0;
-    const maxAttempts = 60;
+    let cancelled = false;
+
     const poll = async () => {
+      if (cancelled) return true;
       attempts++;
-      try {
-        const params = new URLSearchParams({
-          reference: paymentReference,
-          deviceId,
-        });
-        const { data } = await api.get(`/portal/${routerToken}/payment-status?${params}`);
-        if (data.status === 'SUCCESS') {
-          const nextSession = {
-            active: true,
-            sessionEnd: data.sessionEnd,
-            packageName: data.packageName,
-            packageType: data.packageType,
-            dataCapMb: data.dataCapMb,
-            hotspotUsername: data.hotspotUsername,
-            hotspotPin: data.hotspotPin,
-          };
-          setSession(nextSession);
-          setWaiting(false);
-          redirectToMikrotikLogin(
-            linkLogin,
-            nextSession.hotspotUsername,
-            nextSession.hotspotPin,
-            routerToken
-          );
-          return true;
-        }
-        if (data.status === 'FAILED') {
-          setWaiting(false);
-          setPaymentTimedOut(false);
-          setError(data.error || 'Payment failed. Please try again.');
-          return true;
-        }
-      } catch {
-        // fall through to session check
-      }
-      if (attempts >= maxAttempts) {
+      const done = await checkPaymentOnce(paymentReference);
+      if (done) return true;
+
+      if (attempts >= PAYMENT_SOFT_TIMEOUT_ATTEMPTS) {
         setPaymentTimedOut(true);
-        setError('Payment not confirmed. Approve MoMo on your phone or try again.');
-        return true;
+        setError('Still waiting for MoMo approval. Tap “Check payment status” if you already paid.');
       }
       return false;
     };
+
     poll();
     const id = setInterval(async () => {
       const done = await poll();
       if (done) clearInterval(id);
-    }, 2000);
-    return () => clearInterval(id);
-  }, [waiting, paymentReference, routerToken, deviceId, linkLogin]);
+    }, PAYMENT_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [waiting, paymentReference, checkPaymentOnce]);
 
   async function handleLogout() {
     if (!deviceId || loggingOut) return;
@@ -306,6 +427,37 @@ export default function Portal() {
     }
   }
 
+  async function handleCheckPayment() {
+    if (!paymentReference || checkingPayment) return;
+    setCheckingPayment(true);
+    setError('');
+    try {
+      await checkPaymentOnce(paymentReference);
+    } finally {
+      setCheckingPayment(false);
+    }
+  }
+
+  async function handleCancelPayment() {
+    if (!deviceId || cancellingPayment) return;
+    setCancellingPayment(true);
+    setError('');
+    try {
+      await api.post(`/portal/${routerToken}/cancel-payment`, {
+        deviceId,
+        reference: paymentReference || undefined,
+      });
+      setWaiting(false);
+      setPaymentTimedOut(false);
+      setPaymentReference('');
+      clearPendingPayment(routerToken);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not cancel payment. Try again.');
+    } finally {
+      setCancellingPayment(false);
+    }
+  }
+
   async function handlePay() {
     if (!selectedPkg || !phone || !deviceId) return;
     setPaying(true);
@@ -317,9 +469,11 @@ export default function Portal() {
         deviceId,
         macAddress: mac || undefined,
       });
-      setPaymentReference(data.reference);
-      setWaiting(true);
-      setPaymentTimedOut(false);
+      resumePendingPayment({
+        reference: data.reference,
+        phone,
+        packageId: selectedPkg,
+      });
     } catch (err) {
       setError(err.response?.data?.error || 'Payment failed');
     } finally {
@@ -404,23 +558,33 @@ export default function Portal() {
           </p>
           <p className="text-xs text-navy/40 mt-3 font-mono">Username will be {phone || 'your number'}</p>
           {paymentTimedOut && (
-            <>
-              <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>
-              <button
+            <p className="text-amber-700 text-sm mt-4 font-medium">{error}</p>
+          )}
+          {!paymentTimedOut && error && (
+            <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>
+          )}
+          <div className="mt-6 space-y-3">
+            <button
               type="button"
-              onClick={() => {
-                setWaiting(false);
-                setPaymentTimedOut(false);
-                setPaymentReference('');
-                setError('');
-              }}
-              className="btn-primary mt-6 px-6 py-2.5 text-sm"
+              onClick={handleCheckPayment}
+              disabled={checkingPayment}
+              className="btn-primary w-full py-3 text-sm"
               style={accentStyle}
             >
-              Try again
+              {checkingPayment ? 'Checking...' : 'Check payment status'}
             </button>
-            </>
-          )}
+            <button
+              type="button"
+              onClick={handleCancelPayment}
+              disabled={cancellingPayment}
+              className="w-full py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+            >
+              {cancellingPayment ? 'Cancelling...' : 'Cancel and start over'}
+            </button>
+          </div>
+          <p className="text-xs text-navy/40 mt-4">
+            You can close this page and come back — we&apos;ll pick up where you left off.
+          </p>
         </PortalCard>
       </PortalShell>
     );
