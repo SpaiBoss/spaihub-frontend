@@ -58,6 +58,7 @@ export default function AdminDashboard() {
         { label: 'Pending withdrawals', value: `${stats.pendingWithdrawalsCount}`, sub: formatXaf(stats.pendingWithdrawalsTotal) },
         { label: 'Pending payments', value: stats.pendingTransactions },
         { label: 'Failed payments (month)', value: stats.failedTransactionsMonth },
+        { label: 'Dead-letter router commands (24h)', value: stats.deadLetterCommands24h ?? 0 },
       ]
     : [];
 

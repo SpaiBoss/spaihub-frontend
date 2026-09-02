@@ -47,7 +47,7 @@ function redirectToMikrotikLogin(linkLogin, username, pin, routerToken) {
   return true;
 }
 
-function Countdown({ endTime }) {
+function Countdown({ endTime, onExpired }) {
   const [remaining, setRemaining] = useState('');
 
   useEffect(() => {
@@ -55,6 +55,7 @@ function Countdown({ endTime }) {
       const diff = new Date(endTime) - Date.now();
       if (diff <= 0) {
         setRemaining('Expired');
+        onExpired?.();
         return;
       }
       const h = Math.floor(diff / 3600000);
@@ -65,7 +66,7 @@ function Countdown({ endTime }) {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [endTime]);
+  }, [endTime, onExpired]);
 
   return <span className="font-mono font-semibold">{remaining}</span>;
 }
@@ -206,6 +207,10 @@ export default function Portal() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [cancellingPayment, setCancellingPayment] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+
+  const routerUnavailable =
+    portal?.routerStatus === 'OFFLINE' || portal?.routerStatus === 'DEGRADED';
 
   const checkSession = useCallback(async () => {
     if (!deviceId) return null;
@@ -220,6 +225,19 @@ export default function Portal() {
     setSession(data);
     return data;
   }, [routerToken, deviceId, mac, phone]);
+
+  const handleSessionExpired = useCallback(async () => {
+    try {
+      const sessionData = await checkSession();
+      if (!sessionData?.active) {
+        setSession(null);
+        setError('Your session has expired. Choose a package to renew.');
+      }
+    } catch {
+      setSession(null);
+      setError('Your session has expired. Choose a package to renew.');
+    }
+  }, [checkSession]);
 
   const resumePendingPayment = useCallback(
     ({ reference, phone: pendingPhone, packageId }) => {
@@ -319,6 +337,8 @@ export default function Portal() {
         if (!deviceId) return;
 
         const params = new URLSearchParams({ deviceId });
+        const sessionPhone = getPortalSubscriberPhone(routerToken);
+        if (sessionPhone) params.set('phone', sessionPhone);
         const { data: pendingData } = await api.get(
           `/portal/${routerToken}/pending-payment?${params}`
         );
@@ -382,6 +402,24 @@ export default function Portal() {
     };
   }, [waiting, paymentReference, checkPaymentOnce]);
 
+  useEffect(() => {
+    if (!session?.active) return undefined;
+
+    const id = setInterval(async () => {
+      try {
+        const sessionData = await checkSession();
+        if (!sessionData?.active) {
+          setSession(null);
+          setError('Your session has expired. Choose a package to renew.');
+        }
+      } catch {
+        // Ignore transient poll errors.
+      }
+    }, 60_000);
+
+    return () => clearInterval(id);
+  }, [session?.active, checkSession]);
+
   async function handleLogout() {
     if (!deviceId || loggingOut) return;
     setLoggingOut(true);
@@ -403,6 +441,28 @@ export default function Portal() {
       setError(err.response?.data?.error || 'Could not log out. Try again.');
     } finally {
       setLoggingOut(false);
+    }
+  }
+
+  async function handleDisconnectDevice() {
+    if (!deviceId || disconnecting) return;
+    setDisconnecting(true);
+    setError('');
+    try {
+      await api.post(`/portal/${routerToken}/disconnect-device`, {
+        deviceId,
+        mac: mac || undefined,
+        phone: phone || getPortalSubscriberPhone(routerToken) || undefined,
+      });
+      setSession(null);
+      sessionStorage.removeItem(autoLoginStorageKey(routerToken));
+      if (linkLogout) {
+        window.location.href = linkLogout;
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not disconnect this device. Try again.');
+    } finally {
+      setDisconnecting(false);
     }
   }
 
@@ -454,10 +514,22 @@ export default function Portal() {
     setCancellingPayment(true);
     setError('');
     try {
-      await api.post(`/portal/${routerToken}/cancel-payment`, {
+      const { data } = await api.post(`/portal/${routerToken}/cancel-payment`, {
         deviceId,
         reference: paymentReference || undefined,
       });
+      if (data.recovered && data.session?.active) {
+        applyPaidSession(data.session, {
+          linkLogin,
+          routerToken,
+          phone,
+          setSession,
+          setWaiting,
+          setPaymentTimedOut,
+          setError,
+        });
+        return;
+      }
       setWaiting(false);
       setPaymentTimedOut(false);
       setPaymentReference('');
@@ -520,6 +592,7 @@ export default function Portal() {
   const branding = portal?.branding;
   const welcomeText = branding?.welcomeText || 'Pay with Mobile Money to get online instantly';
   const accentStyle = branding?.accentColor ? { backgroundColor: branding.accentColor } : undefined;
+  const familyPlan = (session?.maxSharedDevices ?? 1) > 1;
 
   if (session?.active) {
     return (
@@ -532,9 +605,14 @@ export default function Portal() {
             <p className="text-xs text-navy/50 tracking-wide font-medium">Time remaining</p>
             <div className="flex items-center justify-center gap-2 mt-1 text-brand text-lg font-mono">
               <Clock className="w-4 h-4" />
-              <Countdown endTime={session.sessionEnd} />
+              <Countdown endTime={session.sessionEnd} onExpired={handleSessionExpired} />
             </div>
           </div>
+          {familyPlan && (
+            <p className="text-xs text-navy/50 mt-3">
+              Family plan — up to {session.maxSharedDevices} devices can share this access code.
+            </p>
+          )}
           {session.packageType === 'DATA_BASED' && session.dataCapMb ? (
             <p className="text-sm text-navy/50 mt-4">
               Download allowance: {formatDataCap(session.dataCapMb)}
@@ -551,15 +629,37 @@ export default function Portal() {
             />
           )}
           {error && <p className="text-red-600 text-sm text-center mt-4 font-medium">{error}</p>}
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
-          >
-            <LogOut className="w-4 h-4" />
-            {loggingOut ? 'Logging out...' : 'Log out'}
-          </button>
+          {familyPlan ? (
+            <div className="mt-5 space-y-2">
+              <button
+                type="button"
+                onClick={handleDisconnectDevice}
+                disabled={disconnecting}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+              >
+                <LogOut className="w-4 h-4" />
+                {disconnecting ? 'Disconnecting...' : 'Disconnect this device'}
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                {loggingOut ? 'Ending session...' : 'End session for all devices'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+            >
+              <LogOut className="w-4 h-4" />
+              {loggingOut ? 'Logging out...' : 'Log out'}
+            </button>
+          )}
         </PortalCard>
       </PortalShell>
     );
@@ -631,6 +731,13 @@ export default function Portal() {
           <p className="text-xs font-medium text-navy/45 tracking-wide mb-2">WiFi hotspot</p>
           <h1 className="text-xl font-semibold text-navy">{portal?.locationName}</h1>
           <p className="text-navy/55 text-sm mt-1">{welcomeText}</p>
+          {routerUnavailable && (
+            <p className="mt-3 text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              {portal?.routerStatus === 'OFFLINE'
+                ? 'Router offline — Mobile Money payments are unavailable until it reconnects.'
+                : 'Router connectivity is degraded — payments may be delayed.'}
+            </p>
+          )}
         </div>
 
         <div className="flex rounded-lg bg-surface-muted border border-gray-200 p-0.5 mb-6">
@@ -727,7 +834,7 @@ export default function Portal() {
 
             <button
               onClick={handlePay}
-              disabled={!selectedPkg || phone.length < 9 || paying}
+              disabled={!selectedPkg || phone.length < 9 || paying || portal?.routerStatus === 'OFFLINE'}
               className="btn-primary w-full py-3.5 text-base"
               style={accentStyle}
             >

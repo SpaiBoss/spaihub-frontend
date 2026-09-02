@@ -10,6 +10,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [showResend, setShowResend] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -26,9 +28,27 @@ export default function Login() {
       toast.success('Signed in');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      const msg = err.response?.data?.error || 'Login failed';
+      toast.error(msg);
+      setShowResend(/not active|verify your email/i.test(msg));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!email.trim()) {
+      toast.error('Enter your email above first');
+      return;
+    }
+    setResending(true);
+    try {
+      const { data } = await api.post('/api/auth/resend-verification', { email });
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not resend verification email');
+    } finally {
+      setResending(false);
     }
   }
 
@@ -59,6 +79,16 @@ export default function Login() {
         <Button type="submit" disabled={loading} className="w-full py-3" size="lg">
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
+        {showResend && (
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resending}
+            className="w-full text-sm text-brand hover:text-brand/80 font-medium"
+          >
+            {resending ? 'Sending...' : 'Resend verification email'}
+          </button>
+        )}
         <p className="text-center text-sm text-navy/60">
           Don&apos;t have an account? <AuthLink to="/register">Create one</AuthLink>
         </p>

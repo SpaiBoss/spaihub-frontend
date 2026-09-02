@@ -85,7 +85,7 @@ export default function Locations() {
     setSavingPolicy(true);
     try {
       const { data } = await api.patch(`/api/owner/locations/${expanded}`, accessPolicy);
-      toast.success('Access policy saved');
+      toast.success('Access policy saved — routers will apply changes on their next poll');
       setLocations((prev) => prev.map((loc) => (loc.id === expanded ? { ...loc, ...data } : loc)));
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to save access policy');

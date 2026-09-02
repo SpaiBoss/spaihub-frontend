@@ -73,11 +73,13 @@ export function formatOwnerPackageSummary(pkg) {
 
 export function formatPortalPackageSummary(pkg, { showUploadSpeed = false } = {}) {
   const upload = showUploadSpeed ? ` · ${formatUploadSpeed(pkg.uploadSpeedMbPerSec)}` : '';
+  const devices =
+    Number(pkg.maxSharedDevices) > 1 ? ` · ${formatSharedDevices(pkg.maxSharedDevices)}` : '';
   if (pkg.type === 'DATA_BASED') {
-    return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}`;
+    return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}${devices}`;
   }
   const browse = formatDuration(pkg.durationMinutes);
-  return `${browse} browse · Unlimited data${upload}`;
+  return `${browse} browse · Unlimited data${upload}${devices}`;
 }
 
 export const PACKAGE_TYPE_LABELS = {

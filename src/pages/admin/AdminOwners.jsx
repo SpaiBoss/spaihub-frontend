@@ -28,6 +28,16 @@ export default function AdminOwners() {
 
   useEffect(() => { load(page); }, [page]);
 
+  async function activateOwner(id) {
+    try {
+      await api.post(`/api/admin/owners/${id}/activate`);
+      toast.success('Owner activated');
+      load(page);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to activate owner');
+    }
+  }
+
   async function toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
@@ -89,12 +99,24 @@ export default function AdminOwners() {
                     <td>{o.walletBalance.toLocaleString()} XAF</td>
                     <td>{new Date(o.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <button
-                        onClick={() => toggleStatus(o.id, o.status)}
-                        className={`text-xs px-3 py-1 rounded-lg ${o.status === 'ACTIVE' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-                      >
-                        {o.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        {o.status === 'PENDING' && (
+                          <button
+                            onClick={() => activateOwner(o.id)}
+                            className="text-xs px-3 py-1 rounded-lg bg-green-100 text-green-700"
+                          >
+                            Activate
+                          </button>
+                        )}
+                        {o.status !== 'PENDING' && (
+                          <button
+                            onClick={() => toggleStatus(o.id, o.status)}
+                            className={`text-xs px-3 py-1 rounded-lg ${o.status === 'ACTIVE' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+                          >
+                            {o.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { TrendingUp, Users, Wallet, BarChart3, Ticket } from 'lucide-react';
+import { TrendingUp, Users, Wallet, BarChart3, Ticket, AlertTriangle } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -34,6 +34,9 @@ export default function Home() {
   const [routers, setRouters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showRouterScriptBanner, setShowRouterScriptBanner] = useState(
+    () => !localStorage.getItem('spaihub_router_script_v2_dismissed')
+  );
 
   useEffect(() => {
     Promise.all([
@@ -113,6 +116,29 @@ export default function Home() {
   return (
     <div className="space-y-6">
       <AccountingExportBar mode="owner" />
+
+      {showRouterScriptBanner && routers.length > 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3 items-start">
+          <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-semibold text-amber-900">Update your router connection script</p>
+            <p className="text-sm text-amber-800 mt-1">
+              Re-run the connection script from Locations → your router → Setup. The new script confirms
+              commands with SpaiHub so access grants and kicks are reliable.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem('spaihub_router_script_v2_dismissed', '1');
+                setShowRouterScriptBanner(false);
+              }}
+              className="mt-3 text-sm font-medium text-amber-900 underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard title="Today's Revenue" value={formatXaf(stats.todayRevenue)} icon={TrendingUp} trend={trend} accent="green" />

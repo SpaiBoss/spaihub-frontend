@@ -16,6 +16,12 @@ export default function AdminWithdrawals() {
   const [rejecting, setRejecting] = useState(null);
   const [note, setNote] = useState('');
 
+  function formatCampayStatus(status) {
+    if (!status) return '—';
+    if (typeof status === 'object' && status.error) return `Error: ${status.error}`;
+    return String(status);
+  }
+
   async function loadPending() {
     const { data } = await api.get('/api/admin/withdrawals?status=PENDING');
     setPending(data.withdrawals);
@@ -175,6 +181,12 @@ export default function AdminWithdrawals() {
               <p><strong>API phone:</strong> {campayCheck.campayPhone}</p>
               <p><strong>Network:</strong> {campayCheck.operator || '—'}</p>
               <p><strong>MoMo name:</strong> {campayCheck.holderName || campayCheck.holderError || '—'}</p>
+              {campayCheck.campayReference && (
+                <>
+                  <p><strong>Campay reference:</strong> <span className="font-mono text-xs">{campayCheck.campayReference}</span></p>
+                  <p><strong>Campay payout status:</strong> {formatCampayStatus(campayCheck.campayTransactionStatus)}</p>
+                </>
+              )}
               {campayCheck.balance && (
                 <>
                   <p>

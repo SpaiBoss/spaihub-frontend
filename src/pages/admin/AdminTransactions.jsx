@@ -11,6 +11,7 @@ export default function AdminTransactions() {
   const [data, setData] = useState({ transactions: [], pagination: {} });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reconcilingId, setReconcilingId] = useState(null);
   const [filters, setFilters] = useState({
     page: 1,
     status: '',
@@ -50,6 +51,19 @@ export default function AdminTransactions() {
       toast.success('CSV exported');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Export failed');
+    }
+  }
+
+  async function reconcilePayment(id) {
+    setReconcilingId(id);
+    try {
+      const { data } = await api.post(`/api/admin/transactions/${id}/reconcile`);
+      toast.success(data.message || 'Payment reconciled');
+      setFilters({ ...filters });
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Reconciliation failed');
+    } finally {
+      setReconcilingId(null);
     }
   }
 
@@ -103,18 +117,19 @@ export default function AdminTransactions() {
                 <th>Fee</th>
                 <th>Source</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    <td colSpan={8}><Skeleton className="h-10 my-1" /></td>
+                    <td colSpan={9}><Skeleton className="h-10 my-1" /></td>
                   </tr>
                 ))
               ) : data.transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <EmptyState title="No transactions found" description="Try adjusting your filters." />
                   </td>
                 </tr>
@@ -132,6 +147,18 @@ export default function AdminTransactions() {
                     <td>{tx.platformFeeXaf.toLocaleString()} XAF</td>
                     <td>{tx.voucherId ? 'Voucher' : 'MoMo'}</td>
                     <td><StatusBadge status={tx.status} /></td>
+                    <td>
+                      {tx.status === 'FAILED' && tx.campayReference && (
+                        <button
+                          type="button"
+                          onClick={() => reconcilePayment(tx.id)}
+                          disabled={reconcilingId === tx.id}
+                          className="text-xs px-3 py-1 rounded-lg bg-blue-100 text-blue-700 disabled:opacity-50"
+                        >
+                          {reconcilingId === tx.id ? 'Checking...' : 'Reconcile Campay'}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
