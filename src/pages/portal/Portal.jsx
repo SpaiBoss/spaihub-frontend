@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Loader, Clock, Ticket, KeyRound, LogOut } from 'lucide-react';
 import api from '../../services/api';
@@ -23,6 +23,27 @@ function buildMikrotikLoginUrl(linkLogin, username, password) {
     const separator = linkLogin.includes('?') ? '&' : '?';
     return `${linkLogin}${separator}username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   }
+}
+
+const AUTO_LOGIN_COOLDOWN_MS = 60_000;
+
+function autoLoginStorageKey(routerToken) {
+  return `spaihub_autologin_${routerToken}`;
+}
+
+/** Redirect to MikroTik login once; skip if we tried recently (prevents portal ↔ router loops). */
+function redirectToMikrotikLogin(linkLogin, username, pin, routerToken) {
+  if (!linkLogin || !username || !pin || !routerToken) return false;
+  const key = autoLoginStorageKey(routerToken);
+  const lastAttempt = Number(sessionStorage.getItem(key) || 0);
+  if (lastAttempt && Date.now() - lastAttempt < AUTO_LOGIN_COOLDOWN_MS) return false;
+
+  const loginUrl = buildMikrotikLoginUrl(linkLogin, username, pin);
+  if (!loginUrl) return false;
+
+  sessionStorage.setItem(key, String(Date.now()));
+  window.location.href = loginUrl;
+  return true;
 }
 
 function Countdown({ endTime }) {
@@ -134,7 +155,6 @@ export default function Portal() {
   const linkLogout = searchParams.get('link-logout-only') || searchParams.get('link-logout') || '';
   const mac = queryMac || (import.meta.env.DEV ? DEV_TEST_MAC : '');
   const deviceId = useMemo(() => getPortalDeviceId(routerToken), [routerToken]);
-  const autoLoginAttempted = useRef(false);
 
   const [portal, setPortal] = useState(null);
   const [session, setSession] = useState(null);
@@ -189,7 +209,7 @@ export default function Portal() {
         });
         const { data } = await api.get(`/portal/${routerToken}/payment-status?${params}`);
         if (data.status === 'SUCCESS') {
-          setSession({
+          const nextSession = {
             active: true,
             sessionEnd: data.sessionEnd,
             packageName: data.packageName,
@@ -197,8 +217,15 @@ export default function Portal() {
             dataCapMb: data.dataCapMb,
             hotspotUsername: data.hotspotUsername,
             hotspotPin: data.hotspotPin,
-          });
+          };
+          setSession(nextSession);
           setWaiting(false);
+          redirectToMikrotikLogin(
+            linkLogin,
+            nextSession.hotspotUsername,
+            nextSession.hotspotPin,
+            routerToken
+          );
           return true;
         }
         if (data.status === 'FAILED') {
@@ -223,17 +250,7 @@ export default function Portal() {
       if (done) clearInterval(id);
     }, 2000);
     return () => clearInterval(id);
-  }, [waiting, paymentReference, routerToken, deviceId]);
-
-  useEffect(() => {
-    if (!session?.active || !session.hotspotUsername || !session.hotspotPin || !linkLogin) return;
-    if (autoLoginAttempted.current) return;
-    autoLoginAttempted.current = true;
-    const loginUrl = buildMikrotikLoginUrl(linkLogin, session.hotspotUsername, session.hotspotPin);
-    if (loginUrl) {
-      window.location.href = loginUrl;
-    }
-  }, [session, linkLogin]);
+  }, [waiting, paymentReference, routerToken, deviceId, linkLogin]);
 
   async function handleLogout() {
     if (!deviceId || loggingOut) return;
@@ -245,7 +262,7 @@ export default function Portal() {
         mac: mac || undefined,
       });
       setSession(null);
-      autoLoginAttempted.current = false;
+      sessionStorage.removeItem(autoLoginStorageKey(routerToken));
       if (linkLogout) {
         window.location.href = linkLogout;
         return;
@@ -268,13 +285,20 @@ export default function Portal() {
         deviceId,
         macAddress: mac || undefined,
       });
-      setSession({
+      const nextSession = {
         active: true,
         sessionEnd: data.sessionEnd,
         packageName: data.packageName,
         hotspotUsername: data.hotspotUsername,
         hotspotPin: data.hotspotPin,
-      });
+      };
+      setSession(nextSession);
+      redirectToMikrotikLogin(
+        linkLogin,
+        nextSession.hotspotUsername,
+        nextSession.hotspotPin,
+        routerToken
+      );
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid voucher code');
     } finally {
