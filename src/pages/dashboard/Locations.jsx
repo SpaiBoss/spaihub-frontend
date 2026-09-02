@@ -435,7 +435,7 @@ export default function Locations() {
                           className="input-field"
                         />
                         <p className="text-xs text-navy/45 mt-1.5">
-                          0 = one device per voucher or WiFi code (default). Maps to MikroTik <code className="text-navy/60">shared-users</code> on the router.
+                          Location default when a package does not set its own limit. Prefer setting <strong>Simultaneous devices</strong> on each package (e.g. 4 for family plans).
                         </p>
                       </div>
 

@@ -23,6 +23,7 @@ const defaultForm = () => ({
   type: 'TIME_BASED',
   priceXaf: 500,
   uploadSpeedMbPerSec: 1,
+  maxSharedDevices: 1,
   browseDurationValue: 1,
   browseDurationUnit: 'hours',
   timeDataCapEnabled: false,
@@ -50,6 +51,7 @@ function buildPayload(form) {
       priceXaf: Number(form.priceXaf),
       dataCapMb,
       uploadSpeedMbPerSec,
+      maxSharedDevices: Math.max(1, Math.min(20, Number(form.maxSharedDevices) || 1)),
     };
   }
 
@@ -60,6 +62,7 @@ function buildPayload(form) {
     priceXaf: Number(form.priceXaf),
     dataCapMb: toMegabytes(form.dataAllowanceValue, form.dataAllowanceUnit),
     uploadSpeedMbPerSec,
+    maxSharedDevices: Math.max(1, Math.min(20, Number(form.maxSharedDevices) || 1)),
   };
 }
 
@@ -70,6 +73,11 @@ function validateForm(form) {
   const uploadSpeed = Number(form.uploadSpeedMbPerSec);
   if (!uploadSpeed || uploadSpeed <= 0) return 'Upload speed must be greater than 0';
   if (uploadSpeed > 100) return 'Upload speed cannot exceed 100 MB/s';
+
+  const sharedDevices = Number(form.maxSharedDevices);
+  if (!sharedDevices || sharedDevices < 1 || sharedDevices > 20) {
+    return 'Simultaneous devices must be between 1 and 20';
+  }
 
   if (form.type === 'TIME_BASED') {
     const durationMinutes = toMinutes(form.browseDurationValue, form.browseDurationUnit);
@@ -104,6 +112,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
         type: initialPackage.type || 'TIME_BASED',
         priceXaf: initialPackage.priceXaf,
         uploadSpeedMbPerSec: initialPackage.uploadSpeedMbPerSec ?? 1,
+        maxSharedDevices: initialPackage.maxSharedDevices ?? 1,
         browseDurationValue: browse.value,
         browseDurationUnit: browse.unit,
         timeDataCapEnabled: !!initialPackage.dataCapMb && initialPackage.type === 'TIME_BASED',
@@ -218,6 +227,24 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               required
               className={inputClass}
             />
+          </div>
+
+          <div>
+            <label className={labelClass}>Simultaneous devices</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              step={1}
+              value={form.maxSharedDevices}
+              onChange={(e) => setForm({ ...form, maxSharedDevices: e.target.value })}
+              required
+              className={inputClass}
+            />
+            <p className={hintClass}>
+              How many phones or laptops can use the same WiFi username and PIN at the same time.
+              Use 1 for a single device, or 4 for a family package.
+            </p>
           </div>
 
           <div>

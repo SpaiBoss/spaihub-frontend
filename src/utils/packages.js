@@ -42,19 +42,31 @@ export function formatUploadSpeed(mbPerSec) {
   return `${speed} MB/s upload`;
 }
 
-export function formatPackageSummary(pkg, { includeSpeed = false } = {}) {
+export function formatSharedDevices(count) {
+  const n = Number(count) || 1;
+  if (n <= 1) return '1 device';
+  return `Up to ${n} devices`;
+}
+
+export function formatPackageSummary(pkg, { includeSpeed = false, includeDevices = false } = {}) {
   const upload = includeSpeed ? ` · ${formatUploadSpeed(pkg.uploadSpeedMbPerSec)}` : '';
+  const devices =
+    includeDevices && Number(pkg.maxSharedDevices) > 1
+      ? ` · ${formatSharedDevices(pkg.maxSharedDevices)}`
+      : includeDevices && Number(pkg.maxSharedDevices) === 1
+        ? ' · 1 device'
+        : '';
   if (pkg.type === 'DATA_BASED') {
-    return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}`;
+    return `${formatDataCap(pkg.dataCapMb)} download · expires in ${formatDuration(pkg.durationMinutes)}${upload}${devices}`;
   }
 
   const browse = formatDuration(pkg.durationMinutes);
   const data = pkg.dataCapMb ? formatDataCap(pkg.dataCapMb) : 'Unlimited data';
-  return `${browse} browse · ${data}${upload}`;
+  return `${browse} browse · ${data}${upload}${devices}`;
 }
 
 export function formatOwnerPackageSummary(pkg) {
-  return formatPackageSummary(pkg, { includeSpeed: true });
+  return formatPackageSummary(pkg, { includeSpeed: true, includeDevices: true });
 }
 
 export function formatPortalPackageSummary(pkg, { showUploadSpeed = false } = {}) {
