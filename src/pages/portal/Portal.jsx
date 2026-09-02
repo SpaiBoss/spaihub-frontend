@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Loader, Clock, Ticket, KeyRound } from 'lucide-react';
+import { CheckCircle, Loader, Clock, Ticket, KeyRound, LogOut } from 'lucide-react';
 import api from '../../services/api';
 import { formatPortalPackageSummary, formatDataCap } from '../../utils/packages';
 import { getPortalDeviceId } from '../../utils/portalDevice';
@@ -131,6 +131,7 @@ export default function Portal() {
   const [searchParams] = useSearchParams();
   const queryMac = searchParams.get('mac') || '';
   const linkLogin = searchParams.get('link-login-only') || searchParams.get('link-login') || '';
+  const linkLogout = searchParams.get('link-logout-only') || searchParams.get('link-logout') || '';
   const mac = queryMac || (import.meta.env.DEV ? DEV_TEST_MAC : '');
   const deviceId = useMemo(() => getPortalDeviceId(routerToken), [routerToken]);
   const autoLoginAttempted = useRef(false);
@@ -149,6 +150,7 @@ export default function Portal() {
   const [voucherPin, setVoucherPin] = useState('');
   const [redeeming, setRedeeming] = useState(false);
   const [paymentTimedOut, setPaymentTimedOut] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const checkSession = useCallback(async () => {
     if (!deviceId) return null;
@@ -232,6 +234,28 @@ export default function Portal() {
       window.location.href = loginUrl;
     }
   }, [session, linkLogin]);
+
+  async function handleLogout() {
+    if (!deviceId || loggingOut) return;
+    setLoggingOut(true);
+    setError('');
+    try {
+      await api.post(`/portal/${routerToken}/logout`, {
+        deviceId,
+        mac: mac || undefined,
+      });
+      setSession(null);
+      autoLoginAttempted.current = false;
+      if (linkLogout) {
+        window.location.href = linkLogout;
+        return;
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not log out. Try again.');
+    } finally {
+      setLoggingOut(false);
+    }
+  }
 
   async function handleRedeemVoucher() {
     if (!voucherCode.trim() || !voucherPin.trim() || !deviceId) return;
@@ -331,6 +355,16 @@ export default function Portal() {
               accentColor={branding?.accentColor}
             />
           )}
+          {error && <p className="text-red-600 text-sm text-center mt-4 font-medium">{error}</p>}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-4 h-4" />
+            {loggingOut ? 'Logging out...' : 'Log out'}
+          </button>
         </PortalCard>
       </PortalShell>
     );

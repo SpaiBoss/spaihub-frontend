@@ -146,7 +146,7 @@ export default function Locations() {
   async function kickSession(transactionId) {
     try {
       await api.post(`/api/owner/sessions/${transactionId}/kick`);
-      toast.success('Session ended');
+      toast.success('Session ended — device should disconnect within 15 seconds');
       expandLocation(expanded);
       loadLocations();
     } catch (err) {
