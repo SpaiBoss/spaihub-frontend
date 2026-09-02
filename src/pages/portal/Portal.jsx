@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Loader, Clock, Ticket, KeyRound, LogOut } from 'lucide-react';
 import api from '../../services/api';
 import { formatPortalPackageSummary, formatDataCap } from '../../utils/packages';
-import { getPortalDeviceId } from '../../utils/portalDevice';
+import { getPortalDeviceId, getPortalSubscriberPhone, savePortalSubscriberPhone, clearPortalSubscriberPhone } from '../../utils/portalDevice';
 import { savePendingPayment, loadPendingPayment, clearPendingPayment } from '../../utils/portalPayment';
 import PortalBrand, { PortalCredit } from '../../components/PortalBrand';
 
@@ -162,8 +162,10 @@ function sessionFromPayment(data) {
   };
 }
 
-function applyPaidSession(data, { linkLogin, routerToken, setSession, setWaiting, setPaymentTimedOut, setError }) {
+function applyPaidSession(data, { linkLogin, routerToken, phone: paidPhone, setSession, setWaiting, setPaymentTimedOut, setError }) {
   const nextSession = sessionFromPayment(data);
+  const phoneToSave = paidPhone || data.hotspotUsername;
+  if (phoneToSave) savePortalSubscriberPhone(routerToken, phoneToSave);
   setSession(nextSession);
   setWaiting(false);
   setPaymentTimedOut(false);
@@ -191,7 +193,7 @@ export default function Portal() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPkg, setSelectedPkg] = useState(null);
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(() => getPortalSubscriberPhone(routerToken) || '');
   const [paying, setPaying] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [paymentReference, setPaymentReference] = useState('');
@@ -209,10 +211,15 @@ export default function Portal() {
     if (!deviceId) return null;
     const params = new URLSearchParams({ deviceId });
     if (mac) params.set('mac', mac);
+    const sessionPhone = phone || getPortalSubscriberPhone(routerToken);
+    if (sessionPhone) params.set('phone', sessionPhone);
     const { data } = await api.get(`/portal/${routerToken}/session?${params}`);
+    if (data?.active && data.hotspotUsername) {
+      savePortalSubscriberPhone(routerToken, data.hotspotUsername);
+    }
     setSession(data);
     return data;
-  }, [routerToken, deviceId, mac]);
+  }, [routerToken, deviceId, mac, phone]);
 
   const resumePendingPayment = useCallback(
     ({ reference, phone: pendingPhone, packageId }) => {
@@ -227,6 +234,7 @@ export default function Portal() {
         phone: pendingPhone || '',
         packageId: packageId || '',
       });
+      if (pendingPhone) savePortalSubscriberPhone(routerToken, pendingPhone);
     },
     [routerToken]
   );
@@ -246,6 +254,7 @@ export default function Portal() {
           applyPaidSession(data, {
             linkLogin,
             routerToken,
+            phone,
             setSession,
             setWaiting,
             setPaymentTimedOut,
@@ -286,7 +295,7 @@ export default function Portal() {
 
       return false;
     },
-    [deviceId, routerToken, linkLogin, checkSession]
+    [deviceId, routerToken, linkLogin, checkSession, phone]
   );
 
   useEffect(() => {
@@ -381,8 +390,10 @@ export default function Portal() {
       await api.post(`/portal/${routerToken}/logout`, {
         deviceId,
         mac: mac || undefined,
+        phone: phone || getPortalSubscriberPhone(routerToken) || undefined,
       });
       setSession(null);
+      clearPortalSubscriberPhone(routerToken);
       sessionStorage.removeItem(autoLoginStorageKey(routerToken));
       if (linkLogout) {
         window.location.href = linkLogout;
@@ -475,7 +486,14 @@ export default function Portal() {
         packageId: selectedPkg,
       });
     } catch (err) {
-      setError(err.response?.data?.error || 'Payment failed');
+      const data = err.response?.data;
+      if (data?.recoverSession && data.active) {
+        savePortalSubscriberPhone(routerToken, phone);
+        setSession(sessionFromPayment(data));
+        setError('');
+        return;
+      }
+      setError(data?.error || 'Payment failed');
     } finally {
       setPaying(false);
     }
