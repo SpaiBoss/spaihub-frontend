@@ -146,7 +146,11 @@ export default function Landing() {
         <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-12 pt-24 sm:px-6 sm:pb-24 sm:pt-32 lg:px-8">
           <div className="max-w-2xl">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
-              <BrandLogo theme="dark" textClassName="text-4xl sm:text-6xl lg:text-7xl" className="mb-5 sm:mb-10" />
+              <BrandLogo
+                theme="dark"
+                textClassName="text-4xl sm:text-6xl lg:text-7xl"
+                className="mb-5 sm:mb-10"
+              />
             </div>
             <h1
               className="mkt-display animate-hero-in text-[2.05rem] leading-[1.08] sm:text-5xl sm:leading-[1.05] lg:text-[3.9rem] text-white"
