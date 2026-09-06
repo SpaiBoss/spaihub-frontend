@@ -1,0 +1,34 @@
+export const MARKETING_FAQ = [
+  {
+    q: 'What is Spai-Hub?',
+    a: 'Spai-Hub is a hotspot billing platform for Cameroon operators. Subscribers pay with Mobile Money or redeem vouchers; you manage MikroTik locations, packages, and wallet withdrawals from one dashboard.',
+  },
+  {
+    q: 'Do I need new hardware?',
+    a: 'No. SpaiHub is built for MikroTik routers you already run. From the dashboard you copy a hotspot setup script (once) and a SpaiHub connection script (heartbeat + commands).',
+  },
+  {
+    q: 'How do subscribers pay?',
+    a: 'Through Campay on the captive portal — MTN MoMo or Orange Money. They approve on their phone and receive WiFi username and PIN immediately. Printed vouchers work when cash still rules.',
+  },
+  {
+    q: 'When do I get paid?',
+    a: 'Each successful MoMo sale credits your SpaiHub wallet (minus the platform fee). Withdraw to your MoMo number from the wallet page. Voucher redemptions do not credit the wallet — they are prepaid stock you sold offline.',
+  },
+  {
+    q: 'Is there a subscription fee?',
+    a: 'Creating an account is free. SpaiHub takes a percentage of each successful MoMo sale (the live rate is shown on the Pricing page and comes from our platform configuration).',
+  },
+  {
+    q: 'Can one package serve several phones?',
+    a: 'Yes. Packages support max shared devices for family or room plans. Subscribers can disconnect one device or end the session for everyone.',
+  },
+  {
+    q: 'What if payment succeeds but WiFi does not?',
+    a: 'SpaiHub recovers orphan Campay successes, keeps pending payments across reloads, and queues MikroTik grants. Owners must keep the connection script (commands scheduler) running on the router.',
+  },
+  {
+    q: 'How do I get help?',
+    a: 'Use the Contact page for WhatsApp when configured, or reach the SpaiTrace team via spaitrace.com.',
+  },
+];

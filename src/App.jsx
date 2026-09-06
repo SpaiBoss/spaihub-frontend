@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
+import MarketingLayout from './components/layout/MarketingLayout';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -26,6 +27,16 @@ import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminWithdrawals from './pages/admin/AdminWithdrawals';
 import NotFound from './pages/NotFound';
 
+import Landing from './pages/marketing/Landing';
+import Features from './pages/marketing/Features';
+import HowItWorks from './pages/marketing/HowItWorks';
+import Pricing from './pages/marketing/Pricing';
+import Faq from './pages/marketing/Faq';
+import Contact from './pages/marketing/Contact';
+import ForMikrotik from './pages/marketing/ForMikrotik';
+import ForMobileMoney from './pages/marketing/ForMobileMoney';
+import ForVouchers from './pages/marketing/ForVouchers';
+
 export default function App() {
   return (
     <AuthProvider>
@@ -48,7 +59,18 @@ export default function App() {
           }}
         />
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route element={<MarketingLayout />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/for/mikrotik" element={<ForMikrotik />} />
+            <Route path="/for/mobile-money" element={<ForMobileMoney />} />
+            <Route path="/for/vouchers" element={<ForVouchers />} />
+          </Route>
+
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />

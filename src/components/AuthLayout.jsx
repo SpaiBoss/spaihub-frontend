@@ -6,7 +6,9 @@ export default function AuthLayout({ children, title, subtitle }) {
     <div className="min-h-screen min-h-[100dvh] flex">
       <div className="hidden lg:flex lg:w-[42%] xl:w-[40%] bg-navy relative">
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
-          <BrandLogo theme="dark" textClassName="text-2xl" className="justify-start" />
+          <Link to="/" className="inline-flex w-fit">
+            <BrandLogo theme="dark" textClassName="text-2xl" className="justify-start" />
+          </Link>
 
           <div className="max-w-sm">
             <h2 className="text-2xl xl:text-[1.75rem] font-semibold leading-snug text-white tracking-tight">
@@ -24,7 +26,9 @@ export default function AuthLayout({ children, title, subtitle }) {
       <div className="flex-1 flex items-center justify-center bg-surface-muted px-4 py-10 sm:px-8">
         <div className="w-full max-w-[400px] animate-slide-up">
           <div className="lg:hidden text-center mb-8">
-            <BrandLogo className="mb-4 justify-center" textClassName="text-2xl" />
+            <Link to="/" className="inline-flex justify-center">
+              <BrandLogo className="mb-4 justify-center" textClassName="text-2xl" />
+            </Link>
           </div>
 
           <div className="text-center lg:text-left mb-7">

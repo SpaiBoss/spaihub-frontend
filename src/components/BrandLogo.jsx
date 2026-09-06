@@ -2,7 +2,10 @@ export function TextWordmark({ theme = 'light', className = 'text-2xl', as: Tag 
   const color = theme === 'dark' ? 'text-white' : 'text-navy';
 
   return (
-    <Tag className={`font-semibold tracking-tight leading-none ${color} ${className}`} aria-label="Spai-Hub">
+    <Tag
+      className={`font-display font-bold tracking-tight leading-none ${color} ${className}`}
+      aria-label="Spai-Hub"
+    >
       Spai-Hub
     </Tag>
   );

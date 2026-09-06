@@ -4,7 +4,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Remapped to graphite ink (call sites keep `navy-*` class names)
         navy: {
           DEFAULT: '#0E141B',
           dark: '#0A0F14',
@@ -21,11 +20,12 @@ export default {
         },
         surface: {
           DEFAULT: '#ffffff',
-          muted: '#F3F4F6',
+          muted: '#F0F2F5',
         },
       },
       fontFamily: {
         sans: ['"IBM Plex Sans"', 'Segoe UI', 'system-ui', 'sans-serif'],
+        display: ['Syne', '"IBM Plex Sans"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       borderRadius: {
@@ -43,11 +43,15 @@ export default {
         'brand-gradient': 'linear-gradient(180deg, #0E141B 0%, #161D27 100%)',
         'auth-panel': 'linear-gradient(180deg, #0E141B 0%, #161D27 100%)',
         'sidebar-gradient': 'linear-gradient(180deg, #0E141B 0%, #0E141B 100%)',
-        'portal-gradient': 'linear-gradient(180deg, #F3F4F6 0%, #EEF0F3 100%)',
+        'portal-gradient': 'linear-gradient(180deg, #F0F2F5 0%, #E8EBEE 100%)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.25s ease-out',
-        'slide-up': 'slideUp 0.28s ease-out',
+        'fade-in': 'fadeIn 0.45s ease-out both',
+        'slide-up': 'slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'hero-in': 'heroIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'pulse-soft': 'pulseSoft 3.2s ease-in-out infinite',
+        'drift': 'drift 28s linear infinite',
+        'signal-ring': 'signalRing 4.5s ease-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -55,8 +59,25 @@ export default {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        heroIn: {
+          '0%': { opacity: '0', transform: 'translateY(22px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { opacity: '0.35' },
+          '50%': { opacity: '0.7' },
+        },
+        drift: {
+          '0%': { transform: 'translate3d(0,0,0)' },
+          '100%': { transform: 'translate3d(-48px, -24px, 0)' },
+        },
+        signalRing: {
+          '0%': { opacity: '0.55', transform: 'scale(0.72)' },
+          '70%': { opacity: '0' },
+          '100%': { opacity: '0', transform: 'scale(1.35)' },
         },
       },
     },

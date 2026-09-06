@@ -11,11 +11,11 @@ export default function NotFound() {
           This route does not exist or has moved.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-          <Link to="/login">
-            <Button>Owner login</Button>
+          <Link to="/">
+            <Button>Go to home</Button>
           </Link>
-          <Link to="/admin/login">
-            <Button variant="secondary">Admin login</Button>
+          <Link to="/login">
+            <Button variant="secondary">Owner login</Button>
           </Link>
         </div>
       </div>
