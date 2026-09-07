@@ -150,6 +150,16 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor }) {
 const DEV_TEST_MAC = 'AA:BB:CC:DD:EE:01';
 const PAYMENT_POLL_INTERVAL_MS = 2000;
 const PAYMENT_SOFT_TIMEOUT_ATTEMPTS = 90;
+const PORTAL_BOOTSTRAP_TIMEOUT_MS = 10_000;
+
+function isAbortError(err) {
+  return (
+    err?.name === 'CanceledError' ||
+    err?.name === 'AbortError' ||
+    err?.code === 'ERR_CANCELED' ||
+    err?.code === 'ECONNABORTED'
+  );
+}
 
 function sessionFromPayment(data) {
   return {
@@ -193,6 +203,7 @@ export default function Portal() {
   const [portal, setPortal] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [bootstrapKey, setBootstrapKey] = useState(0);
   const [selectedPkg, setSelectedPkg] = useState(null);
   const [phone, setPhone] = useState(() => getPortalSubscriberPhone(routerToken) || '');
   const [paying, setPaying] = useState(false);
@@ -208,6 +219,13 @@ export default function Portal() {
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [cancellingPayment, setCancellingPayment] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+
+  const retryPortalBootstrap = useCallback(() => {
+    setError('');
+    setPortal(null);
+    setLoading(true);
+    setBootstrapKey((k) => k + 1);
+  }, []);
 
   const routerUnavailable =
     portal?.routerStatus === 'OFFLINE' || portal?.routerStatus === 'DEGRADED';
@@ -317,12 +335,20 @@ export default function Portal() {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PORTAL_BOOTSTRAP_TIMEOUT_MS);
+
     async function init() {
       try {
-        const { data } = await api.get(`/portal/${routerToken}`);
+        const { data } = await api.get(`/portal/${routerToken}`, {
+          signal: controller.signal,
+        });
+        if (cancelled) return;
         setPortal(data);
 
         const sessionData = await checkSession();
+        if (cancelled) return;
         if (sessionData?.active) {
           clearPendingPayment(routerToken);
           return;
@@ -340,8 +366,10 @@ export default function Portal() {
         const sessionPhone = getPortalSubscriberPhone(routerToken);
         if (sessionPhone) params.set('phone', sessionPhone);
         const { data: pendingData } = await api.get(
-          `/portal/${routerToken}/pending-payment?${params}`
+          `/portal/${routerToken}/pending-payment?${params}`,
+          { signal: controller.signal }
         );
+        if (cancelled) return;
 
         if (pendingData.session?.active) {
           setSession(pendingData.session);
@@ -362,14 +390,27 @@ export default function Portal() {
             packageId: pendingData.packageId,
           });
         }
-      } catch {
-        setError('Router not found or unavailable');
+      } catch (err) {
+        if (cancelled) return;
+        const aborted = controller.signal.aborted || isAbortError(err);
+        setError(
+          aborted
+            ? 'Portal is taking too long to load. Retry or open in your browser.'
+            : 'Router not found or unavailable'
+        );
       } finally {
-        setLoading(false);
+        clearTimeout(timeoutId);
+        if (!cancelled) setLoading(false);
       }
     }
+
     init();
-  }, [routerToken, checkSession, deviceId, linkLogin, resumePendingPayment]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [routerToken, checkSession, deviceId, linkLogin, resumePendingPayment, bootstrapKey]);
 
   useEffect(() => {
     if (!waiting || !paymentReference) return;
@@ -573,8 +614,9 @@ export default function Portal() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-portal-gradient flex items-center justify-center px-4">
+      <div className="min-h-[100dvh] bg-portal-gradient flex flex-col items-center justify-center gap-3 px-4 text-center">
         <Loader className="w-8 h-8 animate-spin text-brand" />
+        <p className="text-sm text-navy/60">Loading portal…</p>
       </div>
     );
   }
@@ -584,6 +626,19 @@ export default function Portal() {
       <PortalShell branding={null}>
         <PortalCard className="text-center">
           <p className="text-red-600 font-medium">{error}</p>
+          <div className="mt-5 flex flex-col gap-2">
+            <button type="button" className="btn-primary w-full py-3 text-sm" onClick={retryPortalBootstrap}>
+              Retry
+            </button>
+            <a
+              href={typeof window !== 'undefined' ? window.location.href : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary w-full py-3 text-center text-sm"
+            >
+              Open in browser
+            </a>
+          </div>
         </PortalCard>
       </PortalShell>
     );
