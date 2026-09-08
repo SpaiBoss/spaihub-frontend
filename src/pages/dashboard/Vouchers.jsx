@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Download, Copy, Ban, Ticket, FileText } from 'lucide-react';
+import { Plus, Download, Copy, Ban, Ticket, FileText, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { StatusBadge, Button, Card, EmptyState, Pagination, TableShell } from '../../components/ui';
@@ -20,6 +20,7 @@ export default function Vouchers() {
   const [showPdfExport, setShowPdfExport] = useState(false);
   const [branding, setBranding] = useState(null);
   const [filters, setFilters] = useState({ locationId: '', status: '', page: 1 });
+  const [syncing, setSyncing] = useState(false);
 
   async function loadLocations() {
     try {
@@ -72,6 +73,27 @@ export default function Vouchers() {
     const { data: result } = await api.post(`/api/owner/locations/${locationId}/vouchers`, payload);
     loadVouchers();
     return result;
+  }
+
+  async function syncUnusedToRouter() {
+    if (!filters.locationId) {
+      toast.error('Select a location first');
+      return;
+    }
+    setSyncing(true);
+    try {
+      const { data: result } = await api.post(
+        `/api/owner/locations/${filters.locationId}/vouchers/sync`
+      );
+      toast.success(result.message || 'Sync queued');
+      if (result.queued > 0) {
+        toast.success('Wait ~15s for spaihub-commands to import, then check Hotspot users');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not sync vouchers to router');
+    } finally {
+      setSyncing(false);
+    }
   }
 
   async function revokeVoucher(id) {
@@ -164,6 +186,16 @@ export default function Vouchers() {
         </select>
         <Button onClick={() => setShowCreate(true)} className="gap-2">
           <Plus className="w-4 h-4" /> Generate vouchers
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={syncUnusedToRouter}
+          disabled={syncing || !filters.locationId}
+          className="gap-2"
+          title={!filters.locationId ? 'Select a location first' : 'Queue unused vouchers onto the MikroTik'}
+        >
+          <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+          {syncing ? 'Syncing…' : 'Sync to router'}
         </Button>
         <Button variant="secondary" onClick={() => setShowPdfExport(true)} className="gap-2 ml-auto">
           <FileText className="w-4 h-4" /> Print PDF
