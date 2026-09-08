@@ -28,7 +28,7 @@ export default function ForMikrotik() {
           <div>
             <h3 className="text-base font-semibold text-navy">1. Hotspot setup (once)</h3>
             <p className="mt-2 text-sm text-navy/55 leading-relaxed">
-              Profiles, walled garden for SpaiHub hosts, anti-tether rules when you disable sharing, and
+              Profiles, walled garden for SpaiHub hosts, cloud captive portal redirect, and
               login.html that redirects to your branded portal.
             </p>
           </div>

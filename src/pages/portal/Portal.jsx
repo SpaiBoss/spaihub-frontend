@@ -27,13 +27,52 @@ function buildMikrotikLoginUrl(linkLogin, username, password) {
 }
 
 const AUTO_LOGIN_COOLDOWN_MS = 60_000;
+/** Wait for Hex command poll (~15s) before recommending Connect. */
+const ROUTER_IMPORT_WAIT_MS = 22_000;
 
 function autoLoginStorageKey(routerToken) {
   return `spaihub_autologin_${routerToken}`;
 }
 
-/** Redirect to MikroTik login once; skip if we tried recently (prevents portal ↔ router loops). */
-function redirectToMikrotikLogin(linkLogin, username, pin, routerToken) {
+function credentialsStorageKey(routerToken) {
+  return `spaihub_wifi_creds_${routerToken}`;
+}
+
+function saveWifiCredentials(routerToken, username, pin, readyAt = Date.now() + ROUTER_IMPORT_WAIT_MS) {
+  if (!routerToken || !username || !pin) return;
+  try {
+    sessionStorage.setItem(
+      credentialsStorageKey(routerToken),
+      JSON.stringify({ username, pin, readyAt })
+    );
+  } catch {
+    // Ignore quota / private mode failures.
+  }
+}
+
+function loadWifiCredentials(routerToken) {
+  if (!routerToken) return null;
+  try {
+    const raw = sessionStorage.getItem(credentialsStorageKey(routerToken));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.username || !parsed?.pin) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function clearWifiCredentials(routerToken) {
+  try {
+    sessionStorage.removeItem(credentialsStorageKey(routerToken));
+  } catch {
+    // ignore
+  }
+}
+
+/** Navigate to MikroTik login on user tap; cooldown prevents portal ↔ router loops. */
+function navigateToMikrotikLogin(linkLogin, username, pin, routerToken) {
   if (!linkLogin || !username || !pin || !routerToken) return false;
   const key = autoLoginStorageKey(routerToken);
   const lastAttempt = Number(sessionStorage.getItem(key) || 0);
@@ -105,15 +144,42 @@ function PortalCard({ children, className = '' }) {
   );
 }
 
-function CredentialsPanel({ username, pin, linkLogin, accentColor }) {
+function CredentialsPanel({ username, pin, linkLogin, accentColor, routerToken, readyAt }) {
   const loginUrl = buildMikrotikLoginUrl(linkLogin, username, pin);
   const accentStyle = accentColor ? { backgroundColor: accentColor } : undefined;
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    if (!readyAt) return 0;
+    return Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
+  });
+  const routerReady = secondsLeft <= 0;
+
+  useEffect(() => {
+    if (!readyAt) {
+      setSecondsLeft(0);
+      return undefined;
+    }
+    const tick = () => {
+      setSecondsLeft(Math.max(0, Math.ceil((readyAt - Date.now()) / 1000)));
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [readyAt]);
+
+  function handleConnect(e) {
+    e.preventDefault();
+    const ok = navigateToMikrotikLogin(linkLogin, username, pin, routerToken);
+    if (!ok && loginUrl) {
+      // Cooldown or missing token — still allow manual navigation.
+      window.location.href = loginUrl;
+    }
+  }
 
   return (
     <div className="mt-5 p-4 rounded-lg bg-surface-muted border border-gray-200 text-left">
       <div className="flex items-center gap-2 mb-3">
         <KeyRound className="w-4 h-4 text-brand" style={accentColor ? { color: accentColor } : undefined} />
-        <p className="text-xs font-medium text-navy/50 tracking-wide">WiFi login</p>
+        <p className="text-xs font-medium text-navy/50 tracking-wide">WiFi login — save these</p>
       </div>
       <div className="space-y-2">
         <div>
@@ -131,16 +197,26 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor }) {
         </div>
       </div>
       {loginUrl ? (
-        <a
-          href={loginUrl}
-          className="btn-primary w-full mt-4 py-3 text-center block text-sm"
-          style={accentStyle}
-        >
-          Connect to WiFi now
-        </a>
+        <>
+          <button
+            type="button"
+            onClick={handleConnect}
+            className="btn-primary w-full mt-4 py-3 text-center block text-sm"
+            style={accentStyle}
+          >
+            {routerReady
+              ? 'Connect to WiFi now'
+              : `Preparing router… ${secondsLeft}s (tap to try anyway)`}
+          </button>
+          <p className="text-xs text-navy/50 mt-2">
+            {routerReady
+              ? 'If connect fails, wait a few seconds and tap again.'
+              : 'Your credentials stay here. Wait for the router to import access, then connect.'}
+          </p>
+        </>
       ) : (
         <p className="text-xs text-navy/50 mt-3">
-          Enter these credentials on the MikroTik hotspot login page to get online.
+          Open this portal from the WiFi captive page so Connect is available, or enter these credentials on the hotspot login.
         </p>
       )}
     </div>
@@ -170,24 +246,21 @@ function sessionFromPayment(data) {
     dataCapMb: data.dataCapMb,
     hotspotUsername: data.hotspotUsername,
     hotspotPin: data.hotspotPin,
+    connectReadyAt: data.connectReadyAt,
   };
 }
 
-function applyPaidSession(data, { linkLogin, routerToken, phone: paidPhone, setSession, setWaiting, setPaymentTimedOut, setError }) {
-  const nextSession = sessionFromPayment(data);
+function applyPaidSession(data, { routerToken, phone: paidPhone, setSession, setWaiting, setPaymentTimedOut, setError }) {
+  const readyAt = Date.now() + ROUTER_IMPORT_WAIT_MS;
+  const nextSession = { ...sessionFromPayment(data), connectReadyAt: readyAt };
   const phoneToSave = paidPhone || data.hotspotUsername;
   if (phoneToSave) savePortalSubscriberPhone(routerToken, phoneToSave);
+  saveWifiCredentials(routerToken, nextSession.hotspotUsername, nextSession.hotspotPin, readyAt);
   setSession(nextSession);
   setWaiting(false);
   setPaymentTimedOut(false);
   setError('');
   clearPendingPayment(routerToken);
-  redirectToMikrotikLogin(
-    linkLogin,
-    nextSession.hotspotUsername,
-    nextSession.hotspotPin,
-    routerToken
-  );
   return true;
 }
 
@@ -288,7 +361,6 @@ export default function Portal() {
 
         if (data.status === 'SUCCESS') {
           applyPaidSession(data, {
-            linkLogin,
             routerToken,
             phone,
             setSession,
@@ -313,16 +385,22 @@ export default function Portal() {
       try {
         const sessionData = await checkSession();
         if (sessionData?.active) {
+          const readyAt = Date.now() + ROUTER_IMPORT_WAIT_MS;
+          const stored = loadWifiCredentials(routerToken);
+          const next = {
+            ...sessionData,
+            hotspotUsername: sessionData.hotspotUsername || stored?.username,
+            hotspotPin: sessionData.hotspotPin || stored?.pin,
+            connectReadyAt: stored?.readyAt || readyAt,
+          };
+          if (next.hotspotUsername && next.hotspotPin) {
+            saveWifiCredentials(routerToken, next.hotspotUsername, next.hotspotPin, next.connectReadyAt);
+          }
+          setSession(next);
           setWaiting(false);
           setPaymentTimedOut(false);
           setError('');
           clearPendingPayment(routerToken);
-          redirectToMikrotikLogin(
-            linkLogin,
-            sessionData.hotspotUsername,
-            sessionData.hotspotPin,
-            routerToken
-          );
           return true;
         }
       } catch {
@@ -331,7 +409,7 @@ export default function Portal() {
 
       return false;
     },
-    [deviceId, routerToken, linkLogin, checkSession, phone]
+    [deviceId, routerToken, checkSession, phone]
   );
 
   useEffect(() => {
@@ -351,6 +429,13 @@ export default function Portal() {
         if (cancelled) return;
         if (sessionData?.active) {
           clearPendingPayment(routerToken);
+          const stored = loadWifiCredentials(routerToken);
+          setSession({
+            ...sessionData,
+            hotspotUsername: sessionData.hotspotUsername || stored?.username,
+            hotspotPin: sessionData.hotspotPin || stored?.pin,
+            connectReadyAt: stored?.readyAt || Date.now(),
+          });
           return;
         }
 
@@ -372,14 +457,19 @@ export default function Portal() {
         if (cancelled) return;
 
         if (pendingData.session?.active) {
-          setSession(pendingData.session);
+          const stored = loadWifiCredentials(routerToken);
+          const readyAt = stored?.readyAt || Date.now() + ROUTER_IMPORT_WAIT_MS;
+          const next = {
+            ...pendingData.session,
+            hotspotUsername: pendingData.session.hotspotUsername || stored?.username,
+            hotspotPin: pendingData.session.hotspotPin || stored?.pin,
+            connectReadyAt: readyAt,
+          };
+          if (next.hotspotUsername && next.hotspotPin) {
+            saveWifiCredentials(routerToken, next.hotspotUsername, next.hotspotPin, readyAt);
+          }
+          setSession(next);
           clearPendingPayment(routerToken);
-          redirectToMikrotikLogin(
-            linkLogin,
-            pendingData.session.hotspotUsername,
-            pendingData.session.hotspotPin,
-            routerToken
-          );
           return;
         }
 
@@ -473,6 +563,7 @@ export default function Portal() {
       });
       setSession(null);
       clearPortalSubscriberPhone(routerToken);
+      clearWifiCredentials(routerToken);
       sessionStorage.removeItem(autoLoginStorageKey(routerToken));
       if (linkLogout) {
         window.location.href = linkLogout;
@@ -496,6 +587,7 @@ export default function Portal() {
         phone: phone || getPortalSubscriberPhone(routerToken) || undefined,
       });
       setSession(null);
+      clearWifiCredentials(routerToken);
       sessionStorage.removeItem(autoLoginStorageKey(routerToken));
       if (linkLogout) {
         window.location.href = linkLogout;
@@ -518,20 +610,17 @@ export default function Portal() {
         deviceId,
         macAddress: mac || undefined,
       });
+      const readyAt = Date.now() + ROUTER_IMPORT_WAIT_MS;
       const nextSession = {
         active: true,
         sessionEnd: data.sessionEnd,
         packageName: data.packageName,
         hotspotUsername: data.hotspotUsername,
         hotspotPin: data.hotspotPin,
+        connectReadyAt: readyAt,
       };
+      saveWifiCredentials(routerToken, nextSession.hotspotUsername, nextSession.hotspotPin, readyAt);
       setSession(nextSession);
-      redirectToMikrotikLogin(
-        linkLogin,
-        nextSession.hotspotUsername,
-        nextSession.hotspotPin,
-        routerToken
-      );
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid voucher code');
     } finally {
@@ -561,7 +650,6 @@ export default function Portal() {
       });
       if (data.recovered && data.session?.active) {
         applyPaidSession(data.session, {
-          linkLogin,
           routerToken,
           phone,
           setSession,
@@ -601,9 +689,14 @@ export default function Portal() {
     } catch (err) {
       const data = err.response?.data;
       if (data?.recoverSession && data.active) {
-        savePortalSubscriberPhone(routerToken, phone);
-        setSession(sessionFromPayment(data));
-        setError('');
+        applyPaidSession(data, {
+          routerToken,
+          phone,
+          setSession,
+          setWaiting,
+          setPaymentTimedOut,
+          setError,
+        });
         return;
       }
       setError(data?.error || 'Payment failed');
@@ -654,8 +747,11 @@ export default function Portal() {
       <PortalShell branding={branding}>
         <PortalCard className="text-center">
           <CheckCircle className="w-8 h-8 text-signal mx-auto" strokeWidth={1.75} />
-          <h1 className="text-xl font-semibold text-navy mt-4">You&apos;re connected</h1>
+          <h1 className="text-xl font-semibold text-navy mt-4">Access ready</h1>
           <p className="text-navy/55 mt-1 text-sm">{session.packageName}</p>
+          <p className="text-navy/50 mt-2 text-sm">
+            Save your username and PIN below, then connect to WiFi when the router is ready.
+          </p>
           <div className="mt-6 p-4 rounded-lg bg-surface-muted border border-gray-200">
             <p className="text-xs text-navy/50 tracking-wide font-medium">Time remaining</p>
             <div className="flex items-center justify-center gap-2 mt-1 text-brand text-lg font-mono">
@@ -681,6 +777,8 @@ export default function Portal() {
               pin={session.hotspotPin}
               linkLogin={linkLogin}
               accentColor={branding?.accentColor}
+              routerToken={routerToken}
+              readyAt={session.connectReadyAt}
             />
           )}
           {error && <p className="text-red-600 text-sm text-center mt-4 font-medium">{error}</p>}
@@ -838,7 +936,7 @@ export default function Portal() {
               className="btn-primary w-full py-3.5 text-base"
               style={accentStyle}
             >
-              {redeeming ? 'Redeeming...' : 'Connect with voucher'}
+              {redeeming ? 'Redeeming...' : 'Redeem voucher'}
             </button>
           </div>
         ) : (
@@ -881,7 +979,7 @@ export default function Portal() {
                 </p>
               )}
               <p className="text-xs text-center text-navy/45 mt-2">
-                Pay via Campay — your phone number becomes your WiFi username and a PIN is generated instantly.
+                Pay via Campay — your phone number becomes your WiFi username. A PIN appears here after payment; then tap Connect.
               </p>
             </div>
 

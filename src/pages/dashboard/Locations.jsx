@@ -455,7 +455,7 @@ export default function Locations() {
                         <span>
                           <span className="font-medium text-navy block">Allow hotspot sharing</span>
                           <span className="text-sm text-navy/50">
-                            When enabled, additional devices can connect using the same access code via hotspot. Disabling this adds TTL anti-tethering rules on the router setup script.
+                            When enabled, additional devices can connect using the same access code via hotspot sharing. Device limits still apply from package simultaneous-device settings.
                           </span>
                         </span>
                       </label>
