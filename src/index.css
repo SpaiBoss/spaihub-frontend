@@ -147,7 +147,7 @@
   }
 
   .mkt-icon-frame {
-    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-current/15 text-brand
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-navy/15 text-brand
       transition-colors duration-200;
   }
 
