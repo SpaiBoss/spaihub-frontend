@@ -43,12 +43,12 @@ export function PortalCredit() {
     <p className="text-center text-xs mt-6 text-navy/35">
       Powered by{' '}
       <a
-        href="https://spaitrace.com"
+        href="https://www.spaitrace.com"
         target="_blank"
         rel="noreferrer"
         className="font-medium text-navy/55 hover:text-brand"
       >
-        spaitrace.com
+        www.spaitrace.com
       </a>
     </p>
   );

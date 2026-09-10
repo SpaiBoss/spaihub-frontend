@@ -90,7 +90,7 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, bran
         <div className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-navy/60 space-y-1">
           <p className="font-semibold text-navy">Each ticket includes</p>
           <p>Your logo or brand name · location · package · voucher code · WiFi PIN · redeem instructions</p>
-          <p className="text-navy/45">Footer: Powered by spaitrace.com</p>
+          <p className="text-navy/45">Footer: Powered by www.spaitrace.com</p>
         </div>
 
         <div className="flex gap-3 pt-1">

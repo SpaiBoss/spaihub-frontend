@@ -18,7 +18,7 @@ const DEFAULT_FORM = {
 };
 
 const PLATFORM_CREDIT_MESSAGE =
-  'White-label removal requires a custom agreement. Contact us at spaitrace.com to negotiate.';
+  'White-label removal requires a custom agreement. Contact us at www.spaitrace.com to negotiate.';
 
 export default function PortalBrandingSettings() {
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -228,7 +228,7 @@ export default function PortalBrandingSettings() {
               className="mt-1 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer"
             />
             <span>
-              <span className="font-medium text-navy block">Show &quot;Powered by spaitrace.com&quot;</span>
+              <span className="font-medium text-navy block">Show &quot;Powered by www.spaitrace.com&quot;</span>
               <span className="text-sm text-navy/50">
                 Always shown on the captive portal. Contact us about white-label options.
               </span>

@@ -270,12 +270,12 @@ export default function MarketingLayout() {
           <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <p className="text-xs text-navy/40">Spai-Hub · Cameroon</p>
             <a
-              href="https://spaitrace.com"
+              href="https://www.spaitrace.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-navy/40 hover:text-navy/70 transition-colors"
             >
-              Powered by spaitrace.com
+              Powered by www.spaitrace.com
             </a>
           </div>
         </div>

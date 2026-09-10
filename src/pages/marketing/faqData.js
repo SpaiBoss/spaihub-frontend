@@ -29,6 +29,6 @@ export const MARKETING_FAQ = [
   },
   {
     q: 'How do I get help?',
-    a: 'Use the Contact page for WhatsApp when configured, or reach the SpaiTrace team via spaitrace.com.',
+    a: 'Use the Contact page for WhatsApp when configured, or reach the SpaiTrace team via www.spaitrace.com.',
   },
 ];

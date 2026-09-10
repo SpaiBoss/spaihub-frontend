@@ -31,12 +31,12 @@ export default function Contact() {
             <p className="text-sm text-navy/50">
               Prefer email or a website visit?{' '}
               <a
-                href="https://spaitrace.com"
+                href="https://www.spaitrace.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand font-medium hover:text-brand-dark"
               >
-                spaitrace.com
+                www.spaitrace.com
               </a>
             </p>
           </div>
@@ -45,12 +45,12 @@ export default function Contact() {
             <p className="text-sm text-navy/60 leading-relaxed">
               WhatsApp contact is not configured on this deployment yet. Reach the SpaiTrace team at{' '}
               <a
-                href="https://spaitrace.com"
+                href="https://www.spaitrace.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand font-medium hover:text-brand-dark"
               >
-                spaitrace.com
+                www.spaitrace.com
               </a>{' '}
               or create an account to explore the product.
             </p>
