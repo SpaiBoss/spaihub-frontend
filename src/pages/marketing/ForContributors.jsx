@@ -37,8 +37,8 @@ export default function ForContributors() {
       <section className="relative min-h-[88dvh] min-h-[88svh] overflow-hidden text-white">
         <img
           src="/marketing/contributor-hero.jpg"
-          alt="Home internet dish and cable linking toward a nearby neighborhood hotspot"
-          className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+          alt="Network engineer configuring routers, switches, and cables for a SpaiHub uplink"
+          className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
         />
         <div
           className="pointer-events-none absolute inset-0"

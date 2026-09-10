@@ -16,7 +16,6 @@ import {
   FaqList,
   FeatureGrid,
   FinalCta,
-  HeroSignalField,
   MarketingCtaGroup,
   MarketingHeading,
   MarketingSection,
@@ -170,7 +169,27 @@ export default function Landing() {
   return (
     <>
       <section className="relative min-h-[100dvh] min-h-[100svh] overflow-hidden text-white">
-        <HeroSignalField />
+        <img
+          src="/marketing/landing-hero.jpg"
+          alt="Printed WiFi vouchers and Mobile Money payment at a Cameroon hotspot counter"
+          className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(105deg, rgba(7,11,16,0.92) 0%, rgba(14,20,27,0.82) 38%, rgba(14,20,27,0.5) 65%, rgba(14,20,27,0.58) 100%), linear-gradient(to top, rgba(7,11,16,0.8) 0%, transparent 45%)',
+          }}
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-45"
+          style={{
+            background:
+              'radial-gradient(ellipse 55% 50% at 80% 25%, rgba(15,118,110,0.38), transparent 58%)',
+          }}
+          aria-hidden
+        />
 
         <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-12 pt-24 sm:px-6 sm:pb-24 sm:pt-32 lg:px-8">
           <div className="max-w-2xl">
