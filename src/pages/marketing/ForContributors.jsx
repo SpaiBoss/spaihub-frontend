@@ -45,7 +45,7 @@ export default function ForContributors() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(105deg, rgba(7,11,16,0.92) 0%, rgba(14,20,27,0.78) 42%, rgba(14,20,27,0.45) 68%, rgba(14,20,27,0.55) 100%), linear-gradient(to top, rgba(7,11,16,0.75) 0%, transparent 42%)',
+              'linear-gradient(105deg, rgba(7,11,16,0.92) 0%, rgba(14,20,27,0.78) 42%, rgba(14,20,27,0.45) 68%, rgba(14,20,27,0.55) 100%), linear-gradient(to top, rgba(7,11,16,0.82) 0%, transparent 42%)',
           }}
           aria-hidden
         />
@@ -58,14 +58,14 @@ export default function ForContributors() {
           aria-hidden
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[88dvh] min-h-[88svh] max-w-6xl flex-col justify-end px-4 pb-20 pt-28 sm:justify-center sm:px-6 sm:pb-28 sm:pt-32 lg:px-8">
+        <div className="relative z-10 mx-auto flex min-h-[88dvh] min-h-[88svh] max-w-6xl flex-col justify-end px-4 pb-24 pt-28 sm:justify-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8">
           <div className="max-w-xl">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
               <p className="mkt-eyebrow text-brand-light/85 mb-4">Contributors · Cameroon</p>
               <BrandLogo theme="dark" textClassName="text-3xl sm:text-5xl" className="mb-5 sm:mb-8" />
             </div>
             <h1
-              className="mkt-display animate-hero-in text-[2.1rem] leading-[1.08] sm:text-5xl sm:leading-[1.05] lg:text-[3.4rem] text-white"
+              className="mkt-display animate-hero-in text-[2.1rem] leading-[1.08] text-white sm:text-5xl sm:leading-[1.05] lg:text-[3.4rem]"
               style={{ animationDelay: '140ms' }}
             >
               Spare bandwidth.
@@ -75,10 +75,11 @@ export default function ForContributors() {
               <span className="text-brand-light">Credit on MoMo.</span>
             </h1>
             <p
-              className="mt-4 sm:mt-6 animate-hero-in text-[0.95rem] sm:text-lg text-white/70 leading-relaxed max-w-md"
+              className="mt-4 max-w-md animate-hero-in text-[0.95rem] leading-relaxed text-white/70 sm:mt-6 sm:text-lg"
               style={{ animationDelay: '260ms' }}
             >
-              Sell unused Starlink, fiber, or any home connection to a nearby SpaiHub hotspot — without running the hotspot yourself.
+              Sell unused Starlink, fiber, or any home connection to a nearby SpaiHub hotspot — without running the
+              hotspot yourself.
             </p>
             <div className="animate-hero-in" style={{ animationDelay: '380ms' }}>
               <MarketingCtaGroup
@@ -94,45 +95,40 @@ export default function ForContributors() {
         <WaveEdge fill="#F0F2F5" accent="#148F86" />
       </section>
 
-      <MarketingSection
-        tone="muted"
-        className="py-16 sm:py-20"
-        dividerLabel="Physical"
-        waveBottomFill="#ffffff"
-      >
+      <MarketingSection tone="muted" className="py-16 sm:py-20" waveBottomFill="#ffffff">
         <MarketingHeading
           eyebrow="How it works"
           title="Plug a switch. We handle the rest."
           subtitle="Same neighborhood internet you already pay for — a second port becomes the line SpaiHub meters and pays for."
         />
-        <div className="grid gap-10 sm:grid-cols-3 border-t border-navy/10 pt-10">
+        <div className="grid gap-10 border-t border-navy/10 pt-10 sm:grid-cols-3">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             return (
               <Reveal key={step.title} delayMs={index * 70}>
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-xs text-brand tracking-[0.2em]">0{index + 1}</p>
+                  <p className="font-mono text-xs tracking-[0.2em] text-brand">0{index + 1}</p>
                   <span className="mkt-icon-frame border-navy/10">
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
                 </div>
                 <h3 className="mkt-display mt-4 text-xl text-navy">{step.title}</h3>
-                <p className="mt-3 text-sm sm:text-base text-navy/55 leading-relaxed">{step.body}</p>
+                <p className="mt-3 text-sm leading-relaxed text-navy/55 sm:text-base">{step.body}</p>
               </Reveal>
             );
           })}
         </div>
       </MarketingSection>
 
-      <MarketingSection className="py-14 sm:py-16" dividerLabel="Trust" waveBottomFill="#0E141B" waveAccent="#148F86">
+      <MarketingSection className="py-14 sm:py-16" waveBottomFill="#0E141B" waveAccent="#148F86">
         <MarketingHeading
           title="Not a VPN tunnel. Not cloud relay."
           subtitle="Contribution is a local physical link into the hotspot router. That keeps latency low and avoids shipping user traffic through the cloud. Capacity is bonus layer for the site — not a promise to end users."
         />
-        <p className="text-sm text-navy/50 max-w-2xl leading-relaxed">
-          Check your ISP terms before joining. Consumer plans (including Starlink) may restrict resale. SpaiHub
-          treats contributor uplinks as opportunistic capacity.{' '}
-          <Link to="/faq" className="text-brand font-medium hover:text-brand-dark">
+        <p className="max-w-2xl text-sm leading-relaxed text-navy/50">
+          Check your ISP terms before joining. Consumer plans (including Starlink) may restrict resale. SpaiHub treats
+          contributor uplinks as opportunistic capacity.{' '}
+          <Link to="/faq" className="font-medium text-brand hover:text-brand-dark">
             Read the FAQ →
           </Link>
         </p>

@@ -146,6 +146,24 @@
     @apply font-mono text-[10px] tracking-[0.2em] uppercase opacity-45 shrink-0;
   }
 
+  .mkt-wave-edge {
+    filter: drop-shadow(0 -10px 24px rgba(7, 11, 16, 0.22));
+  }
+
+  @keyframes mkt-wave-sheen {
+    0%,
+    100% {
+      opacity: 0.75;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .mkt-wave-sheen {
+    animation: mkt-wave-sheen 6.5s ease-in-out infinite;
+  }
+
   .mkt-icon-frame {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-navy/15 text-brand
       transition-colors duration-200;
@@ -156,6 +174,10 @@
       opacity: 1;
       transform: none;
       transition: none;
+    }
+
+    .mkt-wave-sheen {
+      animation: none;
     }
   }
 }

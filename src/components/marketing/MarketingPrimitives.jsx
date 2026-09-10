@@ -2,76 +2,21 @@ import { Link } from 'react-router-dom';
 import { useId } from 'react';
 import Reveal from './Reveal';
 
-const WAVE_PATHS = {
-  back: 'M0,28 C150,8 300,48 450,28 C600,8 750,42 900,24 C1050,6 1125,34 1200,22 L1200,48 L0,48 Z',
-  mid: 'M0,32 C180,14 320,44 480,30 C640,16 780,40 940,28 C1080,18 1140,36 1200,30 L1200,48 L0,48 Z',
-  front: 'M0,36 C200,22 340,46 520,34 C700,22 820,44 980,32 C1100,24 1160,40 1200,36 L1200,48 L0,48 Z',
-  ribbon:
-    'M0,24 C120,6 240,42 360,22 C480,2 600,40 720,20 C840,0 960,38 1080,18 C1140,10 1170,28 1200,22',
-};
-
-/**
- * Wavy curled divider with layered 3D depth + optional mono label.
- */
+/** Quiet in-content rule — never a floating pill on a wave. */
 export function SectionDivider({ label, light = false, className = '' }) {
-  const uid = useId().replace(/:/g, '');
-  const stroke = light ? 'rgba(255,255,255,0.55)' : 'rgba(14,20,27,0.35)';
-  const fillBack = light ? 'rgba(20,143,134,0.28)' : 'rgba(15,118,110,0.16)';
-  const fillMid = light ? 'rgba(15,118,110,0.38)' : 'rgba(15,118,110,0.28)';
-  const fillFront = light ? 'rgba(255,255,255,0.12)' : 'rgba(14,20,27,0.08)';
-
+  const tone = light ? 'text-white' : 'text-navy';
   return (
-    <div className={`relative w-full ${className}`} aria-hidden={!label}>
-      <svg
-        className="pointer-events-none block h-11 w-full sm:h-12"
-        viewBox="0 0 1200 48"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <linearGradient id={`${uid}-g1`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#0F766E" stopOpacity={light ? 0.15 : 0.08} />
-            <stop offset="50%" stopColor="#148F86" stopOpacity={light ? 0.55 : 0.45} />
-            <stop offset="100%" stopColor="#0F766E" stopOpacity={light ? 0.15 : 0.08} />
-          </linearGradient>
-          <filter id={`${uid}-soft`} x="-5%" y="-40%" width="110%" height="180%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#0E141B" floodOpacity="0.22" />
-          </filter>
-          <filter id={`${uid}-curl`} x="-5%" y="-50%" width="110%" height="200%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#0F766E" floodOpacity="0.35" />
-          </filter>
-        </defs>
-        <path d={WAVE_PATHS.back} fill={fillBack} />
-        <path d={WAVE_PATHS.mid} fill={fillMid} filter={`url(#${uid}-soft)`} />
-        <path d={WAVE_PATHS.front} fill={fillFront} />
-        <path
-          d={WAVE_PATHS.ribbon}
-          fill="none"
-          stroke={`url(#${uid}-g1)`}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          filter={`url(#${uid}-curl)`}
-        />
-        <path d={WAVE_PATHS.ribbon} fill="none" stroke={stroke} strokeWidth="1.25" strokeLinecap="round" opacity="0.7" />
-      </svg>
-      {label ? (
-        <span
-          className={`absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-3.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] shadow-card backdrop-blur-sm ${
-            light
-              ? 'bg-navy/70 text-brand-light ring-1 ring-white/15'
-              : 'bg-white/90 text-brand ring-1 ring-navy/10'
-          }`}
-        >
-          {label}
-        </span>
-      ) : null}
+    <div className={`mkt-divider ${tone} ${className}`} aria-hidden={!label}>
+      <span className="mkt-divider-line" />
+      {label ? <span className="mkt-divider-label">{label}</span> : null}
+      <span className="mkt-divider-line" />
     </div>
   );
 }
 
 /**
- * Full-bleed wavy edge for stacking sections (3D curl between color bands).
- * Place at the bottom of a section; `fill` should match the NEXT section background.
+ * Full-bleed sculptural 3D ribbon curl between color bands.
+ * Sit at the bottom of a section; `fill` must match the NEXT background.
  */
 export function WaveEdge({
   fill = '#ffffff',
@@ -80,48 +25,84 @@ export function WaveEdge({
   className = '',
 }) {
   const uid = useId().replace(/:/g, '');
+  const fillKey = String(fill).replace('#', '').toLowerCase();
+  const darkNext = ['0e141b', '070b10', '0a0f14', '12202a'].includes(fillKey);
+
+  // Soft bowl that reveals the next section
+  const bowl =
+    'M0,78 C160,48 320,108 500,72 C680,36 860,110 1040,68 C1200,36 1340,88 1440,58 L1440,140 L0,140 Z';
+  // Parallel ribbon centerline (tube sits on this)
+  const ribbon =
+    'M0,62 C160,32 320,92 500,56 C680,20 860,94 1040,52 C1200,20 1340,72 1440,42';
+
   return (
     <div
-      className={`pointer-events-none absolute left-0 right-0 z-20 leading-[0] ${
+      className={`pointer-events-none absolute inset-x-0 z-20 leading-[0] ${
         flip ? 'top-0 rotate-180' : 'bottom-0'
       } ${className}`}
       aria-hidden
     >
       <svg
-        className="block h-10 w-full sm:h-14 md:h-16"
-        viewBox="0 0 1440 80"
+        className="mkt-wave-edge block h-20 w-full sm:h-28 md:h-32"
+        viewBox="0 0 1440 140"
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id={`${uid}-sheen`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.05" />
-            <stop offset="45%" stopColor={accent} stopOpacity="0.55" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0.08" />
+          <linearGradient id={`${uid}-tube`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#99F6E4" stopOpacity={darkNext ? 0.95 : 0.9} />
+            <stop offset="35%" stopColor={accent} stopOpacity="1" />
+            <stop offset="70%" stopColor="#0F766E" stopOpacity="1" />
+            <stop offset="100%" stopColor="#042F2E" stopOpacity="0.95" />
           </linearGradient>
-          <filter id={`${uid}-depth`} x="-2%" y="-30%" width="104%" height="160%">
-            <feDropShadow dx="0" dy="-2" stdDeviation="3" floodColor="#0E141B" floodOpacity="0.28" />
+          <linearGradient id={`${uid}-run`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#5EEAD4" stopOpacity="0.15" />
+            <stop offset="40%" stopColor="#CCFBF1" stopOpacity={darkNext ? 0.85 : 0.55} />
+            <stop offset="100%" stopColor="#5EEAD4" stopOpacity="0.12" />
+          </linearGradient>
+          <filter id={`${uid}-soft`} x="-2%" y="-50%" width="104%" height="200%">
+            <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#070B10" floodOpacity="0.45" />
+          </filter>
+          <filter id={`${uid}-glow`} x="-2%" y="-60%" width="104%" height="220%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#5EEAD4" floodOpacity={darkNext ? 0.45 : 0.25} />
           </filter>
         </defs>
-        {/* Under-curl (shadow band) */}
+
+        {/* Next-section color bowl */}
+        <path d={bowl} fill={fill} />
+
+        {/* Soft shadow under the tube */}
         <path
-          d="M0,28 C180,8 320,52 520,30 C720,8 880,54 1080,32 C1240,16 1360,44 1440,28 L1440,80 L0,80 Z"
-          fill={accent}
-          opacity="0.22"
-        />
-        {/* Main fill matching next section */}
-        <path
-          d="M0,36 C200,12 360,58 560,34 C760,10 920,56 1120,34 C1280,18 1380,46 1440,36 L1440,80 L0,80 Z"
-          fill={fill}
-          filter={`url(#${uid}-depth)`}
-        />
-        {/* Highlight ribbon for 3D curl */}
-        <path
-          d="M0,34 C200,10 360,56 560,32 C760,8 920,54 1120,32 C1280,16 1380,44 1440,34"
+          d={ribbon}
           fill="none"
-          stroke={`url(#${uid}-sheen)`}
-          strokeWidth="4"
+          stroke="#070B10"
+          strokeWidth={darkNext ? 18 : 16}
           strokeLinecap="round"
+          opacity={darkNext ? 0.55 : 0.22}
+          vectorEffect="non-scaling-stroke"
+        />
+
+        {/* 3D tube body */}
+        <path
+          d={ribbon}
+          fill="none"
+          stroke={`url(#${uid}-tube)`}
+          strokeWidth={darkNext ? 14 : 12}
+          strokeLinecap="round"
+          filter={`url(#${uid}-soft)`}
+          vectorEffect="non-scaling-stroke"
+        />
+
+        {/* Specular run along the crest */}
+        <path
+          d={ribbon}
+          fill="none"
+          stroke={`url(#${uid}-run)`}
+          strokeWidth={darkNext ? 4 : 3.25}
+          strokeLinecap="round"
+          filter={`url(#${uid}-glow)`}
+          className="mkt-wave-sheen"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
     </div>
@@ -148,12 +129,12 @@ export function MarketingSection({
     <section
       id={id}
       className={`relative overflow-x-hidden px-4 sm:px-6 lg:px-8 ${toneClass} ${
-        waveBottomFill ? 'pb-24 sm:pb-28' : ''
+        waveBottomFill ? 'pb-32 sm:pb-36' : ''
       } ${className}`}
     >
       {dividerLabel ? (
-        <div className="relative mx-auto w-full max-w-6xl pt-2">
-          <SectionDivider label={dividerLabel} light={tone === 'dark'} className="mb-10 sm:mb-14" />
+        <div className="relative mx-auto w-full max-w-6xl">
+          <SectionDivider label={dividerLabel} light={tone === 'dark'} className="mb-10 sm:mb-12" />
         </div>
       ) : null}
       <div className="relative mx-auto w-full max-w-6xl">{children}</div>
@@ -452,7 +433,7 @@ export function FinalCta({
       />
       <div className="relative mx-auto max-w-6xl">
         <Reveal className="max-w-2xl">
-          <SectionDivider label="Deploy" light className="mb-8 max-w-xs" />
+          <p className="mkt-eyebrow text-brand-light/80 mb-5">Deploy</p>
           <h2 className="mkt-display text-3xl sm:text-4xl lg:text-5xl text-white">{title}</h2>
           <p className="mt-5 text-base sm:text-lg text-white/55 leading-relaxed">{subtitle}</p>
           <MarketingCtaGroup

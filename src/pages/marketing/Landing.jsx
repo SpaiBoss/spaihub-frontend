@@ -21,7 +21,6 @@ import {
   MarketingSection,
   NightTimeline,
   ProductBoard,
-  SectionDivider,
   WaveEdge,
   TestimonialGrid,
 } from '../../components/marketing/MarketingPrimitives';
@@ -141,27 +140,21 @@ const PROBLEMS = [
     t: 'Cash-only sales',
     d: 'No Campay flow means you miss night sales and walk-in MoMo.',
     icon: Wallet,
-    accent: 'from-brand to-brand-dark',
-    chip: 'bg-brand/25 text-brand-light',
-    glow: 'rgba(15,118,110,0.45)',
+    accent: 'from-[#0F766E] via-[#0D9488] to-[#115E59]',
   },
   {
     n: '02',
     t: 'Router out of sync',
     d: 'Access codes that never hit MikroTik leave people “paid” but offline.',
     icon: Router,
-    accent: 'from-cyan-600 to-teal-800',
-    chip: 'bg-cyan-400/20 text-cyan-200',
-    glow: 'rgba(8,145,178,0.4)',
+    accent: 'from-[#0E7490] via-[#0F766E] to-[#134E4A]',
   },
   {
     n: '03',
     t: 'Unclear payouts',
     d: 'Without a wallet and fee line, you cannot tell what you actually earned.',
     icon: Activity,
-    accent: 'from-amber-500 to-orange-700',
-    chip: 'bg-amber-400/20 text-amber-100',
-    glow: 'rgba(245,158,11,0.35)',
+    accent: 'from-[#B45309] via-[#C2410C] to-[#7C2D12]',
   },
 ];
 
@@ -184,7 +177,6 @@ export default function Landing() {
           alt="WiFi vouchers, Mobile Money payment, and hotspot router on a shop counter"
           className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-[78%_45%] sm:object-[82%_40%]"
         />
-        {/* Hard left reading column so copy never fights the product photo */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -197,12 +189,12 @@ export default function Landing() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(to top, rgba(7,11,16,0.55) 0%, transparent 38%), radial-gradient(ellipse 45% 40% at 85% 55%, rgba(15,118,110,0.22), transparent 70%)',
+              'linear-gradient(to top, rgba(7,11,16,0.7) 0%, transparent 42%), radial-gradient(ellipse 45% 40% at 85% 55%, rgba(15,118,110,0.22), transparent 70%)',
           }}
           aria-hidden
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:justify-center sm:px-6 sm:pb-28 sm:pt-32 lg:px-8">
+        <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-28 pt-28 sm:justify-center sm:px-6 sm:pb-36 sm:pt-32 lg:px-8">
           <div className="max-w-[22rem] sm:max-w-md lg:max-w-lg">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
               <p className="mkt-eyebrow text-brand-light/90 mb-5">Hotspot billing · Cameroon</p>
@@ -236,54 +228,47 @@ export default function Landing() {
         <WaveEdge fill="#0E141B" accent="#148F86" />
       </section>
 
-      <section className="relative overflow-x-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 pb-28 sm:pb-32">
+      {/* Continuous dark band: problem → night ops */}
+      <section className="relative overflow-x-hidden bg-navy text-white">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 70% 55% at 10% 0%, rgba(15,118,110,0.4), transparent 55%), radial-gradient(ellipse 50% 45% at 100% 80%, rgba(245,158,11,0.18), transparent 50%), linear-gradient(160deg, #070B10 0%, #0E141B 55%, #12241f 100%)',
+              'radial-gradient(ellipse 70% 40% at 8% 8%, rgba(15,118,110,0.38), transparent 55%), radial-gradient(ellipse 45% 35% at 100% 55%, rgba(245,158,11,0.12), transparent 50%), linear-gradient(180deg, #070B10 0%, #0E141B 42%, #0A1214 100%)',
           }}
           aria-hidden
         />
-        <div className="relative mx-auto max-w-6xl">
-          <SectionDivider label="Signal" light className="mb-10 sm:mb-14" />
-          <MarketingHeading
-            light
-            eyebrow="The problem"
-            title="Manual vouchers and chasing MoMo are not a business."
-            subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell by the hour or the megabyte."
-          />
-          <div className="grid gap-4 sm:gap-5 sm:grid-cols-3">
+
+        <div className="relative px-4 pt-20 sm:px-6 sm:pt-28 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <MarketingHeading
+              light
+              eyebrow="The problem"
+              title="Manual vouchers and chasing MoMo are not a business."
+              subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell by the hour or the megabyte."
+            />
+          </div>
+        </div>
+
+        <div className="relative mt-2 sm:mt-4">
+          <div className="grid sm:grid-cols-3">
             {PROBLEMS.map((item, index) => {
               const Icon = item.icon;
               return (
-                <Reveal key={item.t} delayMs={index * 80}>
+                <Reveal key={item.t} delayMs={index * 70}>
                   <div
-                    className={`relative min-h-[16.5rem] overflow-hidden border border-white/10 bg-gradient-to-br ${item.accent} p-6 sm:p-7 transition-transform duration-300 hover:-translate-y-1`}
+                    className={`relative min-h-[17rem] overflow-hidden bg-gradient-to-br ${item.accent} px-6 py-8 sm:min-h-[19rem] sm:px-8 sm:py-10 ${
+                      index > 0 ? 'border-t border-white/10 sm:border-t-0 sm:border-l' : ''
+                    }`}
                   >
-                    <div
-                      className="pointer-events-none absolute -right-6 -top-8 h-36 w-36 rounded-full blur-2xl opacity-70"
-                      style={{ background: item.glow }}
-                      aria-hidden
-                    />
-                    <p
-                      className="pointer-events-none absolute -bottom-6 -right-1 mkt-display text-[6.5rem] leading-none text-white/[0.12] select-none"
-                      aria-hidden
-                    >
-                      {item.n}
-                    </p>
-                    <div className="relative flex items-start justify-between gap-3">
-                      <span className={`inline-flex items-center rounded-md px-2.5 py-1 font-mono text-[11px] tracking-[0.18em] ${item.chip}`}>
-                        {item.n}
-                      </span>
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-sm">
-                        <Icon className="h-5 w-5" strokeWidth={2} />
-                      </span>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-mono text-[11px] tracking-[0.22em] text-white/70">{item.n}</p>
+                      <Icon className="h-5 w-5 text-white/85" strokeWidth={1.75} />
                     </div>
-                    <h3 className="relative mkt-display mt-8 text-2xl sm:text-[1.65rem] text-white leading-tight">
+                    <h3 className="mkt-display mt-10 text-2xl text-white sm:text-[1.7rem] leading-tight">
                       {item.t}
                     </h3>
-                    <p className="relative mt-3 text-sm sm:text-[0.95rem] text-white/80 leading-relaxed max-w-[18rem]">
+                    <p className="mt-3 max-w-[17rem] text-sm leading-relaxed text-white/75 sm:text-[0.95rem]">
                       {item.d}
                     </p>
                   </div>
@@ -292,32 +277,22 @@ export default function Landing() {
             })}
           </div>
         </div>
-        <WaveEdge fill="#0E141B" accent="#0F766E" />
-      </section>
 
-      <section className="relative overflow-x-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 pb-28 sm:pb-36">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-80"
-          style={{
-            background:
-              'radial-gradient(ellipse 60% 50% at 85% 10%, rgba(15,118,110,0.28), transparent 50%)',
-          }}
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-6xl">
-          <SectionDivider label="Ops" light className="mb-10 sm:mb-14" />
-          <MarketingHeading
-            light
-            eyebrow="While you sleep"
-            title="Your network worked the night shift."
-            subtitle="Billing, grants, heartbeats, and wallet credits keep moving. This is a quiet Tuesday in Douala."
-          />
-          <NightTimeline events={NIGHT_EVENTS} />
+        <div className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8 pb-32 sm:pb-40">
+          <div className="mx-auto max-w-6xl">
+            <MarketingHeading
+              light
+              eyebrow="While you sleep"
+              title="Your network worked the night shift."
+              subtitle="Billing, grants, heartbeats, and wallet credits keep moving. This is a quiet Tuesday in Douala."
+            />
+            <NightTimeline events={NIGHT_EVENTS} />
+          </div>
+          <WaveEdge fill="#F0F2F5" accent="#148F86" />
         </div>
-        <WaveEdge fill="#F0F2F5" accent="#148F86" />
       </section>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Stack" waveBottomFill="#ffffff">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#ffffff">
         <MarketingHeading
           eyebrow="Product"
           title="Built for how Cameroon hotspots actually sell."
@@ -353,8 +328,8 @@ export default function Landing() {
         />
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28" dividerLabel="Protocol" waveBottomFill="#F0F2F5">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
+      <MarketingSection className="py-20 sm:py-28" waveBottomFill="#F0F2F5">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <MarketingHeading
             className="mb-0"
             eyebrow="How it works"
@@ -363,31 +338,31 @@ export default function Landing() {
           />
           <Link
             to="/how-it-works"
-            className="text-sm font-semibold text-brand hover:text-brand-dark shrink-0 transition-colors duration-200"
+            className="shrink-0 text-sm font-semibold text-brand transition-colors duration-200 hover:text-brand-dark"
           >
             Full walkthrough →
           </Link>
         </div>
-        <ol className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 border-t border-navy/10 pt-10">
+        <ol className="grid gap-10 border-t border-navy/10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             return (
               <Reveal key={step.n} as="li" delayMs={index * 60}>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="mkt-display text-4xl sm:text-5xl text-navy/[0.08] leading-none">{step.n}</p>
-                  <span className="mkt-icon-frame border-navy/10 mt-1">
+                  <p className="mkt-display text-4xl leading-none text-navy/[0.08] sm:text-5xl">{step.n}</p>
+                  <span className="mkt-icon-frame mt-1 border-navy/10">
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
                 </div>
                 <h3 className="mkt-display mt-4 text-lg text-navy">{step.t}</h3>
-                <p className="mt-2 text-sm text-navy/55 leading-relaxed">{step.d}</p>
+                <p className="mt-2 text-sm leading-relaxed text-navy/55">{step.d}</p>
               </Reveal>
             );
           })}
         </ol>
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Capabilities" waveBottomFill="#ffffff">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#ffffff">
         <MarketingHeading
           eyebrow="Capabilities"
           title="Everything that keeps a hotspot business running."
@@ -396,7 +371,7 @@ export default function Landing() {
         <FeatureGrid items={FEATURES} />
       </MarketingSection>
 
-      <MarketingSection className="py-16 sm:py-20" dividerLabel="Uplink" waveBottomFill="#ffffff" waveAccent="#148F86">
+      <MarketingSection className="py-16 sm:py-20">
         <MarketingHeading
           eyebrow="Contributors"
           title="Grow capacity without another node."
@@ -404,13 +379,13 @@ export default function Landing() {
         />
         <Link
           to="/for/contributors"
-          className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
+          className="font-mono text-xs font-medium tracking-wide text-brand transition-colors hover:text-brand-dark"
         >
           Contribute spare bandwidth →
         </Link>
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28" dividerLabel="Field notes" waveBottomFill="#F0F2F5">
+      <MarketingSection className="border-t border-navy/[0.06] py-20 sm:py-28" waveBottomFill="#F0F2F5">
         <MarketingHeading
           eyebrow="From the field"
           title="Operators who stopped improvising."
@@ -419,12 +394,12 @@ export default function Landing() {
         <TestimonialGrid items={TESTIMONIALS} />
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="FAQ" waveBottomFill="#0E141B" waveAccent="#148F86">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#0E141B" waveAccent="#148F86">
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <MarketingHeading className="mb-0" eyebrow="FAQ" title="Short answers before you deploy." />
           <Link
             to="/faq"
-            className="text-sm font-semibold text-brand hover:text-brand-dark transition-colors duration-200"
+            className="text-sm font-semibold text-brand transition-colors duration-200 hover:text-brand-dark"
           >
             All FAQs →
           </Link>
