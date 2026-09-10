@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ContributorAuthProvider } from './context/ContributorAuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 import MarketingLayout from './components/layout/MarketingLayout';
+import ContributorLayout, { ContributorProtectedRoute } from './components/layout/ContributorLayout';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -25,6 +27,9 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOwners from './pages/admin/AdminOwners';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminWithdrawals from './pages/admin/AdminWithdrawals';
+import AdminContributors from './pages/admin/AdminContributors';
+import AdminContributorLinks from './pages/admin/AdminContributorLinks';
+import AdminContributorWithdrawals from './pages/admin/AdminContributorWithdrawals';
 import NotFound from './pages/NotFound';
 
 import Landing from './pages/marketing/Landing';
@@ -36,74 +41,111 @@ import Contact from './pages/marketing/Contact';
 import ForMikrotik from './pages/marketing/ForMikrotik';
 import ForMobileMoney from './pages/marketing/ForMobileMoney';
 import ForVouchers from './pages/marketing/ForVouchers';
+import ForContributors from './pages/marketing/ForContributors';
+
+import ContributorLogin from './pages/contributor/ContributorLogin';
+import ContributorRegister from './pages/contributor/ContributorRegister';
+import ContributorVerifyEmail from './pages/contributor/ContributorVerifyEmail';
+import ContributorForgotPassword from './pages/contributor/ContributorForgotPassword';
+import ContributorResetPassword from './pages/contributor/ContributorResetPassword';
+import ContributorHome from './pages/contributor/ContributorHome';
+import ContributorLinks from './pages/contributor/ContributorLinks';
+import ContributorWallet from './pages/contributor/ContributorWallet';
+import ContributorSettings from './pages/contributor/ContributorSettings';
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#0E141B',
-              color: '#fff',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '500',
-              padding: '12px 16px',
-              fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
-            },
-            success: { iconTheme: { primary: '#0F766E', secondary: '#fff' } },
-            error: { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
-          }}
-        />
-        <Routes>
-          <Route element={<MarketingLayout />}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/faq" element={<Faq />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/for/mikrotik" element={<ForMikrotik />} />
-            <Route path="/for/mobile-money" element={<ForMobileMoney />} />
-            <Route path="/for/vouchers" element={<ForVouchers />} />
-          </Route>
+      <ContributorAuthProvider>
+        <BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#0E141B',
+                color: '#fff',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '500',
+                padding: '12px 16px',
+                fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+              },
+              success: { iconTheme: { primary: '#0F766E', secondary: '#fff' } },
+              error: { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
+            }}
+          />
+          <Routes>
+            <Route element={<MarketingLayout />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/for/mikrotik" element={<ForMikrotik />} />
+              <Route path="/for/mobile-money" element={<ForMobileMoney />} />
+              <Route path="/for/vouchers" element={<ForVouchers />} />
+              <Route path="/for/contributors" element={<ForContributors />} />
+            </Route>
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Home />} />
-            <Route path="locations" element={<Locations />} />
-            <Route path="vouchers" element={<Vouchers />} />
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="wallet" element={<Wallet />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+            <Route path="/contributor/login" element={<ContributorLogin />} />
+            <Route path="/contributor/register" element={<ContributorRegister />} />
+            <Route path="/contributor/verify-email" element={<ContributorVerifyEmail />} />
+            <Route path="/contributor/forgot-password" element={<ContributorForgotPassword />} />
+            <Route path="/contributor/reset-password" element={<ContributorResetPassword />} />
 
-          <Route path="/portal/:routerToken" element={<Portal />} />
+            <Route
+              path="/contributor"
+              element={
+                <ContributorProtectedRoute>
+                  <ContributorLayout />
+                </ContributorProtectedRoute>
+              }
+            >
+              <Route index element={<ContributorHome />} />
+              <Route path="links" element={<ContributorLinks />} />
+              <Route path="wallet" element={<ContributorWallet />} />
+              <Route path="settings" element={<ContributorSettings />} />
+            </Route>
 
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/owners" element={<AdminOwners />} />
-          <Route path="/admin/transactions" element={<AdminTransactions />} />
-          <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Home />} />
+              <Route path="locations" element={<Locations />} />
+              <Route path="vouchers" element={<Vouchers />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="wallet" element={<Wallet />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="/portal/:routerToken" element={<Portal />} />
+
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/owners" element={<AdminOwners />} />
+            <Route path="/admin/contributors" element={<AdminContributors />} />
+            <Route path="/admin/contributor-links" element={<AdminContributorLinks />} />
+            <Route path="/admin/contributor-withdrawals" element={<AdminContributorWithdrawals />} />
+            <Route path="/admin/transactions" element={<AdminTransactions />} />
+            <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ContributorAuthProvider>
     </AuthProvider>
   );
 }

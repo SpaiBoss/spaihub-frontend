@@ -112,6 +112,12 @@ export default function Features() {
           >
             MikroTik →
           </Link>
+          <Link
+            to="/for/contributors"
+            className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
+          >
+            Contributors →
+          </Link>
         </div>
       </MarketingSection>
 

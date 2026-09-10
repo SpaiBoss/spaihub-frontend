@@ -18,6 +18,7 @@ const FOOTER_PRODUCT = [
   { to: '/for/mikrotik', label: 'MikroTik' },
   { to: '/for/mobile-money', label: 'Mobile Money' },
   { to: '/for/vouchers', label: 'Vouchers' },
+  { to: '/for/contributors', label: 'Contributors' },
 ];
 
 const FOOTER_COMPANY = [

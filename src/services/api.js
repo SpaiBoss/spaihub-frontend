@@ -5,10 +5,18 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const isAdminRoute = config.url?.startsWith('/api/admin') || config.url?.startsWith('/api/auth/admin');
-  const token = isAdminRoute
-    ? localStorage.getItem('adminToken')
-    : localStorage.getItem('token');
+  const url = config.url || '';
+  const isAdminRoute = url.startsWith('/api/admin') || url.startsWith('/api/auth/admin');
+  const isContributorRoute = url.startsWith('/api/contributor');
+
+  let token = null;
+  if (isAdminRoute) {
+    token = localStorage.getItem('adminToken');
+  } else if (isContributorRoute) {
+    token = localStorage.getItem('contributorToken');
+  } else {
+    token = localStorage.getItem('token');
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -33,6 +41,18 @@ api.interceptors.response.use(
       localStorage.removeItem('adminToken');
       if (!window.location.pathname.startsWith('/admin/login')) {
         window.location.href = '/admin/login';
+      }
+    }
+
+    if (
+      status === 401 &&
+      localStorage.getItem('contributorToken') &&
+      url.startsWith('/api/contributor') &&
+      !url.startsWith('/api/contributor/auth')
+    ) {
+      localStorage.removeItem('contributorToken');
+      if (!window.location.pathname.startsWith('/contributor/login')) {
+        window.location.href = '/contributor/login';
       }
     }
 

@@ -31,4 +31,12 @@ export const MARKETING_FAQ = [
     q: 'How do I get help?',
     a: 'Use the Contact page for WhatsApp when configured, or reach the SpaiTrace team via www.spaitrace.com.',
   },
+  {
+    q: 'What is a SpaiHub contributor?',
+    a: 'A contributor sells spare uplink to a nearby SpaiHub hotspot over a local cable or wireless bridge. They do not run the hotspot or sell to end users — they earn by the gigabyte under an agreed rate cap and withdraw on MoMo.',
+  },
+  {
+    q: 'Should I contribute bandwidth or run my own hotspot?',
+    a: 'Run your own SpaiHub node if you want to sell WiFi to subscribers. Contribute if you prefer zero hotspot ops: plug a switch, let SpaiHub handle the link and metering, and get paid for unused capacity.',
+  },
 ];

@@ -22,8 +22,11 @@ export function AdminLayout({ children, title, description }) {
   const links = [
     { to: '/admin/dashboard', label: 'Overview' },
     { to: '/admin/owners', label: 'Owners' },
+    { to: '/admin/contributors', label: 'Contributors' },
+    { to: '/admin/contributor-links', label: 'Links' },
     { to: '/admin/transactions', label: 'Transactions' },
     { to: '/admin/withdrawals', label: 'Withdrawals' },
+    { to: '/admin/contributor-withdrawals', label: 'Contrib. payouts' },
   ];
 
   return (

@@ -14,6 +14,8 @@ const STATUS_LABELS = {
   REDEEMED: 'Redeemed',
   EXPIRED: 'Expired',
   REVOKED: 'Revoked',
+  PAUSED: 'Paused',
+  DISABLED: 'Disabled',
 };
 
 const STATUS_DOT = {
@@ -30,6 +32,8 @@ const STATUS_DOT = {
   REDEEMED: 'bg-signal',
   EXPIRED: 'bg-amber-500',
   REVOKED: 'bg-red-600',
+  PAUSED: 'bg-amber-500',
+  DISABLED: 'bg-red-600',
 };
 
 function formatDuration(minutes) {

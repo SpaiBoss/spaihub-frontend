@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Router, Package, Smartphone, Wallet, Radio } from 'lucide-react';
 import Reveal from '../../components/marketing/Reveal';
 import {
@@ -80,6 +81,13 @@ export default function HowItWorks() {
           title="Two scripts, not a new fleet."
           subtitle="Script 1 installs SpaiHub on an existing hotspot — or creates a guest network if you choose that path. Script 2 keeps heartbeat and GRANT_ACCESS polling. Re-open Setup anytime to re-copy."
         />
+        <p className="mt-6 text-sm text-navy/50 max-w-2xl">
+          Have spare uplink near a site instead?{' '}
+          <Link to="/for/contributors" className="text-brand font-medium hover:text-brand-dark">
+            Contribute bandwidth
+          </Link>{' '}
+          — SpaiHub technicians wire that separately; it is not part of Scripts 1–2.
+        </p>
       </MarketingSection>
 
       <FinalCta

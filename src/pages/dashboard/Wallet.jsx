@@ -101,10 +101,21 @@ export default function Wallet() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm text-center">
-        <p className="text-gray-500 text-sm">Available Balance</p>
-        <p className="text-4xl font-bold text-navy mt-2">
-          {wallet.walletBalance.toLocaleString()} XAF
+        <p className="text-gray-500 text-sm">
+          {(wallet.contributorReservedXaf || 0) > 0 ? 'Available to withdraw' : 'Available Balance'}
         </p>
+        <p className="text-4xl font-bold text-navy mt-2">
+          {(wallet.availableXaf ?? wallet.walletBalance).toLocaleString()} XAF
+        </p>
+        {(wallet.contributorReservedXaf || 0) > 0 && (
+          <div className="mt-3 text-sm text-navy/55 space-y-1">
+            <p>Wallet total: {wallet.walletBalance.toLocaleString()} XAF</p>
+            <p>
+              Reserved for contributors:{' '}
+              <span className="font-medium text-navy">{wallet.contributorReservedXaf.toLocaleString()} XAF</span>
+            </p>
+          </div>
+        )}
         <Button onClick={openWithdrawModal} className="mt-4">
           Withdraw
         </Button>
@@ -158,13 +169,18 @@ export default function Wallet() {
               label="Amount (XAF)"
               type="number"
               min={100}
-              max={wallet.walletBalance}
+              max={wallet.availableXaf ?? wallet.walletBalance}
               value={form.amountXaf}
               onChange={(e) => setForm({ ...form, amountXaf: e.target.value })}
               required
               disabled={submitting}
             />
-            <p className="text-xs text-gray-400 mt-1">Minimum 100 XAF</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Minimum 100 XAF
+              {(wallet.contributorReservedXaf || 0) > 0
+                ? ` · Max ${Number(wallet.availableXaf).toLocaleString()} XAF available`
+                : ''}
+            </p>
           </div>
           <div>
             <Input

@@ -301,7 +301,15 @@ export function FaqList({ items }) {
   );
 }
 
-export function FinalCta({ title, subtitle, whatsappHref }) {
+export function FinalCta({
+  title,
+  subtitle,
+  whatsappHref,
+  primaryTo = '/register',
+  primaryLabel = 'Start free',
+  secondaryTo = '/login',
+  secondaryLabel = 'Sign in',
+}) {
   return (
     <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
       <div
@@ -317,7 +325,13 @@ export function FinalCta({ title, subtitle, whatsappHref }) {
           <SectionDivider label="Deploy" light className="mb-8 max-w-xs" />
           <h2 className="mkt-display text-3xl sm:text-4xl lg:text-5xl text-white">{title}</h2>
           <p className="mt-5 text-base sm:text-lg text-white/55 leading-relaxed">{subtitle}</p>
-          <MarketingCtaGroup className="mt-10" />
+          <MarketingCtaGroup
+            className="mt-10"
+            primaryTo={primaryTo}
+            primaryLabel={primaryLabel}
+            secondaryTo={secondaryTo}
+            secondaryLabel={secondaryLabel}
+          />
           {whatsappHref && (
             <a
               href={whatsappHref}

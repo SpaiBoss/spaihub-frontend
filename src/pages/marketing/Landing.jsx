@@ -330,6 +330,20 @@ export default function Landing() {
         <FeatureGrid items={FEATURES} />
       </MarketingSection>
 
+      <MarketingSection className="py-16 sm:py-20" dividerLabel="Uplink">
+        <MarketingHeading
+          eyebrow="Contributors"
+          title="Grow capacity without another node."
+          subtitle="Neighbors with spare Starlink or fiber can sell unused uplink into an existing SpaiHub hotspot. Local physical link — SpaiHub meters and pays."
+        />
+        <Link
+          to="/for/contributors"
+          className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
+        >
+          Contribute spare bandwidth →
+        </Link>
+      </MarketingSection>
+
       <MarketingSection className="py-20 sm:py-28" dividerLabel="Field notes">
         <MarketingHeading
           eyebrow="From the field"
