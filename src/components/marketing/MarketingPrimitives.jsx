@@ -1,6 +1,18 @@
 import { Link } from 'react-router-dom';
+import Reveal from './Reveal';
 
-export function MarketingSection({ children, className = '', id, tone = 'light' }) {
+export function SectionDivider({ label, light = false, className = '' }) {
+  const tone = light ? 'text-white' : 'text-navy';
+  return (
+    <div className={`mkt-divider ${tone} ${className}`} aria-hidden={!label}>
+      <span className="mkt-divider-line" />
+      {label ? <span className="mkt-divider-label">{label}</span> : null}
+      <span className="mkt-divider-line" />
+    </div>
+  );
+}
+
+export function MarketingSection({ children, className = '', id, tone = 'light', dividerLabel }) {
   const toneClass =
     tone === 'dark'
       ? 'bg-navy text-white'
@@ -10,6 +22,11 @@ export function MarketingSection({ children, className = '', id, tone = 'light' 
 
   return (
     <section id={id} className={`relative px-4 sm:px-6 lg:px-8 ${toneClass} ${className}`}>
+      {dividerLabel ? (
+        <div className="relative mx-auto w-full max-w-6xl pt-2">
+          <SectionDivider label={dividerLabel} light={tone === 'dark'} className="mb-10 sm:mb-14" />
+        </div>
+      ) : null}
       <div className="relative mx-auto w-full max-w-6xl">{children}</div>
     </section>
   );
@@ -24,11 +41,11 @@ export function MarketingHeading({ eyebrow, title, subtitle, align = 'left', lig
   const marginClass = hasMarginOverride ? '' : 'mb-10 sm:mb-14';
 
   return (
-    <div className={`max-w-3xl ${marginClass} ${alignClass} ${className}`}>
+    <Reveal className={`max-w-3xl ${marginClass} ${alignClass} ${className}`}>
       {eyebrow && <p className={`mkt-eyebrow mb-4 ${eyeColor}`}>{eyebrow}</p>}
       <h2 className={`mkt-display text-3xl sm:text-4xl lg:text-[2.75rem] ${titleColor}`}>{title}</h2>
       {subtitle && <p className={`mt-4 text-base sm:text-lg leading-relaxed max-w-2xl ${subColor}`}>{subtitle}</p>}
-    </div>
+    </Reveal>
   );
 }
 
@@ -43,13 +60,13 @@ export function MarketingCtaGroup({
     <div className={`flex flex-wrap items-center gap-3 ${className}`}>
       <Link
         to={primaryTo}
-        className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-brand-dark hover:translate-y-[-1px]"
       >
         {primaryLabel}
       </Link>
       <Link
         to={secondaryTo}
-        className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition-colors hover:border-white/40 hover:bg-white/[0.06]"
+        className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition-all duration-200 hover:border-white/40 hover:bg-white/[0.06]"
       >
         {secondaryLabel}
       </Link>
@@ -68,13 +85,13 @@ export function MarketingCtaGroupLight({
     <div className={`flex flex-wrap items-center gap-3 ${className}`}>
       <Link
         to={primaryTo}
-        className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-brand-dark hover:translate-y-[-1px]"
       >
         {primaryLabel}
       </Link>
       <Link
         to={secondaryTo}
-        className="inline-flex items-center justify-center rounded-lg border border-navy/15 bg-transparent px-6 py-3.5 text-sm font-semibold text-navy transition-colors hover:border-navy/30 hover:bg-navy/[0.03]"
+        className="inline-flex items-center justify-center rounded-lg border border-navy/15 bg-transparent px-6 py-3.5 text-sm font-semibold text-navy transition-all duration-200 hover:border-navy/30 hover:bg-navy/[0.03]"
       >
         {secondaryLabel}
       </Link>
@@ -94,7 +111,7 @@ export function HeroSignalField() {
         }}
       />
       <div
-        className="absolute -inset-[12%] opacity-[0.14] animate-drift"
+        className="absolute -inset-[12%] opacity-[0.14] animate-drift motion-reduce:animate-none"
         style={{
           backgroundImage:
             'linear-gradient(rgba(255,255,255,0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.11) 1px, transparent 1px)',
@@ -106,7 +123,7 @@ export function HeroSignalField() {
         viewBox="0 0 800 800"
         fill="none"
       >
-        <circle cx="520" cy="300" r="56" className="animate-pulse-soft" fill="currentColor" opacity="0.45" />
+        <circle cx="520" cy="300" r="56" className="animate-pulse-soft motion-reduce:animate-none" fill="currentColor" opacity="0.45" />
         {[100, 175, 260, 360, 470, 590].map((r, i) => (
           <circle
             key={r}
@@ -116,7 +133,7 @@ export function HeroSignalField() {
             stroke="currentColor"
             strokeWidth={i < 2 ? 1.75 : 1.15}
             opacity={0.7 - i * 0.09}
-            className="origin-[520px_300px] animate-signal-ring"
+            className="origin-[520px_300px] animate-signal-ring motion-reduce:animate-none"
             style={{ animationDelay: `${i * 0.55}s` }}
           />
         ))}
@@ -139,23 +156,24 @@ export function HeroSignalField() {
 export function NightTimeline({ events }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] lg:gap-16">
-      <div className="relative hidden lg:block">
+      <Reveal className="relative hidden lg:block">
         <p className="mkt-eyebrow text-brand-light/80">Douala · local</p>
         <p className="mkt-display mt-4 text-[4.5rem] leading-none text-white/90 tabular-nums">
-          02<span className="text-brand-light animate-pulse-soft">:</span>15
+          02<span className="text-brand-light animate-pulse-soft motion-reduce:animate-none">:</span>15
         </p>
         <p className="mt-4 max-w-xs text-sm text-white/45 leading-relaxed">
           Heartbeat green. Commands polling. Wallet waiting for morning.
         </p>
         <div className="mt-10 h-px w-24 bg-gradient-to-r from-brand to-transparent" />
-      </div>
+      </Reveal>
 
       <ol className="relative border-l border-white/12 ml-1 sm:ml-2">
         {events.map((event, index) => (
-          <li
+          <Reveal
+            as="li"
             key={`${event.time}-${event.title}`}
-            className="relative pl-8 sm:pl-10 pb-9 last:pb-0 animate-slide-up opacity-0 [animation-fill-mode:forwards]"
-            style={{ animationDelay: `${120 + index * 90}ms` }}
+            delayMs={80 + index * 70}
+            className="relative pl-8 sm:pl-10 pb-9 last:pb-0"
           >
             <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-brand ring-[6px] ring-navy" />
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -166,7 +184,7 @@ export function NightTimeline({ events }) {
             </div>
             <p className="mt-1.5 text-base sm:text-lg font-semibold text-white tracking-tight">{event.title}</p>
             {event.detail && <p className="mt-1.5 text-sm text-white/50 leading-relaxed max-w-xl">{event.detail}</p>}
-          </li>
+          </Reveal>
         ))}
       </ol>
     </div>
@@ -176,15 +194,25 @@ export function NightTimeline({ events }) {
 export function FeatureGrid({ items }) {
   return (
     <div className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((item, index) => (
-        <div key={item.title} className="border-t border-navy/10 pt-6">
-          <p className="font-mono text-[11px] text-brand/80 tracking-widest">
-            {String(index + 1).padStart(2, '0')}
-          </p>
-          <h3 className="mkt-display mt-3 text-xl text-navy">{item.title}</h3>
-          <p className="mt-3 text-sm text-navy/55 leading-relaxed">{item.body}</p>
-        </div>
-      ))}
+      {items.map((item, index) => {
+        const Icon = item.icon;
+        return (
+          <Reveal key={item.title} delayMs={index * 60} className="border-t border-navy/10 pt-6 group">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-mono text-[11px] text-brand/80 tracking-widest">
+                {String(index + 1).padStart(2, '0')}
+              </p>
+              {Icon ? (
+                <span className="mkt-icon-frame border-navy/10 text-brand group-hover:border-brand/30 group-hover:text-brand-dark">
+                  <Icon className="h-4 w-4" strokeWidth={1.75} />
+                </span>
+              ) : null}
+            </div>
+            <h3 className="mkt-display mt-3 text-xl text-navy">{item.title}</h3>
+            <p className="mt-3 text-sm text-navy/55 leading-relaxed">{item.body}</p>
+          </Reveal>
+        );
+      })}
     </div>
   );
 }
@@ -192,7 +220,7 @@ export function FeatureGrid({ items }) {
 /** Product strip — not a card grid; one continuous ops board. */
 export function ProductBoard({ panels }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-navy/10 bg-navy text-white">
+    <Reveal className="overflow-hidden rounded-lg border border-navy/10 bg-navy text-white">
       <div className="grid lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
         {panels.map((panel) => (
           <div key={panel.title} className="p-6 sm:p-8">
@@ -208,7 +236,7 @@ export function ProductBoard({ panels }) {
           </div>
         ))}
       </div>
-    </div>
+    </Reveal>
   );
 }
 
@@ -239,14 +267,14 @@ export function ProductMock({ title, lines, tone = 'dark' }) {
 export function TestimonialGrid({ items }) {
   return (
     <div className="grid gap-10 md:grid-cols-3">
-      {items.map((item) => (
-        <blockquote key={item.name} className="border-t border-navy/10 pt-6">
+      {items.map((item, index) => (
+        <Reveal key={item.name} delayMs={index * 70} as="blockquote" className="border-t border-navy/10 pt-6">
           <p className="text-base text-navy/75 leading-relaxed tracking-tight">&ldquo;{item.quote}&rdquo;</p>
           <footer className="mt-6">
             <p className="text-sm font-semibold text-navy">{item.name}</p>
             <p className="font-mono text-[11px] text-navy/40 mt-1 tracking-wide">{item.role}</p>
           </footer>
-        </blockquote>
+        </Reveal>
       ))}
     </div>
   );
@@ -254,13 +282,13 @@ export function TestimonialGrid({ items }) {
 
 export function FaqList({ items }) {
   return (
-    <div className="divide-y divide-navy/10 border-t border-b border-navy/10">
+    <Reveal className="divide-y divide-navy/10 border-t border-b border-navy/10">
       {items.map((item) => (
         <details key={item.q} className="group py-6">
-          <summary className="cursor-pointer list-none flex items-start justify-between gap-4 text-left text-base sm:text-lg font-semibold text-navy tracking-tight [&::-webkit-details-marker]:hidden">
+          <summary className="cursor-pointer list-none flex items-start justify-between gap-4 text-left text-base sm:text-lg font-semibold text-navy tracking-tight transition-colors hover:text-brand [&::-webkit-details-marker]:hidden">
             <span>{item.q}</span>
             <span
-              className="text-brand/70 group-open:rotate-45 transition-transform text-xl leading-none shrink-0 mt-0.5"
+              className="text-brand/70 group-open:rotate-45 transition-transform duration-200 text-xl leading-none shrink-0 mt-0.5"
               aria-hidden
             >
               +
@@ -269,7 +297,7 @@ export function FaqList({ items }) {
           <p className="mt-3 text-sm sm:text-base text-navy/55 leading-relaxed pr-8 max-w-2xl">{item.a}</p>
         </details>
       ))}
-    </div>
+    </Reveal>
   );
 }
 
@@ -285,7 +313,8 @@ export function FinalCta({ title, subtitle, whatsappHref }) {
         aria-hidden
       />
       <div className="relative mx-auto max-w-6xl">
-        <div className="max-w-2xl">
+        <Reveal className="max-w-2xl">
+          <SectionDivider label="Deploy" light className="mb-8 max-w-xs" />
           <h2 className="mkt-display text-3xl sm:text-4xl lg:text-5xl text-white">{title}</h2>
           <p className="mt-5 text-base sm:text-lg text-white/55 leading-relaxed">{subtitle}</p>
           <MarketingCtaGroup className="mt-10" />
@@ -294,12 +323,12 @@ export function FinalCta({ title, subtitle, whatsappHref }) {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex text-sm font-semibold text-brand-light hover:text-white transition-colors"
+              className="mt-5 inline-flex text-sm font-semibold text-brand-light hover:text-white transition-colors duration-200"
             >
               Chat on WhatsApp →
             </a>
           )}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

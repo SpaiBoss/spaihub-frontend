@@ -17,6 +17,11 @@ export default function Locations() {
   const [showAddPackage, setShowAddPackage] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
   const [showScript, setShowScript] = useState(null);
+  const [setupRouterId, setSetupRouterId] = useState(null);
+  const [physicalSetupMode, setPhysicalSetupMode] = useState('existing');
+  const [lanIf, setLanIf] = useState('ether2');
+  const [wanIf, setWanIf] = useState('ether1');
+  const [scriptLoading, setScriptLoading] = useState(false);
   const [chrWizardRouter, setChrWizardRouter] = useState(null);
   const [scriptTab, setScriptTab] = useState('hotspot');
   const [routers, setRouters] = useState([]);
@@ -173,6 +178,10 @@ export default function Locations() {
       if (data.deploymentType === 'CHR') {
         setChrWizardRouter(data);
       } else {
+        setSetupRouterId(data.id || data.router?.id);
+        setPhysicalSetupMode('existing');
+        setLanIf('ether2');
+        setWanIf('ether1');
         setShowScript(data);
         setScriptTab('hotspot');
       }
@@ -218,15 +227,38 @@ export default function Locations() {
     setChrWizardRouter(router);
   }
 
+  async function loadPhysicalSetup(routerId, mode = physicalSetupMode, lan = lanIf, wan = wanIf) {
+    if (!expanded || !routerId) return;
+    setScriptLoading(true);
+    try {
+      const params = new URLSearchParams({
+        mode,
+        lanIf: lan,
+        wanIf: wan,
+      });
+      const { data } = await api.get(
+        `/api/owner/locations/${expanded}/routers/${routerId}/setup?${params}`
+      );
+      setShowScript(data);
+      setSetupRouterId(routerId);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to load setup scripts');
+    } finally {
+      setScriptLoading(false);
+    }
+  }
+
   async function openRouterSetup(routerId) {
     const router = routers.find((r) => r.id === routerId);
     if (router?.deploymentType === 'CHR') {
       openChrWizard(router);
       return;
     }
-    const { data } = await api.get(`/api/owner/locations/${expanded}/routers/${routerId}/setup`);
+    setPhysicalSetupMode('existing');
+    setLanIf('ether2');
+    setWanIf('ether1');
     setScriptTab('hotspot');
-    setShowScript(data);
+    await loadPhysicalSetup(routerId, 'existing', 'ether2', 'ether1');
   }
 
   function openPreviewPortal(router) {
@@ -662,7 +694,7 @@ export default function Locations() {
             <p className="text-sm font-medium text-navy mb-2">Router type</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { id: 'PHYSICAL', label: 'Physical MikroTik', hint: 'Existing hotspot router' },
+                { id: 'PHYSICAL', label: 'Physical MikroTik', hint: 'Hex / hAP — choose Existing or Create guest in Setup' },
                 { id: 'CHR', label: 'MikroTik CHR', hint: 'Cloud VM — guided setup wizard' },
               ].map((type) => (
                 <label
@@ -706,9 +738,17 @@ export default function Locations() {
         initialPackage={editingPackage}
       />
 
-      <Modal open={!!showScript} onClose={() => setShowScript(null)} title="Router & captive portal setup" size="lg">
+      <Modal
+        open={!!showScript}
+        onClose={() => {
+          setShowScript(null);
+          setSetupRouterId(null);
+        }}
+        title="Router & captive portal setup"
+        size="lg"
+      >
         <p className="text-sm text-navy/60 mb-4">
-          Test the subscriber portal now with <strong>Preview portal</strong>. When you get a MikroTik, run these scripts on the router.
+          Two pastes on the MikroTik terminal. Test the portal with <strong>Preview portal</strong> anytime.
         </p>
 
         {showScript?.previewPortalUrl && (
@@ -724,6 +764,65 @@ export default function Locations() {
             </a>
           </div>
         )}
+
+        <div className="mb-4">
+          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide mb-2">Script 1 path</p>
+          <div className="flex gap-2 mb-3">
+            {[
+              { id: 'existing', label: 'Existing hotspot' },
+              { id: 'create', label: 'Create guest hotspot' },
+            ].map((path) => (
+              <button
+                key={path.id}
+                type="button"
+                onClick={() => {
+                  setPhysicalSetupMode(path.id);
+                  if (setupRouterId) loadPhysicalSetup(setupRouterId, path.id, lanIf, wanIf);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                  physicalSetupMode === path.id ? 'bg-brand text-white' : 'bg-gray-100 text-navy/60'
+                }`}
+              >
+                {path.label}
+              </button>
+            ))}
+          </div>
+          {physicalSetupMode === 'existing' ? (
+            <p className="text-xs text-navy/55 leading-relaxed">
+              Hotspot must already assign IPs and show a login page. Script 1 only installs SpaiHub (walled garden, PAP, captive HTML).
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-navy/55 leading-relaxed">
+                Add-if-missing guest network on LAN (<code className="font-mono">10.10.10.0/24</code>). Does not wipe WAN or wireless. Set your guest port below.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-field">LAN (guest)</label>
+                  <input
+                    className="input-field font-mono text-sm"
+                    value={lanIf}
+                    onChange={(e) => setLanIf(e.target.value)}
+                    onBlur={() => {
+                      if (setupRouterId) loadPhysicalSetup(setupRouterId, 'create', lanIf, wanIf);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="label-field">WAN</label>
+                  <input
+                    className="input-field font-mono text-sm"
+                    value={wanIf}
+                    onChange={(e) => setWanIf(e.target.value)}
+                    onBlur={() => {
+                      if (setupRouterId) loadPhysicalSetup(setupRouterId, 'create', lanIf, wanIf);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex gap-2 mb-4">
           {[
@@ -745,14 +844,19 @@ export default function Locations() {
 
         <div className="relative">
           <pre className="bg-navy-dark text-green-400 p-4 rounded-xl text-xs overflow-x-auto whitespace-pre-wrap max-h-80">
-            {scriptTab === 'hotspot' ? showScript?.hotspotSetupScript : showScript?.connectionScript}
+            {scriptLoading
+              ? 'Loading script…'
+              : scriptTab === 'hotspot'
+                ? showScript?.hotspotSetupScript
+                : showScript?.connectionScript}
           </pre>
           <button
             type="button"
+            disabled={scriptLoading}
             onClick={() =>
               copyScript(scriptTab === 'hotspot' ? showScript?.hotspotSetupScript : showScript?.connectionScript)
             }
-            className="absolute top-2 right-2 p-2 bg-white/10 rounded-lg text-white hover:bg-white/20"
+            className="absolute top-2 right-2 p-2 bg-white/10 rounded-lg text-white hover:bg-white/20 disabled:opacity-40"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           </button>

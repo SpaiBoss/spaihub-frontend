@@ -120,4 +120,42 @@
     font-family: "Syne", "IBM Plex Sans", system-ui, sans-serif;
     @apply font-bold tracking-[-0.03em] leading-[1.05];
   }
+
+  .mkt-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mkt-reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mkt-divider {
+    @apply flex items-center gap-4 w-full;
+  }
+
+  .mkt-divider-line {
+    @apply h-px flex-1 bg-current opacity-15;
+  }
+
+  .mkt-divider-label {
+    @apply font-mono text-[10px] tracking-[0.2em] uppercase opacity-45 shrink-0;
+  }
+
+  .mkt-icon-frame {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-current/15 text-brand
+      transition-colors duration-200;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mkt-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
 }

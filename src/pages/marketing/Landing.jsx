@@ -1,5 +1,17 @@
 import { Link } from 'react-router-dom';
+import {
+  Wallet,
+  Ticket,
+  Router,
+  MapPin,
+  Smartphone,
+  ShieldCheck,
+  Radio,
+  Terminal,
+  Activity,
+} from 'lucide-react';
 import BrandLogo from '../../components/BrandLogo';
+import Reveal from '../../components/marketing/Reveal';
 import {
   FaqList,
   FeatureGrid,
@@ -10,6 +22,7 @@ import {
   MarketingSection,
   NightTimeline,
   ProductBoard,
+  SectionDivider,
   TestimonialGrid,
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
@@ -57,26 +70,32 @@ const FEATURES = [
   {
     title: 'MoMo payments',
     body: 'Subscribers pay with MTN or Orange via Campay. Approve on the phone, get WiFi credentials instantly.',
+    icon: Smartphone,
   },
   {
     title: 'Vouchers & PDFs',
     body: 'Print batches with PIN codes for cafés, hostels, and events. Revoke when you need to.',
+    icon: Ticket,
   },
   {
     title: 'MikroTik commands',
     body: 'Heartbeat, grant, and kick run through schedulers on the router you already own.',
+    icon: Terminal,
   },
   {
     title: 'Locations & packages',
     body: 'One location, one router. Time or data packages, family shared devices, your branding.',
+    icon: MapPin,
   },
   {
     title: 'Wallet withdrawals',
     body: 'Earn from every MoMo sale. Withdraw to your Mobile Money number when you need cash.',
+    icon: Wallet,
   },
   {
     title: 'Reliable sessions',
     body: 'Expiry kicks, payment recovery, and admin reconcile — so money and access stay aligned.',
+    icon: ShieldCheck,
   },
 ];
 
@@ -121,17 +140,27 @@ const PROBLEMS = [
     n: '01',
     t: 'Cash-only sales',
     d: 'No Campay flow means you miss night sales and walk-in MoMo.',
+    icon: Wallet,
   },
   {
     n: '02',
     t: 'Router out of sync',
     d: 'Access codes that never hit MikroTik leave people “paid” but offline.',
+    icon: Router,
   },
   {
     n: '03',
     t: 'Unclear payouts',
     d: 'Without a wallet and fee line, you cannot tell what you actually earned.',
+    icon: Activity,
   },
+];
+
+const STEPS = [
+  { n: '01', t: 'Connect MikroTik', d: 'Hotspot setup once, then the SpaiHub connection script.', icon: Router },
+  { n: '02', t: 'Set packages', d: 'Time or data plans, family device limits, portal branding.', icon: Radio },
+  { n: '03', t: 'Sell access', d: 'MoMo on the portal or printed vouchers with PINs.', icon: Ticket },
+  { n: '04', t: 'Withdraw', d: 'Wallet balance to MTN or Orange when you need cash.', icon: Wallet },
 ];
 
 export default function Landing() {
@@ -146,6 +175,7 @@ export default function Landing() {
         <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-12 pt-24 sm:px-6 sm:pb-24 sm:pt-32 lg:px-8">
           <div className="max-w-2xl">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
+              <p className="mkt-eyebrow text-brand-light/80 mb-4">Hotspot billing · Cameroon</p>
               <BrandLogo
                 theme="dark"
                 textClassName="text-4xl sm:text-6xl lg:text-7xl"
@@ -175,20 +205,28 @@ export default function Landing() {
         </div>
       </section>
 
-      <MarketingSection className="py-20 sm:py-28">
+      <MarketingSection className="py-20 sm:py-28" dividerLabel="Signal">
         <MarketingHeading
           eyebrow="The problem"
           title="Manual vouchers and chasing MoMo are not a business."
           subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell internet by the hour or by the megabyte."
         />
         <div className="grid gap-12 sm:grid-cols-3 border-t border-navy/10 pt-10">
-          {PROBLEMS.map((item) => (
-            <div key={item.t}>
-              <p className="font-mono text-xs text-brand tracking-[0.2em]">{item.n}</p>
-              <h3 className="mkt-display mt-4 text-xl sm:text-2xl text-navy">{item.t}</h3>
-              <p className="mt-3 text-sm sm:text-base text-navy/55 leading-relaxed">{item.d}</p>
-            </div>
-          ))}
+          {PROBLEMS.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <Reveal key={item.t} delayMs={index * 70}>
+                <div className="flex items-center justify-between">
+                  <p className="font-mono text-xs text-brand tracking-[0.2em]">{item.n}</p>
+                  <span className="mkt-icon-frame border-navy/10">
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  </span>
+                </div>
+                <h3 className="mkt-display mt-4 text-xl sm:text-2xl text-navy">{item.t}</h3>
+                <p className="mt-3 text-sm sm:text-base text-navy/55 leading-relaxed">{item.d}</p>
+              </Reveal>
+            );
+          })}
         </div>
       </MarketingSection>
 
@@ -202,6 +240,7 @@ export default function Landing() {
           aria-hidden
         />
         <div className="relative mx-auto max-w-6xl">
+          <SectionDivider label="Ops" light className="mb-10 sm:mb-14" />
           <MarketingHeading
             light
             eyebrow="While you sleep"
@@ -212,7 +251,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Stack">
         <MarketingHeading
           eyebrow="Product"
           title="Built for how Cameroon hotspots actually sell."
@@ -248,7 +287,7 @@ export default function Landing() {
         />
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28">
+      <MarketingSection className="py-20 sm:py-28" dividerLabel="Protocol">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <MarketingHeading
             className="mb-0"
@@ -258,100 +297,64 @@ export default function Landing() {
           />
           <Link
             to="/how-it-works"
-            className="text-sm font-semibold text-brand hover:text-brand-dark shrink-0"
+            className="text-sm font-semibold text-brand hover:text-brand-dark shrink-0 transition-colors duration-200"
           >
             Full walkthrough →
           </Link>
         </div>
         <ol className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 border-t border-navy/10 pt-10">
-          {[
-            { n: '01', t: 'Connect MikroTik', d: 'Hotspot setup once, then the SpaiHub connection script.' },
-            { n: '02', t: 'Set packages', d: 'Time or data plans, family device limits, portal branding.' },
-            { n: '03', t: 'Sell access', d: 'MoMo on the portal or printed vouchers with PINs.' },
-            { n: '04', t: 'Withdraw', d: 'Wallet balance to MTN or Orange when you need cash.' },
-          ].map((step) => (
-            <li key={step.n}>
-              <p className="mkt-display text-4xl sm:text-5xl text-navy/[0.08] leading-none">{step.n}</p>
-              <h3 className="mkt-display mt-4 text-lg text-navy">{step.t}</h3>
-              <p className="mt-2 text-sm text-navy/55 leading-relaxed">{step.d}</p>
-            </li>
-          ))}
+          {STEPS.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <Reveal key={step.n} as="li" delayMs={index * 60}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="mkt-display text-4xl sm:text-5xl text-navy/[0.08] leading-none">{step.n}</p>
+                  <span className="mkt-icon-frame border-navy/10 mt-1">
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  </span>
+                </div>
+                <h3 className="mkt-display mt-4 text-lg text-navy">{step.t}</h3>
+                <p className="mt-2 text-sm text-navy/55 leading-relaxed">{step.d}</p>
+              </Reveal>
+            );
+          })}
         </ol>
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
-          <MarketingHeading
-            className="mb-0"
-            eyebrow="Platform"
-            title="The engine for the whole hotspot."
-            subtitle="Payments, vouchers, routers, and books in one Cameroon-focused product."
-          />
-          <Link to="/features" className="text-sm font-semibold text-brand hover:text-brand-dark shrink-0">
-            All features →
-          </Link>
-        </div>
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Capabilities">
+        <MarketingHeading
+          eyebrow="Capabilities"
+          title="Everything that keeps a hotspot business running."
+          subtitle="Payments, vouchers, MikroTik control, and payouts — without bolting on three other tools."
+        />
         <FeatureGrid items={FEATURES} />
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28">
-        <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <MarketingHeading
-            className="mb-0"
-            eyebrow="Hardware"
-            title="Runs on the MikroTik you already own."
-            subtitle="No rip-and-replace. Physical Hex or CHR — SpaiHub talks heartbeat and commands over HTTPS."
-          />
-          <div className="space-y-8 border-t border-navy/10 pt-8 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-12">
-            <div>
-              <h3 className="mkt-display text-xl text-navy">MikroTik RouterOS</h3>
-              <p className="mt-3 text-sm text-navy/55 leading-relaxed">
-                Schedulers for heartbeat and command import. Captive portal redirects to your branded SpaiHub page.
-              </p>
-              <Link
-                to="/for/mikrotik"
-                className="mt-4 inline-block text-sm font-semibold text-brand hover:text-brand-dark"
-              >
-                MikroTik details →
-              </Link>
-            </div>
-            <div>
-              <h3 className="mkt-display text-xl text-navy">One location, one router</h3>
-              <p className="mt-3 text-sm text-navy/55 leading-relaxed">
-                Antennas and APs stay under your Hex — SpaiHub observes the router that grants access.
-              </p>
-            </div>
-          </div>
-        </div>
-      </MarketingSection>
-
-      <MarketingSection tone="muted" className="py-20 sm:py-28">
+      <MarketingSection className="py-20 sm:py-28" dividerLabel="Field notes">
         <MarketingHeading
-          eyebrow="Social proof"
-          title="What owners care about."
-          subtitle="Illustrative quotes until we publish real operator stories — the product promises match production SpaiHub."
+          eyebrow="From the field"
+          title="Operators who stopped improvising."
+          subtitle="Composite stories based on how Spai-Hub is meant to be used — not paid endorsements."
         />
         <TestimonialGrid items={TESTIMONIALS} />
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="FAQ">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-          <MarketingHeading
-            className="mb-0"
-            eyebrow="FAQ"
-            title="Straight answers."
-            subtitle={`Accounts are free. SpaiHub takes ${platformFeePercent}% of each MoMo sale.`}
-          />
-          <Link to="/faq" className="text-sm font-semibold text-brand hover:text-brand-dark shrink-0">
-            Full FAQ →
+          <MarketingHeading className="mb-0" eyebrow="FAQ" title="Short answers before you deploy." />
+          <Link
+            to="/faq"
+            className="text-sm font-semibold text-brand hover:text-brand-dark transition-colors duration-200"
+          >
+            All FAQs →
           </Link>
         </div>
         <FaqList items={FAQ_TEASER} />
       </MarketingSection>
 
       <FinalCta
-        title="Ready to run your hotspot like a business?"
-        subtitle="Create a free account, connect your MikroTik, and start selling with MoMo and vouchers."
+        title="Stand up billing on the routers you already own."
+        subtitle={`Accounts are free. SpaiHub takes ${platformFeePercent}% of each MoMo sale.`}
         whatsappHref={wa}
       />
     </>

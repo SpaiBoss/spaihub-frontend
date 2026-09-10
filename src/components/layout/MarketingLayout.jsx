@@ -221,7 +221,7 @@ export default function MarketingLayout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-gray-200 bg-surface-muted">
+      <footer className="border-t border-navy/10 bg-surface-muted">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div className="sm:col-span-2 lg:col-span-1">
@@ -231,11 +231,11 @@ export default function MarketingLayout() {
               </p>
             </div>
             <div>
-              <p className="text-xs font-semibold tracking-wide text-navy/40 uppercase mb-3">Product</p>
+              <p className="mkt-eyebrow text-navy/40 mb-3">Product</p>
               <ul className="space-y-2">
                 {FOOTER_PRODUCT.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors">
+                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
                       {item.label}
                     </Link>
                   </li>
@@ -243,11 +243,11 @@ export default function MarketingLayout() {
               </ul>
             </div>
             <div>
-              <p className="text-xs font-semibold tracking-wide text-navy/40 uppercase mb-3">Company</p>
+              <p className="mkt-eyebrow text-navy/40 mb-3">Company</p>
               <ul className="space-y-2">
                 {FOOTER_COMPANY.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors">
+                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
                       {item.label}
                     </Link>
                   </li>
@@ -258,7 +258,7 @@ export default function MarketingLayout() {
                       href={wa}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-navy/60 hover:text-navy transition-colors"
+                      className="text-sm text-navy/60 hover:text-navy transition-colors duration-200"
                     >
                       WhatsApp
                     </a>
@@ -267,13 +267,13 @@ export default function MarketingLayout() {
               </ul>
             </div>
           </div>
-          <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <p className="text-xs text-navy/40">Spai-Hub · Cameroon</p>
+          <div className="mt-10 pt-6 border-t border-navy/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p className="font-mono text-[11px] tracking-wide text-navy/40">Spai-Hub · Cameroon</p>
             <a
               href="https://www.spaitrace.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-navy/40 hover:text-navy/70 transition-colors"
+              className="font-mono text-[11px] tracking-wide text-navy/40 hover:text-navy/70 transition-colors duration-200"
             >
               Powered by www.spaitrace.com
             </a>

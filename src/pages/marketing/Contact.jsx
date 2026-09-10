@@ -11,7 +11,7 @@ export default function Contact() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-16 sm:pb-20">
+      <MarketingSection className="pt-14 sm:pt-20 pb-16 sm:pb-20" dividerLabel="Contact">
         <MarketingHeading
           eyebrow="Contact"
           title="Talk to us on WhatsApp."
