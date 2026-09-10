@@ -22,6 +22,7 @@ import {
   NightTimeline,
   ProductBoard,
   SectionDivider,
+  WaveEdge,
   TestimonialGrid,
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
@@ -232,9 +233,10 @@ export default function Landing() {
             </div>
           </div>
         </div>
+        <WaveEdge fill="#0E141B" accent="#148F86" />
       </section>
 
-      <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+      <section className="relative overflow-x-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 pb-28 sm:pb-32">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -290,9 +292,10 @@ export default function Landing() {
             })}
           </div>
         </div>
+        <WaveEdge fill="#0E141B" accent="#0F766E" />
       </section>
 
-      <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 border-t border-white/10">
+      <section className="relative overflow-x-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 pb-28 sm:pb-36">
         <div
           className="pointer-events-none absolute inset-0 opacity-80"
           style={{
@@ -311,9 +314,10 @@ export default function Landing() {
           />
           <NightTimeline events={NIGHT_EVENTS} />
         </div>
+        <WaveEdge fill="#F0F2F5" accent="#148F86" />
       </section>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Stack">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Stack" waveBottomFill="#ffffff">
         <MarketingHeading
           eyebrow="Product"
           title="Built for how Cameroon hotspots actually sell."
@@ -349,7 +353,7 @@ export default function Landing() {
         />
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28" dividerLabel="Protocol">
+      <MarketingSection className="py-20 sm:py-28" dividerLabel="Protocol" waveBottomFill="#F0F2F5">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <MarketingHeading
             className="mb-0"
@@ -383,7 +387,7 @@ export default function Landing() {
         </ol>
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Capabilities">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="Capabilities" waveBottomFill="#ffffff">
         <MarketingHeading
           eyebrow="Capabilities"
           title="Everything that keeps a hotspot business running."
@@ -392,7 +396,7 @@ export default function Landing() {
         <FeatureGrid items={FEATURES} />
       </MarketingSection>
 
-      <MarketingSection className="py-16 sm:py-20" dividerLabel="Uplink">
+      <MarketingSection className="py-16 sm:py-20" dividerLabel="Uplink" waveBottomFill="#ffffff" waveAccent="#148F86">
         <MarketingHeading
           eyebrow="Contributors"
           title="Grow capacity without another node."
@@ -406,7 +410,7 @@ export default function Landing() {
         </Link>
       </MarketingSection>
 
-      <MarketingSection className="py-20 sm:py-28" dividerLabel="Field notes">
+      <MarketingSection className="py-20 sm:py-28" dividerLabel="Field notes" waveBottomFill="#F0F2F5">
         <MarketingHeading
           eyebrow="From the field"
           title="Operators who stopped improvising."
@@ -415,7 +419,7 @@ export default function Landing() {
         <TestimonialGrid items={TESTIMONIALS} />
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="FAQ">
+      <MarketingSection tone="muted" className="py-20 sm:py-28" dividerLabel="FAQ" waveBottomFill="#0E141B" waveAccent="#148F86">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <MarketingHeading className="mb-0" eyebrow="FAQ" title="Short answers before you deploy." />
           <Link

@@ -7,6 +7,7 @@ import {
   MarketingCtaGroup,
   MarketingHeading,
   MarketingSection,
+  WaveEdge,
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
 
@@ -34,7 +35,7 @@ export default function ForContributors() {
 
   return (
     <>
-      <section className="relative min-h-[88dvh] min-h-[88svh] overflow-hidden text-white">
+      <section className="relative min-h-[88dvh] min-h-[88svh] overflow-x-hidden text-white">
         <img
           src="/marketing/contributor-hero.jpg"
           alt="Network engineer configuring routers, switches, and cables for a SpaiHub uplink"
@@ -57,7 +58,7 @@ export default function ForContributors() {
           aria-hidden
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[88dvh] min-h-[88svh] max-w-6xl flex-col justify-end px-4 pb-14 pt-28 sm:justify-center sm:px-6 sm:pb-24 sm:pt-32 lg:px-8">
+        <div className="relative z-10 mx-auto flex min-h-[88dvh] min-h-[88svh] max-w-6xl flex-col justify-end px-4 pb-20 pt-28 sm:justify-center sm:px-6 sm:pb-28 sm:pt-32 lg:px-8">
           <div className="max-w-xl">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
               <p className="mkt-eyebrow text-brand-light/85 mb-4">Contributors · Cameroon</p>
@@ -90,9 +91,15 @@ export default function ForContributors() {
             </div>
           </div>
         </div>
+        <WaveEdge fill="#F0F2F5" accent="#148F86" />
       </section>
 
-      <MarketingSection tone="muted" className="py-16 sm:py-20" dividerLabel="Physical">
+      <MarketingSection
+        tone="muted"
+        className="py-16 sm:py-20"
+        dividerLabel="Physical"
+        waveBottomFill="#ffffff"
+      >
         <MarketingHeading
           eyebrow="How it works"
           title="Plug a switch. We handle the rest."
@@ -117,7 +124,7 @@ export default function ForContributors() {
         </div>
       </MarketingSection>
 
-      <MarketingSection className="py-14 sm:py-16" dividerLabel="Trust">
+      <MarketingSection className="py-14 sm:py-16" dividerLabel="Trust" waveBottomFill="#0E141B" waveAccent="#148F86">
         <MarketingHeading
           title="Not a VPN tunnel. Not cloud relay."
           subtitle="Contribution is a local physical link into the hotspot router. That keeps latency low and avoids shipping user traffic through the cloud. Capacity is bonus layer for the site — not a promise to end users."
