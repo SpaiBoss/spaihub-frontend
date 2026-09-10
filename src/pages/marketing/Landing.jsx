@@ -171,54 +171,55 @@ export default function Landing() {
       <section className="relative min-h-[100dvh] min-h-[100svh] overflow-hidden text-white">
         <img
           src="/marketing/landing-hero.jpg"
-          alt="Printed WiFi vouchers and Mobile Money payment at a Cameroon hotspot counter"
-          className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+          alt="WiFi vouchers, Mobile Money payment, and hotspot router on a shop counter"
+          className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-[78%_45%] sm:object-[82%_40%]"
+        />
+        {/* Hard left reading column so copy never fights the product photo */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(7,11,16,0.97) 0%, rgba(7,11,16,0.94) 28%, rgba(14,20,27,0.72) 48%, rgba(14,20,27,0.28) 68%, rgba(14,20,27,0.2) 100%)',
+          }}
+          aria-hidden
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(105deg, rgba(7,11,16,0.92) 0%, rgba(14,20,27,0.82) 38%, rgba(14,20,27,0.5) 65%, rgba(14,20,27,0.58) 100%), linear-gradient(to top, rgba(7,11,16,0.8) 0%, transparent 45%)',
-          }}
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-45"
-          style={{
-            background:
-              'radial-gradient(ellipse 55% 50% at 80% 25%, rgba(15,118,110,0.38), transparent 58%)',
+              'linear-gradient(to top, rgba(7,11,16,0.55) 0%, transparent 38%), radial-gradient(ellipse 45% 40% at 85% 55%, rgba(15,118,110,0.22), transparent 70%)',
           }}
           aria-hidden
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-12 pt-24 sm:px-6 sm:pb-24 sm:pt-32 lg:px-8">
-          <div className="max-w-2xl">
+        <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:justify-center sm:px-6 sm:pb-28 sm:pt-32 lg:px-8">
+          <div className="max-w-[22rem] sm:max-w-md lg:max-w-lg">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
-              <p className="mkt-eyebrow text-brand-light/80 mb-4">Hotspot billing · Cameroon</p>
+              <p className="mkt-eyebrow text-brand-light/90 mb-5">Hotspot billing · Cameroon</p>
               <BrandLogo
                 theme="dark"
-                textClassName="text-4xl sm:text-6xl lg:text-7xl"
-                className="mb-5 sm:mb-10"
+                textClassName="text-[2.35rem] sm:text-5xl lg:text-6xl tracking-tight"
+                className="mb-7 sm:mb-9"
               />
             </div>
             <h1
-              className="mkt-display animate-hero-in text-[2.05rem] leading-[1.08] sm:text-5xl sm:leading-[1.05] lg:text-[3.9rem] text-white"
+              className="mkt-display animate-hero-in text-[1.85rem] leading-[1.12] sm:text-[2.75rem] sm:leading-[1.08] lg:text-[3.35rem] text-white"
               style={{ animationDelay: '140ms' }}
             >
               Sell WiFi.
               <br />
               Get paid on MoMo.
               <br />
-              <span className="text-brand-light">Sleep.</span>
+              <span className="text-brand-light">Then sleep.</span>
             </h1>
             <p
-              className="mt-4 sm:mt-6 animate-hero-in text-[0.95rem] sm:text-lg text-white/70 leading-relaxed max-w-md"
+              className="mt-5 animate-hero-in text-sm sm:text-base text-white/65 leading-relaxed max-w-sm"
               style={{ animationDelay: '260ms' }}
             >
-              MikroTik hotspot billing for Cameroon — Campay payments, vouchers, and wallet withdrawals in one place.
+              Campay on the portal. Printed vouchers for walk-ins. Wallet out to MoMo — on the MikroTik you already run.
             </p>
             <div className="animate-hero-in" style={{ animationDelay: '380ms' }}>
-              <MarketingCtaGroup className="mt-6 sm:mt-9" />
+              <MarketingCtaGroup className="mt-8 sm:mt-10" />
             </div>
           </div>
         </div>
