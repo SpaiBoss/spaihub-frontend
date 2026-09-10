@@ -140,18 +140,27 @@ const PROBLEMS = [
     t: 'Cash-only sales',
     d: 'No Campay flow means you miss night sales and walk-in MoMo.',
     icon: Wallet,
+    accent: 'from-brand to-brand-dark',
+    chip: 'bg-brand/25 text-brand-light',
+    glow: 'rgba(15,118,110,0.45)',
   },
   {
     n: '02',
     t: 'Router out of sync',
     d: 'Access codes that never hit MikroTik leave people “paid” but offline.',
     icon: Router,
+    accent: 'from-cyan-600 to-teal-800',
+    chip: 'bg-cyan-400/20 text-cyan-200',
+    glow: 'rgba(8,145,178,0.4)',
   },
   {
     n: '03',
     t: 'Unclear payouts',
     d: 'Without a wallet and fee line, you cannot tell what you actually earned.',
     icon: Activity,
+    accent: 'from-amber-500 to-orange-700',
+    chip: 'bg-amber-400/20 text-amber-100',
+    glow: 'rgba(245,158,11,0.35)',
   },
 ];
 
@@ -225,32 +234,65 @@ export default function Landing() {
         </div>
       </section>
 
-      <MarketingSection className="py-20 sm:py-28" dividerLabel="Signal">
-        <MarketingHeading
-          eyebrow="The problem"
-          title="Manual vouchers and chasing MoMo are not a business."
-          subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell internet by the hour or by the megabyte."
-        />
-        <div className="grid gap-12 sm:grid-cols-3 border-t border-navy/10 pt-10">
-          {PROBLEMS.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <Reveal key={item.t} delayMs={index * 70}>
-                <div className="flex items-center justify-between">
-                  <p className="font-mono text-xs text-brand tracking-[0.2em]">{item.n}</p>
-                  <span className="mkt-icon-frame border-navy/10">
-                    <Icon className="h-4 w-4" strokeWidth={1.75} />
-                  </span>
-                </div>
-                <h3 className="mkt-display mt-4 text-xl sm:text-2xl text-navy">{item.t}</h3>
-                <p className="mt-3 text-sm sm:text-base text-navy/55 leading-relaxed">{item.d}</p>
-              </Reveal>
-            );
-          })}
-        </div>
-      </MarketingSection>
-
       <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 55% at 10% 0%, rgba(15,118,110,0.4), transparent 55%), radial-gradient(ellipse 50% 45% at 100% 80%, rgba(245,158,11,0.18), transparent 50%), linear-gradient(160deg, #070B10 0%, #0E141B 55%, #12241f 100%)',
+          }}
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-6xl">
+          <SectionDivider label="Signal" light className="mb-10 sm:mb-14" />
+          <MarketingHeading
+            light
+            eyebrow="The problem"
+            title="Manual vouchers and chasing MoMo are not a business."
+            subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell by the hour or the megabyte."
+          />
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-3">
+            {PROBLEMS.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <Reveal key={item.t} delayMs={index * 80}>
+                  <div
+                    className={`relative min-h-[16.5rem] overflow-hidden border border-white/10 bg-gradient-to-br ${item.accent} p-6 sm:p-7 transition-transform duration-300 hover:-translate-y-1`}
+                  >
+                    <div
+                      className="pointer-events-none absolute -right-6 -top-8 h-36 w-36 rounded-full blur-2xl opacity-70"
+                      style={{ background: item.glow }}
+                      aria-hidden
+                    />
+                    <p
+                      className="pointer-events-none absolute -bottom-6 -right-1 mkt-display text-[6.5rem] leading-none text-white/[0.12] select-none"
+                      aria-hidden
+                    >
+                      {item.n}
+                    </p>
+                    <div className="relative flex items-start justify-between gap-3">
+                      <span className={`inline-flex items-center rounded-md px-2.5 py-1 font-mono text-[11px] tracking-[0.18em] ${item.chip}`}>
+                        {item.n}
+                      </span>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-sm">
+                        <Icon className="h-5 w-5" strokeWidth={2} />
+                      </span>
+                    </div>
+                    <h3 className="relative mkt-display mt-8 text-2xl sm:text-[1.65rem] text-white leading-tight">
+                      {item.t}
+                    </h3>
+                    <p className="relative mt-3 text-sm sm:text-[0.95rem] text-white/80 leading-relaxed max-w-[18rem]">
+                      {item.d}
+                    </p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28 border-t border-white/10">
         <div
           className="pointer-events-none absolute inset-0 opacity-80"
           style={{
