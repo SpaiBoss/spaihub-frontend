@@ -16,7 +16,7 @@ export default function Pricing() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-10" dividerLabel="Pricing">
+      <MarketingSection className="pt-14 sm:pt-20 pb-10">
         <MarketingHeading
           eyebrow="Pricing"
           title="Free to start. Transparent fee on MoMo sales."

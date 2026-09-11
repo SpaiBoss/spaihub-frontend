@@ -47,7 +47,7 @@ export default function HowItWorks() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-6" dividerLabel="Protocol">
+      <MarketingSection className="pt-14 sm:pt-20 pb-6">
         <MarketingHeading
           eyebrow="How it works"
           title="From empty Hex to night sales."
@@ -76,7 +76,7 @@ export default function HowItWorks() {
         </ol>
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-14 sm:py-16" dividerLabel="Deploy">
+      <MarketingSection tone="muted" className="py-14 sm:py-16">
         <MarketingHeading
           title="Two scripts, not a new fleet."
           subtitle="Script 1 installs SpaiHub on an existing hotspot — or creates a guest network if you choose that path. Script 2 keeps heartbeat and GRANT_ACCESS polling. Re-open Setup anytime to re-copy."

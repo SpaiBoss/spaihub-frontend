@@ -12,7 +12,7 @@ export default function ForMikrotik() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-10" dividerLabel="MikroTik">
+      <MarketingSection className="pt-14 sm:pt-20 pb-10">
         <MarketingHeading
           eyebrow="MikroTik"
           title="Built for RouterOS hotspots."
@@ -23,7 +23,7 @@ export default function ForMikrotik() {
         </Link>
       </MarketingSection>
 
-      <MarketingSection tone="muted" className="py-14 sm:py-16" dividerLabel="Scripts">
+      <MarketingSection tone="muted" className="py-14 sm:py-16">
         <div className="grid gap-10 sm:grid-cols-2">
           <div>
             <h3 className="mkt-display text-base text-navy">1. Hotspot setup (once)</h3>

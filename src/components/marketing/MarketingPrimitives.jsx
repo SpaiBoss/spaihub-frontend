@@ -2,18 +2,6 @@ import { Link } from 'react-router-dom';
 import { useId } from 'react';
 import Reveal from './Reveal';
 
-/** Quiet in-content rule — never a floating pill on a wave. */
-export function SectionDivider({ label, light = false, className = '' }) {
-  const tone = light ? 'text-white' : 'text-navy';
-  return (
-    <div className={`mkt-divider ${tone} ${className}`} aria-hidden={!label}>
-      <span className="mkt-divider-line" />
-      {label ? <span className="mkt-divider-label">{label}</span> : null}
-      <span className="mkt-divider-line" />
-    </div>
-  );
-}
-
 /**
  * Full-bleed sculptural 3D ribbon curl between color bands.
  * Sit at the bottom of a section; `fill` must match the NEXT background.
@@ -114,7 +102,6 @@ export function MarketingSection({
   className = '',
   id,
   tone = 'light',
-  dividerLabel,
   waveBottomFill,
   waveAccent = '#0F766E',
 }) {
@@ -132,11 +119,6 @@ export function MarketingSection({
         waveBottomFill ? 'pb-32 sm:pb-36' : ''
       } ${className}`}
     >
-      {dividerLabel ? (
-        <div className="relative mx-auto w-full max-w-6xl">
-          <SectionDivider label={dividerLabel} light={tone === 'dark'} className="mb-10 sm:mb-12" />
-        </div>
-      ) : null}
       <div className="relative mx-auto w-full max-w-6xl">{children}</div>
       {waveBottomFill ? <WaveEdge fill={waveBottomFill} accent={waveAccent} /> : null}
     </section>

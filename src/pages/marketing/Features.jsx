@@ -87,7 +87,7 @@ export default function Features() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-10" dividerLabel="Features">
+      <MarketingSection className="pt-14 sm:pt-20 pb-10">
         <MarketingHeading
           eyebrow="Features"
           title="Everything you need to sell hotspot internet."
@@ -122,7 +122,7 @@ export default function Features() {
       </MarketingSection>
 
       {GROUPS.map((group) => (
-        <MarketingSection key={group.title} className="pb-16 sm:pb-20" dividerLabel={group.title}>
+        <MarketingSection key={group.title} className="pb-16 sm:pb-20">
           <FeatureGrid items={group.items} />
         </MarketingSection>
       ))}

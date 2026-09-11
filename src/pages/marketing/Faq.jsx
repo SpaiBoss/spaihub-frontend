@@ -22,7 +22,7 @@ export default function Faq() {
 
   return (
     <>
-      <MarketingSection className="pt-14 sm:pt-20 pb-10" dividerLabel="FAQ">
+      <MarketingSection className="pt-14 sm:pt-20 pb-10">
         <MarketingHeading
           eyebrow="FAQ"
           title="Everything owners usually ask."
