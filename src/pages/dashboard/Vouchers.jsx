@@ -226,7 +226,7 @@ export default function Vouchers() {
               <th>Status</th>
               <th>Expires</th>
               <th>Redeemed</th>
-              <th></th>
+              <th className="sticky-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -264,9 +264,9 @@ export default function Vouchers() {
                   <td className="text-navy/70">
                     {v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : '—'}
                   </td>
-                  <td className="whitespace-nowrap">
+                  <td className="sticky-actions whitespace-nowrap">
                     <button onClick={() => copyCode(v.code)} className="text-brand text-xs mr-3 hover:text-brand-dark font-medium">
-                      <Copy className="w-3.5 h-3.5 inline" />
+                      <Copy className="w-3.5 h-3.5 inline" /> Copy
                     </button>
                     {v.status === 'UNUSED' && (
                       <button onClick={() => revokeVoucher(v.id)} className="text-red-500 text-xs hover:text-red-700 font-medium">

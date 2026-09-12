@@ -109,15 +109,22 @@
   }
 
   .table-shell th.sticky-actions,
-  .table-shell td.sticky-actions {
-    @apply sticky right-0 z-[1] min-w-[13rem] shadow-[-8px_0_12px_-8px_rgba(15,23,42,0.14)];
+  .table-shell td.sticky-actions,
+  th.sticky-actions,
+  td.sticky-actions {
+    @apply sticky right-0 z-[1] min-w-[10rem] shadow-[-8px_0_12px_-8px_rgba(15,23,42,0.14)];
   }
 
   .table-shell thead th.sticky-actions {
     @apply bg-surface-muted;
   }
 
-  .table-shell tbody td.sticky-actions {
+  .table-shell tbody td.sticky-actions,
+  tbody td.sticky-actions {
+    @apply bg-white;
+  }
+
+  thead th.sticky-actions {
     @apply bg-white;
   }
 
@@ -125,7 +132,8 @@
     @apply transition-colors hover:bg-navy/[0.03];
   }
 
-  .table-shell tbody tr:hover td.sticky-actions {
+  .table-shell tbody tr:hover td.sticky-actions,
+  tbody tr:hover td.sticky-actions {
     background-color: #f4f6f8;
   }
 

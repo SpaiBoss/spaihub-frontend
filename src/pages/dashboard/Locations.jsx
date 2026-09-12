@@ -370,13 +370,14 @@ export default function Locations() {
                         <Plus className="w-4 h-4" /> Add Router
                       </button>
                     </div>
-                    <table className="w-full text-sm">
+                    <div className="overflow-x-auto -mx-1 px-1">
+                    <table className="w-full text-sm min-w-[36rem]">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
                           <th className="pb-2">Name</th>
                           <th className="pb-2">Status</th>
                           <th className="pb-2">Last Seen</th>
-                          <th className="pb-2"></th>
+                          <th className="pb-2 sticky-actions">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -401,7 +402,7 @@ export default function Locations() {
                             <td className="py-2 text-gray-400">
                               {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : 'Never (normal without MikroTik)'}
                             </td>
-                            <td className="py-2 whitespace-nowrap space-x-2 text-right">
+                            <td className="py-2 sticky-actions whitespace-nowrap space-x-2 text-right">
                               {r.deploymentType === 'CHR' ? (
                                 <button
                                   type="button"
@@ -439,6 +440,7 @@ export default function Locations() {
                         )}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
 
@@ -524,14 +526,15 @@ export default function Locations() {
                     {sessions.length === 0 ? (
                       <p className="text-sm text-navy/50 text-center py-8">No active sessions at this location.</p>
                     ) : (
-                      <table className="w-full text-sm">
+                      <div className="overflow-x-auto -mx-1 px-1">
+                      <table className="w-full text-sm min-w-[32rem]">
                         <thead>
                           <tr className="text-left text-gray-500 border-b">
                             <th className="pb-2">Device</th>
                             <th className="pb-2">Package</th>
                             <th className="pb-2">Router</th>
                             <th className="pb-2">Ends</th>
-                            <th className="pb-2"></th>
+                            <th className="pb-2 sticky-actions">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -544,7 +547,7 @@ export default function Locations() {
                               <td className="py-2">{s.packageName}</td>
                               <td className="py-2">{s.router?.name || '—'}</td>
                               <td className="py-2 text-gray-400">{new Date(s.sessionEnd).toLocaleString()}</td>
-                              <td className="py-2 text-right">
+                              <td className="py-2 sticky-actions text-right">
                                 <button
                                   type="button"
                                   onClick={() => kickSession(s.id)}
@@ -557,6 +560,7 @@ export default function Locations() {
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     )}
                   </div>
                 )}
@@ -574,7 +578,8 @@ export default function Locations() {
                         <Plus className="w-4 h-4" /> Add Package
                       </button>
                     </div>
-                    <table className="w-full text-sm">
+                    <div className="overflow-x-auto -mx-1 px-1">
+                    <table className="w-full text-sm min-w-[40rem]">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
                           <th className="pb-2">Name</th>
@@ -582,7 +587,7 @@ export default function Locations() {
                           <th className="pb-2">Details</th>
                           <th className="pb-2">Price</th>
                           <th className="pb-2">Status</th>
-                          <th className="pb-2"></th>
+                          <th className="pb-2 sticky-actions">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -597,14 +602,14 @@ export default function Locations() {
                           <tr key={p.id} className="border-b border-gray-50">
                             <td className="py-2 font-medium">{p.name}</td>
                             <td className="py-2">
-                              <span className="text-xs px-2 py-0.5 rounded bg-surface-muted border border-gray-200 text-navy font-medium">
+                              <span className="text-xs px-2 py-0.5 rounded bg-surface-muted border border-gray-200 text-navy font-medium whitespace-nowrap">
                                 {PACKAGE_TYPE_LABELS[p.type] || 'Time-based'}
                               </span>
                             </td>
                             <td className="py-2 text-navy/70">{formatOwnerPackageSummary(p)}</td>
-                            <td className="py-2">{p.priceXaf.toLocaleString()} XAF</td>
+                            <td className="py-2 whitespace-nowrap">{p.priceXaf.toLocaleString()} XAF</td>
                             <td className="py-2"><StatusBadge status={p.isActive ? 'ACTIVE' : 'SUSPENDED'} /></td>
-                            <td className="py-2 space-x-2">
+                            <td className="py-2 sticky-actions space-x-2 whitespace-nowrap">
                               {p.isActive && (
                                 <>
                                   <button
@@ -630,6 +635,7 @@ export default function Locations() {
                         )}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
                 </>
