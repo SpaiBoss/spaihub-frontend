@@ -35,8 +35,6 @@ export default function Locations() {
   const [locForm, setLocForm] = useState({ name: '', address: '' });
   const [routerForm, setRouterForm] = useState({ name: '', deploymentType: 'PHYSICAL' });
   const [accessPolicy, setAccessPolicy] = useState({
-    allowHotspotSharing: false,
-    maxHotspotDevices: 0,
     maxDevicesPerAccessCode: 0,
   });
   const [savingPolicy, setSavingPolicy] = useState(false);
@@ -64,8 +62,6 @@ export default function Locations() {
     const loc = locations.find((l) => l.id === id);
     if (loc) {
       setAccessPolicy({
-        allowHotspotSharing: loc.allowHotspotSharing ?? false,
-        maxHotspotDevices: loc.maxHotspotDevices ?? 0,
         maxDevicesPerAccessCode: loc.maxDevicesPerAccessCode ?? 0,
       });
       setEditLocForm({ name: loc.name, address: loc.address });
@@ -454,13 +450,14 @@ export default function Locations() {
                     <div className="mb-6">
                       <h4 className="font-semibold text-navy">Access policy</h4>
                       <p className="text-sm text-navy/50 mt-0.5">
-                        Devices per voucher or access code, and whether hotspot sharing is allowed.
+                        Simultaneous devices are controlled on each package. This location
+                        setting is only a fallback for vouchers when a package limit is missing.
                       </p>
                     </div>
 
                     <div className="space-y-5">
                       <div>
-                        <label className="label-field">Devices per access code</label>
+                        <label className="label-field">Devices per access code (fallback)</label>
                         <input
                           type="number"
                           min={0}
@@ -474,50 +471,16 @@ export default function Locations() {
                           className="input-field"
                         />
                         <p className="text-xs text-navy/45 mt-1.5">
-                          Location default when a package does not set its own limit. Prefer setting <strong>Simultaneous devices</strong> on each package (e.g. 4 for family plans).
+                          0 = one device. Prefer setting <strong>Simultaneous devices</strong> on
+                          each package (e.g. 4 for family plans). Counts distinct Wi‑Fi MACs — not
+                          phones behind a home router in NAT/router mode.
                         </p>
                       </div>
 
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={accessPolicy.allowHotspotSharing}
-                          onChange={(e) =>
-                            setAccessPolicy({
-                              ...accessPolicy,
-                              allowHotspotSharing: e.target.checked,
-                              ...(e.target.checked ? {} : { maxHotspotDevices: 0 }),
-                            })
-                          }
-                          className="mt-1 rounded border-gray-300 text-brand focus:ring-brand"
-                        />
-                        <span>
-                          <span className="font-medium text-navy block">Allow hotspot sharing</span>
-                          <span className="text-sm text-navy/50">
-                            When enabled, additional devices can connect using the same access code via hotspot sharing. Device limits still apply from package simultaneous-device settings.
-                          </span>
-                        </span>
-                      </label>
-
-                      <div className={accessPolicy.allowHotspotSharing ? '' : 'opacity-50 pointer-events-none'}>
-                        <label className="label-field">Max hotspot devices per code</label>
-                        <input
-                          type="number"
-                          min={0}
-                          value={accessPolicy.maxHotspotDevices}
-                          onChange={(e) =>
-                            setAccessPolicy({
-                              ...accessPolicy,
-                              maxHotspotDevices: Math.max(0, Number(e.target.value) || 0),
-                            })
-                          }
-                          className="input-field"
-                          disabled={!accessPolicy.allowHotspotSharing}
-                        />
-                        <p className="text-xs text-navy/45 mt-1.5">
-                          0 = hotspot sharing disabled (default). Primary device only. Does not include the main device.
-                        </p>
-                      </div>
+                      <p className="text-xs text-navy/50 rounded-lg border border-gray-200 bg-surface-muted px-3 py-2.5">
+                        Tip: use 1-device packages with a fair-use data cap, and discourage personal
+                        Wi‑Fi extenders in router mode on this hotspot.
+                      </p>
 
                       <Button onClick={saveAccessPolicy} disabled={savingPolicy} className="w-full sm:w-auto">
                         {savingPolicy ? 'Saving...' : 'Save access policy'}
@@ -529,15 +492,26 @@ export default function Locations() {
                 {tab === 'sessions' && (
                   <div>
                     {sessions.length === 0 ? (
-                      <p className="text-sm text-navy/50 text-center py-8">No active sessions at this location.</p>
+                      <div className="text-center py-8 space-y-2">
+                        <p className="text-sm text-navy/50">No active sessions at this location.</p>
+                        <p className="text-xs text-navy/40 max-w-sm mx-auto">
+                          After re-pasting the router connection script, live “On router” status
+                          appears here. One seen MAC can still be a NAT gateway.
+                        </p>
+                      </div>
                     ) : (
                       <div className="overflow-x-auto -mx-1 px-1">
-                      <table className="w-full text-sm min-w-[32rem]">
+                      <p className="text-xs text-navy/45 mb-3">
+                        “On router” means the login is in MikroTik active hosts. A single MAC may
+                        still be a Pixlink/phone hotspot sharing with many devices.
+                      </p>
+                      <table className="w-full text-sm min-w-[36rem]">
                         <thead>
                           <tr className="text-left text-gray-500 border-b">
                             <th className="pb-2">Device</th>
                             <th className="pb-2">Package</th>
                             <th className="pb-2">Router</th>
+                            <th className="pb-2">Status</th>
                             <th className="pb-2">Ends</th>
                             <th className="pb-2 sticky-actions">Actions</th>
                           </tr>
@@ -551,6 +525,22 @@ export default function Locations() {
                               </td>
                               <td className="py-2">{s.packageName}</td>
                               <td className="py-2">{s.router?.name || '—'}</td>
+                              <td className="py-2">
+                                {s.routerSeen ? (
+                                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-signal">
+                                    <span className="w-1.5 h-1.5 rounded-sm bg-signal" />
+                                    On router
+                                    {s.routerMac ? (
+                                      <span className="text-navy/40 font-normal">· {s.routerMac}</span>
+                                    ) : null}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-navy/45">
+                                    <span className="w-1.5 h-1.5 rounded-sm bg-gray-300" />
+                                    Not seen
+                                  </span>
+                                )}
+                              </td>
                               <td className="py-2 text-gray-400">{new Date(s.sessionEnd).toLocaleString()}</td>
                               <td className="py-2 sticky-actions text-right">
                                 <button

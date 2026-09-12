@@ -26,8 +26,8 @@ const defaultForm = () => ({
   maxSharedDevices: 1,
   browseDurationValue: 1,
   browseDurationUnit: 'hours',
-  timeDataCapEnabled: false,
-  timeDataCapValue: 1,
+  timeDataCapEnabled: true,
+  timeDataCapValue: 2,
   timeDataCapUnit: 'GB',
   dataAllowanceValue: 1,
   dataAllowanceUnit: 'GB',
@@ -242,8 +242,9 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               className={inputClass}
             />
             <p className={hintClass}>
-              How many phones or laptops can use the same WiFi username and PIN at the same time.
-              Use 1 for a single device, or 4 for a family package.
+              How many distinct Wi‑Fi MACs can use the same username and PIN at once.
+              Use 1 for a single device, or 4 for a family package. Phones behind a home
+              router in router/NAT mode still count as one MAC.
             </p>
           </div>
 
@@ -327,7 +328,9 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                 )}
                 {form.timeDataCapEnabled ? (
                   <p className={hintClass}>
-                    Enforced on the router for abuse prevention. Subscribers still see unlimited data.
+                    Enforced on the router for abuse prevention (shared with anyone on the same
+                    login, including tether/NAT). Subscribers still see unlimited data. SpaiHub
+                    does not use anti-tether firewall rules.
                   </p>
                 ) : (
                   <p className={hintClass}>Leave unchecked for unlimited data during the browse period.</p>
