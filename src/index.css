@@ -97,7 +97,7 @@
   }
 
   .table-shell th {
-    @apply px-4 py-3;
+    @apply px-4 py-3 whitespace-nowrap;
   }
 
   .table-shell td {
@@ -108,8 +108,25 @@
     @apply min-w-[12rem];
   }
 
+  .table-shell th.sticky-actions,
+  .table-shell td.sticky-actions {
+    @apply sticky right-0 z-[1] min-w-[13rem] shadow-[-8px_0_12px_-8px_rgba(15,23,42,0.14)];
+  }
+
+  .table-shell thead th.sticky-actions {
+    @apply bg-surface-muted;
+  }
+
+  .table-shell tbody td.sticky-actions {
+    @apply bg-white;
+  }
+
   .table-shell tbody tr {
     @apply transition-colors hover:bg-navy/[0.03];
+  }
+
+  .table-shell tbody tr:hover td.sticky-actions {
+    background-color: #f4f6f8;
   }
 
   .admin-action {

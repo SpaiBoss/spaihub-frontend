@@ -117,7 +117,7 @@ export default function AdminTransactions() {
                 <th>Fee</th>
                 <th>Source</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th className="sticky-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -147,7 +147,7 @@ export default function AdminTransactions() {
                     <td>{tx.platformFeeXaf.toLocaleString()} XAF</td>
                     <td>{tx.voucherId ? 'Voucher' : 'MoMo'}</td>
                     <td><StatusBadge status={tx.status} /></td>
-                    <td>
+                    <td className="sticky-actions">
                       {tx.status === 'FAILED' && tx.campayReference && (
                         <button
                           type="button"

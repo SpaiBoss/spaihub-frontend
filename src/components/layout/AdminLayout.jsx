@@ -11,11 +11,11 @@ export function AdminGuard({ children }) {
 }
 
 const PRIMARY_LINKS = [
-  { to: '/admin/dashboard', label: 'Overview' },
+  { to: '/admin/dashboard', label: 'Overview', short: 'Home' },
   { to: '/admin/owners', label: 'Owners' },
-  { to: '/admin/locations', label: 'Locations' },
-  { to: '/admin/transactions', label: 'Transactions' },
-  { to: '/admin/withdrawals', label: 'Withdrawals' },
+  { to: '/admin/locations', label: 'Locations', short: 'Sites' },
+  { to: '/admin/transactions', label: 'Transactions', short: 'Txns' },
+  { to: '/admin/withdrawals', label: 'Withdrawals', short: 'W/D' },
 ];
 
 const CONTRIBUTOR_LINKS = [
@@ -27,18 +27,26 @@ const CONTRIBUTOR_LINKS = [
 function NavTabs({ links }) {
   const location = useLocation();
   return (
-    <div className="flex gap-0">
+    <div className="flex flex-wrap gap-0">
       {links.map((l) => (
         <NavLink
           key={l.to}
           to={l.to}
-          className={`py-3 px-3.5 sm:px-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+          title={l.label}
+          className={`py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
             location.pathname === l.to
               ? 'border-brand text-navy'
               : 'border-transparent text-navy/50 hover:text-navy'
           }`}
         >
-          {l.label}
+          {l.short ? (
+            <>
+              <span className="sm:hidden">{l.short}</span>
+              <span className="hidden sm:inline">{l.label}</span>
+            </>
+          ) : (
+            l.label
+          )}
         </NavLink>
       ))}
     </div>
@@ -74,16 +82,16 @@ export function AdminLayout({ children, title, description }) {
       </header>
 
       <nav className="bg-white border-b border-gray-200">
-        <div className="px-3 sm:px-5 flex items-stretch gap-4 overflow-x-auto">
+        <div className="px-2 sm:px-5 flex flex-col lg:flex-row lg:items-stretch lg:gap-4">
           <NavTabs links={PRIMARY_LINKS} />
-          <div className="hidden sm:block w-px self-stretch bg-gray-200 my-2 shrink-0" aria-hidden />
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="hidden lg:block w-px self-stretch bg-gray-200 my-2 shrink-0" aria-hidden />
+          <div className="flex items-center gap-1 border-t border-gray-100 lg:border-t-0">
             <span
-              className={`hidden md:inline text-[10px] uppercase tracking-[0.16em] font-semibold px-2 ${
+              className={`text-[10px] uppercase tracking-[0.16em] font-semibold px-2 shrink-0 ${
                 onContributorSection ? 'text-brand' : 'text-navy/35'
               }`}
             >
-              Contributors
+              Contrib.
             </span>
             <NavTabs links={CONTRIBUTOR_LINKS} />
           </div>

@@ -87,7 +87,7 @@ export default function AdminWithdrawals() {
                 <th className="p-3">Method</th>
                 <th className="p-3">Date</th>
                 <th className="p-3">Last error</th>
-                <th className="p-3">Actions</th>
+                <th className="p-3 sticky-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +103,8 @@ export default function AdminWithdrawals() {
                     <td className="p-3">{w.method.replace('_', ' ')}</td>
                     <td className="p-3">{new Date(w.createdAt).toLocaleString()}</td>
                     <td className="p-3 text-xs text-red-600 max-w-xs">{w.adminNote || '—'}</td>
-                    <td className="p-3 flex flex-wrap gap-2">
+                    <td className="p-3 sticky-actions">
+                      <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => checkCampay(w.id)}
@@ -128,6 +129,7 @@ export default function AdminWithdrawals() {
                         Mark paid manually
                       </button>
                       <button onClick={() => setRejecting(w)} className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs">Reject</button>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -55,7 +55,7 @@ export { formatDuration };
 
 export function StatusBadge({ status }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium text-navy bg-surface-muted border border-gray-200">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium text-navy bg-surface-muted border border-gray-200 whitespace-nowrap shrink-0">
       <span
         className={`w-1.5 h-1.5 rounded-sm shrink-0 ${STATUS_DOT[status] || 'bg-gray-400'}`}
         aria-hidden

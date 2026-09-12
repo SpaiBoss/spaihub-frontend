@@ -59,7 +59,7 @@ export default function AdminOwners() {
             action={<Button onClick={() => load(page)}>Retry</Button>}
           />
         ) : (
-        <div className="table-shell">
+        <div className="table-shell overflow-x-auto">
           <table>
             <thead>
               <tr>
@@ -71,7 +71,7 @@ export default function AdminOwners() {
                 <th>Revenue</th>
                 <th>Wallet</th>
                 <th>Joined</th>
-                <th>Actions</th>
+                <th className="sticky-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -98,7 +98,7 @@ export default function AdminOwners() {
                     <td>{o.totalRevenue.toLocaleString()} XAF</td>
                     <td>{o.walletBalance.toLocaleString()} XAF</td>
                     <td>{new Date(o.createdAt).toLocaleDateString()}</td>
-                    <td>
+                    <td className="sticky-actions">
                       <div className="flex flex-wrap gap-2">
                         {o.status === 'PENDING' && (
                           <button

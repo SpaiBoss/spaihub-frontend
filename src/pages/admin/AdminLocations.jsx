@@ -124,10 +124,10 @@ export default function AdminLocations() {
     <AdminGuard>
       <AdminLayout
         title="Locations"
-        description="Manage owner sites, packages, and routers across the platform"
+        description="Deactivate sites or remove empty ones; manage packages and routers per location."
       >
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3 mb-5">
-          <div className="flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3 mb-5">
+          <div className="w-full sm:max-w-sm min-w-0">
             <label className="label-field">Search</label>
             <Input
               value={q}
@@ -141,7 +141,7 @@ export default function AdminLocations() {
               }}
             />
           </div>
-          <div className="w-full sm:w-44">
+          <div className="w-full sm:w-40">
             <label className="label-field">Status</label>
             <select
               className="select-field"
@@ -157,7 +157,7 @@ export default function AdminLocations() {
             </select>
           </div>
           <Button
-            className="sm:mb-0.5"
+            className="sm:mb-0.5 w-full sm:w-auto"
             onClick={() => {
               setPage(1);
               load(1);
@@ -184,7 +184,7 @@ export default function AdminLocations() {
                   <th>Routers</th>
                   <th>Packages</th>
                   <th>Txns</th>
-                  <th className="min-w-[220px]">Actions</th>
+                  <th className="sticky-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,11 +208,11 @@ export default function AdminLocations() {
                       <tr>
                         <td>
                           <p className="font-medium text-navy">{loc.name}</p>
-                          <p className="text-xs text-navy/45 mt-0.5 max-w-[16rem] truncate">{loc.address}</p>
+                          <p className="text-xs text-navy/45 mt-0.5 max-w-[14rem] truncate">{loc.address}</p>
                         </td>
                         <td>
                           <p className="text-navy">{loc.owner?.name}</p>
-                          <p className="text-xs text-navy/45">{loc.owner?.email}</p>
+                          <p className="text-xs text-navy/45 truncate max-w-[12rem]">{loc.owner?.email}</p>
                         </td>
                         <td>
                           <StatusBadge status={loc.isActive ? 'ACTIVE' : 'SUSPENDED'} />
@@ -222,7 +222,7 @@ export default function AdminLocations() {
                         </td>
                         <td>{loc.packageCount}</td>
                         <td>{loc.transactionCount}</td>
-                        <td>
+                        <td className="sticky-actions">
                           <div className="flex flex-wrap gap-2">
                             <button
                               type="button"
