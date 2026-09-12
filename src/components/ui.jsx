@@ -185,14 +185,17 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
       <div className="absolute inset-0 bg-navy-dark/55" onClick={onClose} />
       <div
-        className={`relative bg-white rounded-lg border border-gray-200 shadow-elevated w-full ${sizes[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
+        className={`relative bg-white rounded-t-2xl sm:rounded-lg border border-gray-200 shadow-elevated w-full ${sizes[size]} max-h-[92vh] sm:max-h-[90vh] overflow-y-auto animate-slide-up`}
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200">
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <span className="w-10 h-1 rounded-full bg-gray-300" aria-hidden />
+        </div>
+        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 py-4 border-b border-gray-200">
           <div>
             <h3 className="text-lg font-semibold text-navy">{title}</h3>
             {description && <p className="text-sm text-navy/55 mt-0.5">{description}</p>}
@@ -201,14 +204,14 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-navy/40 hover:text-navy hover:bg-navy/[0.04] transition-colors"
+              className="p-2.5 -mr-1.5 rounded-lg text-navy/40 hover:text-navy hover:bg-navy/[0.04] transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
           )}
         </div>
-        <div className="p-6">{children}</div>
+        <div className="p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6">{children}</div>
       </div>
     </div>
   );

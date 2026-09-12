@@ -272,12 +272,14 @@ export default function Locations() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center gap-3 mb-6">
         <p className="text-sm text-navy/50 font-medium">
           {locations.length} location{locations.length !== 1 ? 's' : ''}
         </p>
-        <Button onClick={() => setShowAddLocation(true)} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Location
+        <Button onClick={() => setShowAddLocation(true)} className="gap-2 min-h-[44px] shrink-0">
+          <Plus className="w-4 h-4" />
+          <span className="sm:hidden">Add</span>
+          <span className="hidden sm:inline">Add Location</span>
         </Button>
       </div>
 
@@ -300,17 +302,17 @@ export default function Locations() {
           <div key={loc.id} className="card overflow-hidden hover:shadow-card-hover transition-shadow duration-200">
             <button
               onClick={() => expandLocation(loc.id)}
-              className="w-full card-body flex items-center justify-between text-left hover:bg-brand/[0.02] transition-colors"
+              className="w-full card-body flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-left hover:bg-brand/[0.02] transition-colors"
             >
-              <div>
+              <div className="min-w-0">
                 <h3 className="font-semibold text-navy">{loc.name}</h3>
                 <p className="text-sm text-navy/50 mt-0.5">{loc.address}</p>
-                <div className="flex gap-4 mt-2 text-xs text-navy/40 font-medium">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-navy/40 font-medium">
                   <span>{loc.onlineRouters}/{loc.routerCount} routers online</span>
                   <span>{loc.activeSessions} active sessions</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
                 <StatusBadge status={loc.isActive ? 'ACTIVE' : 'SUSPENDED'} />
                 <button
                   type="button"
@@ -318,39 +320,40 @@ export default function Locations() {
                     e.stopPropagation();
                     toggleLocationActive(loc);
                   }}
-                  className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-navy/70 hover:bg-gray-200"
+                  className="text-xs px-3 py-2 min-h-[40px] rounded-lg bg-gray-100 text-navy/70 hover:bg-gray-200 font-medium"
                 >
                   {loc.isActive ? 'Suspend' : 'Activate'}
                 </button>
-                {expanded === loc.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                {expanded === loc.id ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
               </div>
             </button>
 
             {expanded === loc.id && (
-              <div className="border-t border-gray-100 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-                  <div className="flex gap-2">
+              <div className="border-t border-gray-100 p-4 sm:p-5">
+                <div className="flex flex-col gap-3 mb-4">
+                  <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
                   {[
-                    { id: 'routers', label: 'Routers' },
-                    { id: 'packages', label: 'Packages' },
-                    { id: 'sessions', label: 'Sessions' },
-                    { id: 'access', label: 'Access policy' },
+                    { id: 'routers', label: 'Routers', short: 'Routers' },
+                    { id: 'packages', label: 'Packages', short: 'Plans' },
+                    { id: 'sessions', label: 'Sessions', short: 'Live' },
+                    { id: 'access', label: 'Access policy', short: 'Policy' },
                   ].map((t) => (
                     <button
                       key={t.id}
                       onClick={() => setTab(t.id)}
-                      className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                      className={`px-3.5 py-2 min-h-[40px] rounded-lg text-sm font-medium whitespace-nowrap shrink-0 ${
                         tab === t.id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {t.label}
+                      <span className="sm:hidden">{t.short}</span>
+                      <span className="hidden sm:inline">{t.label}</span>
                     </button>
                   ))}
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowEditLocation(true)}
-                    className="text-xs text-navy/60 hover:text-navy inline-flex items-center gap-1"
+                    className="text-sm text-navy/60 hover:text-navy inline-flex items-center gap-1.5 self-start min-h-[40px]"
                   >
                     <Pencil className="w-3.5 h-3.5" /> Edit location
                   </button>
@@ -402,12 +405,13 @@ export default function Locations() {
                             <td className="py-2 text-gray-400">
                               {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : 'Never (normal without MikroTik)'}
                             </td>
-                            <td className="py-2 sticky-actions whitespace-nowrap space-x-2 text-right">
+                            <td className="py-2 sticky-actions">
+                              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-2">
                               {r.deploymentType === 'CHR' ? (
                                 <button
                                   type="button"
                                   onClick={() => openChrWizard(r)}
-                                  className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center gap-1"
+                                  className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-brand/10 sm:bg-transparent sm:px-0 sm:min-h-0"
                                 >
                                   <Cloud className="w-3.5 h-3.5" /> Setup CHR
                                 </button>
@@ -415,7 +419,7 @@ export default function Locations() {
                                 <button
                                   type="button"
                                   onClick={() => openRouterSetup(r.id)}
-                                  className="text-navy/60 text-xs font-medium hover:text-navy inline-flex items-center gap-1"
+                                  className="text-navy/70 text-xs font-medium hover:text-navy inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-navy/5 sm:bg-transparent sm:px-0 sm:min-h-0"
                                 >
                                   <Router className="w-3.5 h-3.5" /> Setup script
                                 </button>
@@ -423,17 +427,18 @@ export default function Locations() {
                               <button
                                 type="button"
                                 onClick={() => openPreviewPortal(r)}
-                                className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center gap-1"
+                                className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-brand/10 sm:bg-transparent sm:px-0 sm:min-h-0"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" /> Preview portal
                               </button>
                               <button
                                 type="button"
                                 onClick={() => deleteRouter(r.id)}
-                                className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center gap-1"
+                                className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-red-50 sm:bg-transparent sm:px-0 sm:min-h-0"
                               >
                                 <Trash2 className="w-3.5 h-3.5" /> Remove
                               </button>
+                              </div>
                             </td>
                           </tr>
                         ))

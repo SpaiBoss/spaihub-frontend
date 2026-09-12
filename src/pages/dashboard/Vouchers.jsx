@@ -165,11 +165,11 @@ export default function Vouchers() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
         <select
           value={filters.locationId}
           onChange={(e) => setFilters({ ...filters, locationId: e.target.value, page: 1 })}
-          className="select-field w-auto min-w-[160px] py-2"
+          className="select-field w-full sm:w-auto sm:min-w-[160px] py-2.5 min-h-[44px]"
         >
           <option value="">All locations</option>
           {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -177,32 +177,34 @@ export default function Vouchers() {
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-          className="select-field w-auto min-w-[140px] py-2"
+          className="select-field w-full sm:w-auto sm:min-w-[140px] py-2.5 min-h-[44px]"
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.filter(Boolean).map((s) => (
             <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
           ))}
         </select>
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
+        <Button onClick={() => setShowCreate(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
           <Plus className="w-4 h-4" /> Generate vouchers
         </Button>
         <Button
           variant="secondary"
           onClick={syncUnusedToRouter}
           disabled={syncing || !filters.locationId}
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto min-h-[44px]"
           title={!filters.locationId ? 'Select a location first' : 'Queue unused vouchers onto the MikroTik'}
         >
           <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
           {syncing ? 'Syncing…' : 'Sync to router'}
         </Button>
-        <Button variant="secondary" onClick={() => setShowPdfExport(true)} className="gap-2 ml-auto">
-          <FileText className="w-4 h-4" /> Print PDF
-        </Button>
-        <Button variant="secondary" onClick={exportCsv} className="gap-2">
-          <Download className="w-4 h-4" /> Export CSV
-        </Button>
+        <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
+          <Button variant="secondary" onClick={() => setShowPdfExport(true)} className="gap-2 flex-1 sm:flex-none min-h-[44px]">
+            <FileText className="w-4 h-4" /> PDF
+          </Button>
+          <Button variant="secondary" onClick={exportCsv} className="gap-2 flex-1 sm:flex-none min-h-[44px]">
+            <Download className="w-4 h-4" /> CSV
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -215,6 +217,60 @@ export default function Vouchers() {
         </Card>
       )}
 
+      {/* Phone-friendly cards */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <Card bodyClassName="p-6 text-center text-navy/40 text-sm">Loading vouchers...</Card>
+        ) : data.vouchers.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Ticket}
+              title="No vouchers yet"
+              description="Generate prepaid codes for subscribers to redeem on your captive portal."
+              action={
+                <Button onClick={() => setShowCreate(true)}>
+                  <Plus className="w-4 h-4" /> Generate vouchers
+                </Button>
+              }
+            />
+          </Card>
+        ) : (
+          data.vouchers.map((v) => (
+            <div key={v.id} className="card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-mono font-semibold text-navy text-sm break-all">{v.code}</p>
+                <StatusBadge status={v.status} />
+              </div>
+              <p className="text-sm text-navy mt-2 font-medium">{v.package.name}</p>
+              <p className="text-xs text-navy/50 mt-0.5">{formatOwnerPackageSummary(v.package)}</p>
+              <p className="text-xs text-navy/45 mt-2">
+                {v.location.name}
+                {v.batchLabel ? ` · ${v.batchLabel}` : ''}
+              </p>
+              <div className="flex gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => copyCode(v.code)}
+                  className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand/10 text-brand text-sm font-medium"
+                >
+                  <Copy className="w-4 h-4" /> Copy
+                </button>
+                {v.status === 'UNUSED' && (
+                  <button
+                    type="button"
+                    onClick={() => revokeVoucher(v.id)}
+                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-50 text-red-600 text-sm font-medium"
+                  >
+                    <Ban className="w-4 h-4" /> Revoke
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block">
       <TableShell>
         <table>
           <thead>
@@ -280,6 +336,7 @@ export default function Vouchers() {
           </tbody>
         </table>
       </TableShell>
+      </div>
 
       <Pagination
         className="mt-6"

@@ -58,11 +58,11 @@ export default function Transactions() {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
         <select
           value={filters.locationId}
           onChange={(e) => setFilters({ ...filters, locationId: e.target.value, page: 1 })}
-          className="select-field w-auto min-w-[160px] py-2"
+          className="select-field w-full sm:w-auto sm:min-w-[160px] py-2.5 min-h-[44px]"
         >
           <option value="">All locations</option>
           {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -70,7 +70,7 @@ export default function Transactions() {
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-          className="select-field w-auto min-w-[140px] py-2"
+          className="select-field w-full sm:w-auto sm:min-w-[140px] py-2.5 min-h-[44px]"
         >
           <option value="">All statuses</option>
           <option value="SUCCESS">Success</option>
@@ -81,15 +81,15 @@ export default function Transactions() {
           type="date"
           value={filters.dateFrom}
           onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value, page: 1 })}
-          className="input-field w-auto py-2"
+          className="input-field w-full sm:w-auto py-2.5 min-h-[44px]"
         />
         <input
           type="date"
           value={filters.dateTo}
           onChange={(e) => setFilters({ ...filters, dateTo: e.target.value, page: 1 })}
-          className="input-field w-auto py-2"
+          className="input-field w-full sm:w-auto py-2.5 min-h-[44px]"
         />
-        <Button variant="secondary" onClick={exportCsv} className="gap-2 ml-auto">
+        <Button variant="secondary" onClick={exportCsv} className="gap-2 w-full sm:w-auto sm:ml-auto min-h-[44px]">
           <Download className="w-4 h-4" /> Export CSV
         </Button>
       </div>
@@ -103,6 +103,35 @@ export default function Transactions() {
           }
         />
       ) : (
+      <>
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          [...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)
+        ) : data.transactions.length === 0 ? (
+          <EmptyState title="No transactions yet" description="Payments from your captive portal will appear here." />
+        ) : (
+          data.transactions.map((tx) => (
+            <div key={tx.id} className="card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-navy">{tx.amountXaf.toLocaleString()} XAF</p>
+                  <p className="text-xs text-navy/50 mt-0.5">
+                    You keep {tx.ownerCreditXaf.toLocaleString()} XAF
+                  </p>
+                </div>
+                <StatusBadge status={tx.status} />
+              </div>
+              <p className="text-sm text-navy mt-2">{tx.packageName}</p>
+              <p className="text-xs text-navy/50 mt-1">
+                {tx.locationName} · {tx.subscriberPhone}
+              </p>
+              <p className="text-xs text-navy/40 mt-2">{new Date(tx.createdAt).toLocaleString()}</p>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block">
       <TableShell>
         <table>
           <thead>
@@ -145,6 +174,8 @@ export default function Transactions() {
           </tbody>
         </table>
       </TableShell>
+      </div>
+      </>
       )}
 
       <Pagination

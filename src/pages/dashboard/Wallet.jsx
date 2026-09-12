@@ -102,11 +102,11 @@ export default function Wallet() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm text-center">
+      <div className="bg-white rounded-xl border border-gray-100 p-6 sm:p-8 shadow-sm text-center">
         <p className="text-gray-500 text-sm">
           {(wallet.contributorReservedXaf || 0) > 0 ? 'Available to withdraw' : 'Available Balance'}
         </p>
-        <p className="text-4xl font-bold text-navy mt-2">
+        <p className="text-3xl sm:text-4xl font-bold text-navy mt-2">
           {(wallet.availableXaf ?? wallet.walletBalance).toLocaleString()} XAF
         </p>
         {(wallet.contributorReservedXaf || 0) > 0 && (
@@ -118,16 +118,38 @@ export default function Wallet() {
             </p>
           </div>
         )}
-        <Button onClick={openWithdrawModal} className="mt-4">
-          Withdraw
+        <Button onClick={openWithdrawModal} className="mt-4 w-full sm:w-auto min-h-[48px] text-base">
+          Withdraw to MoMo
         </Button>
         <p className="mt-4 text-xs text-navy/45 max-w-sm mx-auto leading-relaxed">
           MoMo sales credit your wallet after the platform fee ({platformFeePercent}%). Voucher stock you sold offline does not add wallet balance.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <h3 className="p-4 font-semibold border-b">Withdrawal History</h3>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {wallet.withdrawals.length === 0 ? (
+            <p className="p-8 text-center text-gray-400 text-sm">No withdrawals yet</p>
+          ) : (
+            wallet.withdrawals.map((w) => (
+              <div key={w.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-semibold text-navy">{w.amountXaf.toLocaleString()} XAF</p>
+                  <StatusBadge status={w.status} />
+                </div>
+                <p className="text-xs text-navy/50 mt-1">
+                  {w.method.replace('_', ' ')} · {w.phoneNumber}
+                </p>
+                <p className="text-xs text-navy/40 mt-1">{new Date(w.createdAt).toLocaleString()}</p>
+                {w.adminNote && <p className="text-xs text-gray-400 mt-1">{w.adminNote}</p>}
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-gray-500 border-b bg-gray-50">
@@ -157,6 +179,7 @@ export default function Wallet() {
             )}
           </tbody>
         </table>
+        </div>
         <Pagination
           className="p-4 border-t"
           page={pagination.page}

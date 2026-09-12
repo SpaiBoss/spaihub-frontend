@@ -22,6 +22,14 @@ const navItems = [
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
+const bottomNavItems = [
+  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, end: true },
+  { to: '/dashboard/locations', label: 'Sites', icon: MapPin },
+  { to: '/dashboard/vouchers', label: 'Codes', icon: Ticket },
+  { to: '/dashboard/wallet', label: 'Cash', icon: Wallet },
+  { to: '/dashboard/transactions', label: 'Sales', icon: Receipt },
+];
+
 const pageMeta = {
   '/dashboard': {
     title: 'Dashboard',
@@ -88,7 +96,7 @@ export default function DashboardLayout() {
             end={end}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
-              `group flex items-center gap-3 pl-3 pr-3 py-2.5 text-sm transition-colors duration-150 border-l-2 ${
+              `group flex items-center gap-3 pl-3 pr-3 py-3 text-sm transition-colors duration-150 border-l-2 min-h-[44px] ${
                 isActive
                   ? 'border-brand text-white bg-white/[0.06] font-medium'
                   : 'border-transparent text-white/60 hover:text-white hover:bg-white/[0.04]'
@@ -112,7 +120,7 @@ export default function DashboardLayout() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center justify-center gap-2 w-full mt-3 py-2 rounded-lg text-white/65 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-colors"
+          className="flex items-center justify-center gap-2 w-full mt-3 min-h-[44px] py-2 rounded-lg text-white/65 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sign out
@@ -130,16 +138,16 @@ export default function DashboardLayout() {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-in">
           <div className="absolute inset-0 bg-navy-dark/60" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-72 h-full animate-slide-up">{sidebar}</aside>
+          <aside className="relative w-[min(18rem,86vw)] h-full animate-slide-up">{sidebar}</aside>
         </div>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-5 py-3.5 flex items-center justify-between sticky top-0 z-10">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-5 py-3 flex items-center justify-between sticky top-0 z-10">
+          <div className="flex items-center gap-2.5 min-w-0">
             <button
               type="button"
-              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-navy/[0.04] transition-colors"
+              className="lg:hidden p-2.5 -ml-1.5 rounded-lg hover:bg-navy/[0.04] transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
@@ -150,11 +158,42 @@ export default function DashboardLayout() {
               <p className="text-xs text-navy/50 hidden sm:block truncate">{meta.description}</p>
             </div>
           </div>
+          <NavLink
+            to="/dashboard/settings"
+            className="lg:hidden p-2.5 rounded-lg text-navy/55 hover:text-navy hover:bg-navy/[0.04] min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+            aria-label="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </NavLink>
         </header>
 
-        <main className="flex-1 p-5 sm:p-6 animate-fade-in">
+        <main className="flex-1 p-4 sm:p-6 animate-fade-in pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6">
           <Outlet />
         </main>
+
+        <nav
+          className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-200"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          aria-label="Primary"
+        >
+          <div className="grid grid-cols-5 h-14 max-w-lg mx-auto">
+            {bottomNavItems.map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+                    isActive ? 'text-brand' : 'text-navy/45'
+                  }`
+                }
+              >
+                <Icon className="w-5 h-5" strokeWidth={1.75} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
       </div>
     </div>
   );

@@ -147,23 +147,23 @@ export default function Home() {
         <StatCard title="Wallet Balance" value={formatXaf(stats.walletBalance)} icon={Wallet} accent="amber" />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card bodyClassName="p-4">
-          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">All-time revenue</p>
-          <p className="text-xl font-bold text-navy mt-2">{formatXaf(stats.allTimeRevenue)}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card bodyClassName="p-3.5 sm:p-4">
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">All-time</p>
+          <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.allTimeRevenue)}</p>
         </Card>
-        <Card bodyClassName="p-4">
-          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">Unique subscribers today</p>
-          <p className="text-xl font-bold text-navy mt-2">{stats.uniqueSubscribersToday}</p>
-          <p className="text-xs text-navy/45 mt-1">{stats.transactionsToday} total payments</p>
+        <Card bodyClassName="p-3.5 sm:p-4">
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">Subscribers today</p>
+          <p className="text-lg sm:text-xl font-bold text-navy mt-2">{stats.uniqueSubscribersToday}</p>
+          <p className="text-xs text-navy/45 mt-1">{stats.transactionsToday} payments</p>
         </Card>
-        <Card bodyClassName="p-4">
-          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">MoMo this month</p>
-          <p className="text-xl font-bold text-navy mt-2">{formatXaf(stats.momoRevenueMonth)}</p>
+        <Card bodyClassName="p-3.5 sm:p-4">
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">MoMo month</p>
+          <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.momoRevenueMonth)}</p>
         </Card>
-        <Card bodyClassName="p-4">
-          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">Voucher revenue</p>
-          <p className="text-xl font-bold text-navy mt-2">{formatXaf(stats.voucherRevenueMonth)}</p>
+        <Card bodyClassName="p-3.5 sm:p-4">
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">Voucher month</p>
+          <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.voucherRevenueMonth)}</p>
         </Card>
       </div>
 
@@ -176,12 +176,13 @@ export default function Home() {
             </div>
             <span className="text-xs font-medium text-brand border border-brand/25 px-2 py-0.5 rounded">Live</span>
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={chart} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <div className="h-[220px] sm:h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chart} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
               <ChartGradientDefs />
               <CartesianGrid strokeDasharray="4 4" stroke="#eef2f6" vertical={false} />
-              <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(d) => d.slice(5)} />
-              <YAxis {...CHART_AXIS} width={56} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+              <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(d) => d.slice(5)} interval="preserveStartEnd" />
+              <YAxis {...CHART_AXIS} width={40} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
               <Tooltip content={<ChartTooltip />} labelFormatter={formatChartDate} />
               <Area
                 type="monotone"
@@ -195,6 +196,7 @@ export default function Home() {
               />
             </AreaChart>
           </ResponsiveContainer>
+          </div>
         </Card>
 
         <Card>

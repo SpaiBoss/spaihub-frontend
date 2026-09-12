@@ -40,20 +40,20 @@ export default function AccountingExportBar({ mode = 'owner' }) {
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-3">
+    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3">
       <input
         type="date"
         value={range.dateFrom}
         onChange={(e) => setRange({ ...range, dateFrom: e.target.value })}
-        className="input-field py-2 w-auto"
+        className="input-field py-2.5 w-full sm:w-auto min-h-[44px]"
       />
       <input
         type="date"
         value={range.dateTo}
         onChange={(e) => setRange({ ...range, dateTo: e.target.value })}
-        className="input-field py-2 w-auto"
+        className="input-field py-2.5 w-full sm:w-auto min-h-[44px]"
       />
-      <Button onClick={exportAccounting} disabled={loading} variant="secondary" className="gap-2">
+      <Button onClick={exportAccounting} disabled={loading} variant="secondary" className="gap-2 w-full sm:w-auto min-h-[44px]">
         <Download className="w-4 h-4" />
         {loading ? 'Exporting...' : 'Export CSV'}
       </Button>
