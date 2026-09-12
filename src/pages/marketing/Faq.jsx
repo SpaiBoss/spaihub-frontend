@@ -11,14 +11,21 @@ export default function Faq() {
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
   const wa = whatsappUrl(contactWhatsApp, 'Hi — I have a Spai-Hub question.');
 
-  const items = MARKETING_FAQ.map((item) =>
-    item.q === 'Is there a subscription fee?'
-      ? {
-          ...item,
-          a: `Creating an account is free. SpaiHub currently takes ${platformFeePercent}% of each successful MoMo sale (shown live from platform configuration).`,
-        }
-      : item
-  );
+  const items = MARKETING_FAQ.map((item) => {
+    if (item.q === 'Is there a subscription fee?') {
+      return {
+        ...item,
+        a: `Creating an account is free. SpaiHub currently takes ${platformFeePercent}% of each successful MoMo sale (shown live from platform configuration).`,
+      };
+    }
+    if (item.q === 'When do I get paid?') {
+      return {
+        ...item,
+        a: `Each successful MoMo sale credits your SpaiHub wallet after the ${platformFeePercent}% platform fee. Withdraw to your MoMo number from the wallet page. Voucher redemptions do not credit the wallet — they are prepaid stock you sold offline.`,
+      };
+    }
+    return item;
+  });
 
   return (
     <>

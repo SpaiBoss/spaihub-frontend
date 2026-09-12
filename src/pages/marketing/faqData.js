@@ -13,11 +13,11 @@ export const MARKETING_FAQ = [
   },
   {
     q: 'When do I get paid?',
-    a: 'Each successful MoMo sale credits your SpaiHub wallet (minus the platform fee). Withdraw to your MoMo number from the wallet page. Voucher redemptions do not credit the wallet — they are prepaid stock you sold offline.',
+    a: 'Each successful MoMo sale credits your SpaiHub wallet after the live platform fee percent. Withdraw to your MoMo number from the wallet page. Voucher redemptions do not credit the wallet — they are prepaid stock you sold offline.',
   },
   {
     q: 'Is there a subscription fee?',
-    a: 'Creating an account is free. SpaiHub takes a percentage of each successful MoMo sale (the live rate is shown on the Pricing page and comes from our platform configuration).',
+    a: 'Creating an account is free. SpaiHub takes a percentage of each successful MoMo sale — the live rate comes from platform configuration and is shown on Pricing and in the FAQ.',
   },
   {
     q: 'Can one package serve several phones?',

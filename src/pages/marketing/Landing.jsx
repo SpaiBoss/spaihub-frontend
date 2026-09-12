@@ -119,7 +119,7 @@ const TESTIMONIALS = [
   },
 ];
 
-const FAQ_TEASER = [
+const FAQ_TEASER_BASE = [
   {
     q: 'Do I need new hardware?',
     a: 'No. SpaiHub is built for MikroTik routers you already run. Paste the hotspot and connection scripts from the dashboard.',
@@ -130,7 +130,7 @@ const FAQ_TEASER = [
   },
   {
     q: 'When do I get paid?',
-    a: 'Each successful MoMo sale credits your SpaiHub wallet (minus the platform fee). Withdraw to MoMo from the dashboard.',
+    a: null, // filled from live platformFeePercent
   },
 ];
 
@@ -168,6 +168,14 @@ const STEPS = [
 export default function Landing() {
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
   const wa = whatsappUrl(contactWhatsApp, 'Hi — I want to learn about Spai-Hub for my hotspot.');
+  const faqTeaser = FAQ_TEASER_BASE.map((item) =>
+    item.q === 'When do I get paid?'
+      ? {
+          ...item,
+          a: `Each successful MoMo sale credits your SpaiHub wallet after the ${platformFeePercent}% platform fee. Withdraw to MoMo from the dashboard.`,
+        }
+      : item
+  );
 
   return (
     <>
@@ -404,7 +412,7 @@ export default function Landing() {
             All FAQs →
           </Link>
         </div>
-        <FaqList items={FAQ_TEASER} />
+        <FaqList items={faqTeaser} />
       </MarketingSection>
 
       <FinalCta

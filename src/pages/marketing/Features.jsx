@@ -82,8 +82,20 @@ const GROUPS = [
 ];
 
 export default function Features() {
-  const { contactWhatsApp } = usePublicConfig();
+  const { platformFeePercent, contactWhatsApp } = usePublicConfig();
   const wa = whatsappUrl(contactWhatsApp, 'Hi — I have a question about Spai-Hub features.');
+
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    items: group.items.map((item) =>
+      item.title === 'Owner wallet'
+        ? {
+            ...item,
+            body: `MoMo sales credit your balance after the ${platformFeePercent}% platform fee. Withdraw to MoMo when you need cash.`,
+          }
+        : item
+    ),
+  }));
 
   return (
     <>
@@ -121,7 +133,7 @@ export default function Features() {
         </div>
       </MarketingSection>
 
-      {GROUPS.map((group) => (
+      {groups.map((group) => (
         <MarketingSection key={group.title} className="pb-16 sm:pb-20">
           <FeatureGrid items={group.items} />
         </MarketingSection>

@@ -4,8 +4,10 @@ import { Loader } from 'lucide-react';
 import api from '../../services/api';
 import { Modal, Pagination, StatusBadge, Button, Input, Skeleton, EmptyState } from '../../components/ui';
 import { detectCameroonOperator, paymentMethodForOperator } from '../../utils/phone';
+import { usePublicConfig } from '../../hooks/usePublicConfig';
 
 export default function Wallet() {
+  const { platformFeePercent } = usePublicConfig();
   const [wallet, setWallet] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
@@ -119,6 +121,9 @@ export default function Wallet() {
         <Button onClick={openWithdrawModal} className="mt-4">
           Withdraw
         </Button>
+        <p className="mt-4 text-xs text-navy/45 max-w-sm mx-auto leading-relaxed">
+          MoMo sales credit your wallet after the platform fee ({platformFeePercent}%). Voucher stock you sold offline does not add wallet balance.
+        </p>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">

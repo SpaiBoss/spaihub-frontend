@@ -44,6 +44,14 @@ const STEPS = [
 export default function HowItWorks() {
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
   const wa = whatsappUrl(contactWhatsApp, 'Hi — I need help setting up Spai-Hub.');
+  const steps = STEPS.map((step) =>
+    step.n === '05'
+      ? {
+          ...step,
+          body: `Successful MoMo sales credit your wallet after the ${platformFeePercent}% platform fee. Request a withdrawal to your MTN or Orange number.`,
+        }
+      : step
+  );
 
   return (
     <>
@@ -57,7 +65,7 @@ export default function HowItWorks() {
 
       <MarketingSection className="pb-16 sm:pb-20">
         <ol className="space-y-0 border-l border-navy/15 ml-3 sm:ml-4">
-          {STEPS.map((step, index) => {
+          {steps.map((step, index) => {
             const Icon = step.icon;
             return (
               <Reveal key={step.n} as="li" delayMs={index * 70} className="relative pl-8 sm:pl-10 pb-10 last:pb-0">
