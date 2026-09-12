@@ -74,10 +74,10 @@ export default function AdminWithdrawals() {
 
   return (
     <AdminGuard>
-      <AdminLayout title="Withdrawals">
-        <h3 className="font-semibold mb-3">Pending ({pending.length})</h3>
-        <div className="bg-white rounded-xl border shadow-sm overflow-x-auto mb-8">
-          <table className="w-full text-sm">
+      <AdminLayout title="Withdrawals" description="Approve, reject, or manually settle owner MoMo payouts">
+        <h3 className="font-semibold text-navy mb-3">Pending ({pending.length})</h3>
+        <div className="table-shell overflow-x-auto mb-8">
+          <table>
             <thead>
               <tr className="text-left text-gray-500 border-b bg-gray-50">
                 <th className="p-3">Owner</th>

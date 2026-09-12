@@ -101,11 +101,35 @@
   }
 
   .table-shell td {
-    @apply px-4 py-3 border-b border-gray-100;
+    @apply px-4 py-3.5 border-b border-gray-100 align-middle;
+  }
+
+  .table-shell td:last-child {
+    @apply min-w-[12rem];
   }
 
   .table-shell tbody tr {
     @apply transition-colors hover:bg-navy/[0.03];
+  }
+
+  .admin-action {
+    @apply text-xs px-3 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-40;
+  }
+
+  .admin-action-neutral {
+    @apply admin-action bg-navy/5 text-navy hover:bg-navy/10;
+  }
+
+  .admin-action-danger {
+    @apply admin-action bg-red-50 text-red-700 hover:bg-red-100;
+  }
+
+  .admin-action-success {
+    @apply admin-action bg-green-50 text-green-700 hover:bg-green-100;
+  }
+
+  .admin-action-warn {
+    @apply admin-action bg-amber-50 text-amber-800 hover:bg-amber-100;
   }
 
   .table-shell tbody tr:last-child td {

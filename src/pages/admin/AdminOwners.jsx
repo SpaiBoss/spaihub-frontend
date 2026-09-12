@@ -102,16 +102,18 @@ export default function AdminOwners() {
                       <div className="flex flex-wrap gap-2">
                         {o.status === 'PENDING' && (
                           <button
+                            type="button"
                             onClick={() => activateOwner(o.id)}
-                            className="text-xs px-3 py-1 rounded-lg bg-green-100 text-green-700"
+                            className="admin-action-success"
                           >
                             Activate
                           </button>
                         )}
                         {o.status !== 'PENDING' && (
                           <button
+                            type="button"
                             onClick={() => toggleStatus(o.id, o.status)}
-                            className={`text-xs px-3 py-1 rounded-lg ${o.status === 'ACTIVE' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+                            className={o.status === 'ACTIVE' ? 'admin-action-danger' : 'admin-action-success'}
                           >
                             {o.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                           </button>

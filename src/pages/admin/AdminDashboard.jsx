@@ -94,14 +94,16 @@ export default function AdminDashboard() {
 
           {!error && (
           <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {loading || cards.length === 0
-              ? [...Array(6)].map((_, i) => <Skeleton key={i} className="h-28" />)
+              ? [...Array(8)].map((_, i) => <Skeleton key={i} className="h-28 rounded-lg" />)
               : cards.map((c) => (
-                  <Card key={c.label} bodyClassName="p-5">
-                    <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">{c.label}</p>
-                    <p className="text-2xl font-bold text-navy mt-2 tracking-tight">{c.value}</p>
-                    {c.sub && <p className="text-xs text-navy/45 mt-1.5">{c.sub}</p>}
+                  <Card key={c.label} bodyClassName="p-5 h-full">
+                    <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide leading-snug">
+                      {c.label}
+                    </p>
+                    <p className="text-2xl font-bold text-navy mt-2.5 tracking-tight tabular-nums">{c.value}</p>
+                    {c.sub && <p className="text-xs text-navy/45 mt-1.5 leading-relaxed">{c.sub}</p>}
                   </Card>
                 ))}
           </div>

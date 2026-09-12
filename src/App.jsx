@@ -25,6 +25,7 @@ import Portal from './pages/portal/Portal';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOwners from './pages/admin/AdminOwners';
+import AdminLocations from './pages/admin/AdminLocations';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminWithdrawals from './pages/admin/AdminWithdrawals';
 import AdminContributors from './pages/admin/AdminContributors';
@@ -136,6 +137,7 @@ export default function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/owners" element={<AdminOwners />} />
+            <Route path="/admin/locations" element={<AdminLocations />} />
             <Route path="/admin/contributors" element={<AdminContributors />} />
             <Route path="/admin/contributor-links" element={<AdminContributorLinks />} />
             <Route path="/admin/contributor-withdrawals" element={<AdminContributorWithdrawals />} />
