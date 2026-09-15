@@ -266,7 +266,7 @@ function applyPaidSession(data, { routerToken, phone: paidPhone, setSession, set
 
 export default function Portal() {
   const { routerToken } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryMac = searchParams.get('mac') || '';
   const linkLogin = searchParams.get('link-login-only') || searchParams.get('link-login') || '';
   const linkLogout = searchParams.get('link-logout-only') || searchParams.get('link-logout') || '';
@@ -292,6 +292,15 @@ export default function Portal() {
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [cancellingPayment, setCancellingPayment] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [fairUseNotice, setFairUseNotice] = useState(() => searchParams.get('reason') === 'fair-use');
+
+  useEffect(() => {
+    if (searchParams.get('reason') !== 'fair-use') return;
+    setFairUseNotice(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('reason');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const retryPortalBootstrap = useCallback(() => {
     setError('');
@@ -884,6 +893,20 @@ export default function Portal() {
           <p className="text-xs font-medium text-navy/45 tracking-wide mb-2">WiFi hotspot</p>
           <h1 className="text-xl font-semibold text-navy">{portal?.locationName}</h1>
           <p className="text-navy/55 text-sm mt-1">{welcomeText}</p>
+          {fairUseNotice && (
+            <div className="mt-3 text-left rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+              <p className="text-sm font-medium text-amber-900">
+                Fair use limit reached. Buy another package to continue.
+              </p>
+              <button
+                type="button"
+                onClick={() => setFairUseNotice(false)}
+                className="mt-2 text-xs font-medium text-amber-800/80 hover:text-amber-950 underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           {routerUnavailable && (
             <p className="mt-3 text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
               {portal?.routerStatus === 'OFFLINE'
