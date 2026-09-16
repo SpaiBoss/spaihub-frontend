@@ -142,7 +142,7 @@ export default function Home() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard title="Today's Revenue" value={formatXaf(stats.todayRevenue)} icon={TrendingUp} trend={trend} accent="green" />
-        <StatCard title="This Month" value={formatXaf(stats.monthRevenue)} icon={BarChart3} trend={stats.monthChangePercent} accent="brand" />
+        <StatCard title="This Month" value={formatXaf(stats.monthRevenue)} icon={BarChart3} trend={stats.monthChangePercent} trendLabel="vs last month" accent="brand" />
         <StatCard title="Active Sessions" value={stats.activeSessions} icon={Users} accent="navy" />
         <StatCard title="Wallet Balance" value={formatXaf(stats.walletBalance)} icon={Wallet} accent="amber" />
       </div>

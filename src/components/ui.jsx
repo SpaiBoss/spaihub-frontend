@@ -146,7 +146,7 @@ export function EmptyState({ icon: Icon, title, description, action }) {
   );
 }
 
-export function StatCard({ title, value, icon: Icon, trend, accent = 'brand' }) {
+export function StatCard({ title, value, icon: Icon, trend, trendLabel = 'vs yesterday', accent = 'brand' }) {
   return (
     <Card className="hover:shadow-card-hover transition-shadow duration-200">
       <div className="min-w-0">
@@ -155,7 +155,7 @@ export function StatCard({ title, value, icon: Icon, trend, accent = 'brand' }) 
         {trend !== undefined && (
           <p className={`text-xs font-medium mt-2 ${trend >= 0 ? 'text-signal' : 'text-red-600'}`}>
             {trend >= 0 ? '+' : ''}
-            {trend}% vs yesterday
+            {trend}% {trendLabel}
           </p>
         )}
       </div>
