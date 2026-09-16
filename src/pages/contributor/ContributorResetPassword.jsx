@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import AuthLayout, { AuthLink } from '../../components/AuthLayout';
 import { Button, Input } from '../../components/ui';
 
 export default function ContributorResetPassword() {
+  const { t } = useTranslation('auth');
+  const { t: tc } = useTranslation('common');
   const [params] = useSearchParams();
   const token = params.get('token') || '';
   const [password, setPassword] = useState('');
@@ -28,39 +31,39 @@ export default function ContributorResetPassword() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (password !== confirm) {
-      toast.error('Passwords do not match');
+      toast.error(tc('errors.passwordsMismatch'));
       return;
     }
     setLoading(true);
     try {
       const { data } = await api.post('/api/contributor/auth/reset-password', { token, password });
-      toast.success(data.message);
+      toast.success(data.message || t('reset.success'));
       navigate('/contributor/login');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Reset failed');
+      toast.error(err.response?.data?.error || tc('errors.generic'));
     } finally {
       setLoading(false);
     }
   }
 
   if (valid === null) {
-    return <AuthLayout title="Reset password" subtitle="Checking link…" />;
+    return <AuthLayout title={t('reset.title')} subtitle={t('reset.verifying')} />;
   }
   if (!valid) {
     return (
-      <AuthLayout title="Invalid link" subtitle="This reset link is invalid or expired">
+      <AuthLayout title={t('reset.invalidTitle')} subtitle={t('reset.invalidSubtitle')}>
         <p className="text-center text-sm">
-          <AuthLink to="/contributor/forgot-password">Request a new link</AuthLink>
+          <AuthLink to="/contributor/forgot-password">{t('reset.requestNew')}</AuthLink>
         </p>
       </AuthLayout>
     );
   }
 
   return (
-    <AuthLayout title="Choose a new password" subtitle="Contributor account">
+    <AuthLayout title={t('reset.title')} subtitle={t('contributor.forgotTitle')}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="New password"
+          label={t('reset.newPassword')}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -68,14 +71,14 @@ export default function ContributorResetPassword() {
           minLength={8}
         />
         <Input
-          label="Confirm password"
+          label={t('reset.confirm')}
           type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
         />
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Saving...' : 'Reset password'}
+          {loading ? t('reset.resetting') : t('reset.submit')}
         </Button>
       </form>
     </AuthLayout>

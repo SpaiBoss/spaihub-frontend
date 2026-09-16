@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toMinutes } from '../utils/packages';
 import { Modal, Button } from './ui';
 
@@ -13,6 +14,8 @@ const defaultForm = () => ({
 });
 
 export default function VoucherFormModal({ open, onClose, onSubmit, locations, packagesByLocation }) {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [form, setForm] = useState(defaultForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,11 +42,11 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.locationId) {
-      setError('Select a location');
+      setError(t('vouchers.selectLocationErr'));
       return;
     }
     if (!form.packageId) {
-      setError('Select a package');
+      setError(t('vouchers.selectPackageErr'));
       return;
     }
 
@@ -69,11 +72,11 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
       if (apiError) {
         setError(apiError);
       } else if (err.response?.status === 404) {
-        setError('Voucher API not found. Restart the backend and try again.');
+        setError(t('vouchers.apiNotFound'));
       } else if (!err.response) {
-        setError('Cannot reach the API. Check that the backend is running on port 4000.');
+        setError(t('vouchers.networkError'));
       } else {
-        setError('Failed to create vouchers');
+        setError(t('vouchers.createFailed'));
       }
     } finally {
       setLoading(false);
@@ -86,11 +89,11 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
     <Modal
       open={open}
       onClose={onClose}
-      title={createdCodes ? 'Vouchers created' : 'Generate vouchers'}
+      title={createdCodes ? t('vouchers.createdTitle') : t('vouchers.generate')}
       description={
         createdCodes
-          ? `${createdCodes.length} code${createdCodes.length !== 1 ? 's' : ''} ready to distribute`
-          : 'Create prepaid codes subscribers can redeem on the captive portal.'
+          ? t('vouchers.createdDesc', { count: createdCodes.length })
+          : t('vouchers.createDesc')
       }
     >
         {createdCodes ? (
@@ -105,23 +108,23 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
               onClick={() => navigator.clipboard.writeText(createdCodes.join('\n'))}
               className="w-full mt-4"
             >
-              Copy all codes
+              {t('vouchers.copyAll')}
             </Button>
             <Button type="button" variant="secondary" onClick={onClose} className="w-full mt-2">
-              Done
+              {t('vouchers.done')}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label-field">Location</label>
+              <label className="label-field">{t('vouchers.location')}</label>
               <select
                 value={form.locationId}
                 onChange={(e) => setForm({ ...form, locationId: e.target.value, packageId: '' })}
                 className="select-field"
                 required
               >
-                <option value="">Select location</option>
+                <option value="">{t('vouchers.selectLocationPh')}</option>
                 {locations.map((loc) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
@@ -129,7 +132,7 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
             </div>
 
             <div>
-              <label className="label-field">Package</label>
+              <label className="label-field">{t('vouchers.package')}</label>
               <select
                 value={form.packageId}
                 onChange={(e) => setForm({ ...form, packageId: e.target.value })}
@@ -137,20 +140,20 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
                 required
                 disabled={!form.locationId || activePackages.length === 0}
               >
-                <option value="">Select package</option>
+                <option value="">{t('vouchers.selectPackagePh')}</option>
                 {activePackages.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
               {form.locationId && activePackages.length === 0 && (
                 <p className="text-xs text-amber-700 mt-1.5 font-medium">
-                  This location has no active packages. Create one under Locations first.
+                  {t('vouchers.noActivePackages')}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="label-field">Quantity</label>
+              <label className="label-field">{t('vouchers.quantity')}</label>
               <input
                 type="number"
                 min={1}
@@ -160,15 +163,15 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
                 className="input-field"
                 required
               />
-              <p className="text-xs text-navy/50 mt-1.5">Generate 1–500 unique codes at once.</p>
+              <p className="text-xs text-navy/50 mt-1.5">{t('vouchers.quantityHint')}</p>
             </div>
 
             <div>
-              <label className="label-field">Batch label (optional)</label>
+              <label className="label-field">{t('vouchers.batchLabel')}</label>
               <input
                 value={form.batchLabel}
                 onChange={(e) => setForm({ ...form, batchLabel: e.target.value })}
-                placeholder="e.g. March Promo, Event 2026"
+                placeholder={t('vouchers.batchPh')}
                 className="input-field"
               />
             </div>
@@ -181,7 +184,7 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
                   onChange={(e) => setForm({ ...form, hasExpiry: e.target.checked })}
                   className="rounded border-gray-300 text-brand focus:ring-brand"
                 />
-                <span className="text-sm font-medium text-navy">Set redeem-by expiry</span>
+                <span className="text-sm font-medium text-navy">{t('vouchers.setExpiry')}</span>
               </label>
               {form.hasExpiry && (
                 <div className="flex gap-2">
@@ -197,23 +200,23 @@ export default function VoucherFormModal({ open, onClose, onSubmit, locations, p
                     onChange={(e) => setForm({ ...form, expiryUnit: e.target.value })}
                     className="select-field w-36"
                   >
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
+                    <option value="minutes">{t('packages.minutes')}</option>
+                    <option value="hours">{t('packages.hours')}</option>
+                    <option value="days">{t('packages.days')}</option>
                   </select>
                 </div>
               )}
-              <p className="text-xs text-navy/50">Codes must be redeemed before this period ends.</p>
+              <p className="text-xs text-navy/50">{t('vouchers.expiryHint')}</p>
             </div>
 
             {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
 
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
-                Cancel
+                {tc('actions.cancel')}
               </Button>
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? 'Generating...' : 'Generate vouchers'}
+                {loading ? t('vouchers.generating') : t('vouchers.generate')}
               </Button>
             </div>
           </form>

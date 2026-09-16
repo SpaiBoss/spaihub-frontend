@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AreaChart,
   Area,
@@ -25,12 +26,14 @@ import {
 } from '../../components/charts/ChartPrimitives';
 
 export default function AdminDashboard() {
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const [stats, setStats] = useState(null);
   const [chart, setChart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  function loadStats() {
     setLoading(true);
     setError(null);
     Promise.all([api.get('/api/admin/stats'), api.get('/api/admin/stats/revenue-chart')])
@@ -41,52 +44,44 @@ export default function AdminDashboard() {
       .catch((err) => {
         setStats(null);
         setChart([]);
-        setError(err.response?.data?.error || 'Failed to load platform stats');
+        setError(err.response?.data?.error || t('dashboard.loadError'));
       })
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    loadStats();
   }, []);
 
   const cards = stats
     ? [
-        { label: 'Total owners', value: stats.totalOwners, sub: `${stats.activeOwners} active` },
-        { label: 'Successful transactions', value: stats.totalTransactions.toLocaleString() },
-        { label: 'Gross revenue processed', value: formatXaf(stats.totalRevenueProcessed) },
-        { label: 'Platform fees earned', value: formatXaf(stats.totalPlatformFees) },
-        { label: 'Fees this month', value: formatXaf(stats.monthPlatformFees), sub: `${stats.monthFeeChangePercent >= 0 ? '+' : ''}${stats.monthFeeChangePercent}% vs last month` },
-        { label: 'Today platform fees', value: formatXaf(stats.todayPlatformFees), sub: `${formatXaf(stats.todayGrossRevenue)} gross` },
-        { label: 'Total withdrawn', value: formatXaf(stats.totalWithdrawn) },
-        { label: 'Pending withdrawals', value: `${stats.pendingWithdrawalsCount}`, sub: formatXaf(stats.pendingWithdrawalsTotal) },
-        { label: 'Pending payments', value: stats.pendingTransactions },
-        { label: 'Failed payments (month)', value: stats.failedTransactionsMonth },
-        { label: 'Dead-letter router commands (24h)', value: stats.deadLetterCommands24h ?? 0 },
+        { label: t('dashboard.totalOwners'), value: stats.totalOwners, sub: t('dashboard.activeCount', { count: stats.activeOwners }) },
+        { label: t('dashboard.successfulTx'), value: stats.totalTransactions.toLocaleString() },
+        { label: t('dashboard.grossRevenue'), value: formatXaf(stats.totalRevenueProcessed) },
+        { label: t('dashboard.platformFees'), value: formatXaf(stats.totalPlatformFees) },
+        { label: t('dashboard.feesMonth'), value: formatXaf(stats.monthPlatformFees), sub: t('dashboard.vsLastMonth', { sign: stats.monthFeeChangePercent >= 0 ? '+' : '', pct: stats.monthFeeChangePercent }) },
+        { label: t('dashboard.todayFees'), value: formatXaf(stats.todayPlatformFees), sub: t('dashboard.todayGross', { amount: formatXaf(stats.todayGrossRevenue) }) },
+        { label: t('dashboard.totalWithdrawn'), value: formatXaf(stats.totalWithdrawn) },
+        { label: t('dashboard.pendingWithdrawals'), value: `${stats.pendingWithdrawalsCount}`, sub: formatXaf(stats.pendingWithdrawalsTotal) },
+        { label: t('dashboard.pendingPayments'), value: stats.pendingTransactions },
+        { label: t('dashboard.failedMonth'), value: stats.failedTransactionsMonth },
+        { label: t('dashboard.deadLetter'), value: stats.deadLetterCommands24h ?? 0 },
       ]
     : [];
 
   return (
     <AdminGuard>
-      <AdminLayout title="Platform overview" description="Revenue, fees, and network health across Spai-Hub">
+      <AdminLayout title={t('dashboard.title')} description={t('dashboard.description')}>
         <div className="space-y-6">
           <AccountingExportBar mode="admin" />
 
           {error && (
             <EmptyState
-              title="Could not load dashboard"
+              title={t('dashboard.couldNotLoad')}
               description={error}
               action={
-                <Button
-                  onClick={() => {
-                    setLoading(true);
-                    setError(null);
-                    Promise.all([api.get('/api/admin/stats'), api.get('/api/admin/stats/revenue-chart')])
-                      .then(([statsRes, chartRes]) => {
-                        setStats(statsRes.data);
-                        setChart(chartRes.data);
-                      })
-                      .catch((err) => setError(err.response?.data?.error || 'Failed to load platform stats'))
-                      .finally(() => setLoading(false));
-                  }}
-                >
-                  Retry
+                <Button onClick={loadStats}>
+                  {tc('actions.retry')}
                 </Button>
               }
             />
@@ -111,13 +106,13 @@ export default function AdminDashboard() {
           <Card className="overflow-hidden">
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
-                <h3 className="font-semibold text-navy">Platform revenue</h3>
-                <p className="text-xs text-navy/50 mt-1">Gross payments vs platform fees — last 30 days</p>
+                <h3 className="font-semibold text-navy">{t('dashboard.revenueTitle')}</h3>
+                <p className="text-xs text-navy/50 mt-1">{t('dashboard.revenueSubtitle')}</p>
               </div>
             </div>
             {chart.length === 0 ? (
               loading ? <Skeleton className="h-80" /> : (
-                <p className="text-sm text-navy/50 text-center py-16">No revenue data for the last 30 days</p>
+                <p className="text-sm text-navy/50 text-center py-16">{t('dashboard.noRevenue')}</p>
               )
             ) : (
               <ResponsiveContainer width="100%" height={320}>
@@ -131,13 +126,13 @@ export default function AdminDashboard() {
                   <Area
                     type="monotone"
                     dataKey="gross"
-                    name="Gross revenue"
+                    name={t('dashboard.chartGross')}
                     stroke="#0E141B"
                     strokeWidth={2}
                     fill="url(#navyArea)"
                     dot={false}
                   />
-                  <Bar dataKey="fees" name="Platform fees" fill="url(#brandBar)" radius={[6, 6, 0, 0]} barSize={14} />
+                  <Bar dataKey="fees" name={t('dashboard.chartFees')} fill="url(#brandBar)" radius={[6, 6, 0, 0]} barSize={14} />
                 </ComposedChart>
               </ResponsiveContainer>
             )}
@@ -145,8 +140,8 @@ export default function AdminDashboard() {
 
           {chart.length > 0 && (
             <Card>
-              <h3 className="font-semibold text-navy mb-1">Daily platform fees</h3>
-              <p className="text-xs text-navy/50 mb-5">Fee collection trend</p>
+              <h3 className="font-semibold text-navy mb-1">{t('dashboard.dailyFees')}</h3>
+              <p className="text-xs text-navy/50 mb-5">{t('dashboard.feeTrend')}</p>
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={chart}>
                   <ChartGradientDefs />
@@ -154,7 +149,7 @@ export default function AdminDashboard() {
                   <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(d) => d.slice(5)} />
                   <YAxis {...CHART_AXIS} width={56} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                   <Tooltip content={<ChartTooltip />} labelFormatter={formatChartDate} />
-                  <Area type="monotone" dataKey="fees" name="Platform fees" stroke="#0F766E" strokeWidth={2} fill="url(#brandArea)" dot={false} />
+                  <Area type="monotone" dataKey="fees" name={t('dashboard.chartFees')} stroke="#0F766E" strokeWidth={2} fill="url(#brandArea)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>

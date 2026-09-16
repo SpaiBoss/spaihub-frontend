@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import Seo from '../../components/Seo';
+import { LocaleLink } from '../../components/LocaleLink';
 import { Router, Package, Smartphone, Wallet, Radio } from 'lucide-react';
 import Reveal from '../../components/marketing/Reveal';
 import {
@@ -8,58 +10,28 @@ import {
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
 
-const STEPS = [
-  {
-    n: '01',
-    title: 'Create your owner account',
-    body: 'Register, verify email, and open the dashboard. No hardware required to explore packages and vouchers.',
-    icon: Radio,
-  },
-  {
-    n: '02',
-    title: 'Add a location and router',
-    body: 'One location maps to one MikroTik. Choose Existing hotspot or Create guest, then paste Script 1 and Script 2.',
-    icon: Router,
-  },
-  {
-    n: '03',
-    title: 'Publish packages or vouchers',
-    body: 'Time-based browse, data-based download, shared device limits for families. Print PDF voucher sheets when you sell cash.',
-    icon: Package,
-  },
-  {
-    n: '04',
-    title: 'Subscribers pay or redeem',
-    body: 'Captive portal opens SpaiHub. MoMo via Campay or voucher code + PIN. Credentials grant access on the Hex.',
-    icon: Smartphone,
-  },
-  {
-    n: '05',
-    title: 'Withdraw to MoMo',
-    body: 'Successful MoMo sales credit your wallet after the platform fee. Request a withdrawal to your MTN or Orange number.',
-    icon: Wallet,
-  },
-];
+const STEP_ICONS = [Radio, Router, Package, Smartphone, Wallet];
 
 export default function HowItWorks() {
+  const { t } = useTranslation('marketing');
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
-  const wa = whatsappUrl(contactWhatsApp, 'Hi — I need help setting up Spai-Hub.');
-  const steps = STEPS.map((step) =>
-    step.n === '05'
-      ? {
-          ...step,
-          body: `Successful MoMo sales credit your wallet after the ${platformFeePercent}% platform fee. Request a withdrawal to your MTN or Orange number.`,
-        }
-      : step
-  );
+  const wa = whatsappUrl(contactWhatsApp, t('waSetup'));
+  const raw = t('how.steps', { returnObjects: true });
+  const steps = (Array.isArray(raw) ? raw : []).map((_, i) => ({
+    n: t(`how.steps.${i}.n`),
+    title: t(`how.steps.${i}.title`),
+    body: t(`how.steps.${i}.body`, { fee: platformFeePercent }),
+    icon: STEP_ICONS[i],
+  }));
 
   return (
     <>
+      <Seo title={t('how.seoTitle')} description={t('how.seoDescription')} />
       <MarketingSection className="pt-14 sm:pt-20 pb-6">
         <MarketingHeading
-          eyebrow="How it works"
-          title="From empty Hex to night sales."
-          subtitle={`Owners connect MikroTik, sell access, and withdraw. Platform fee on MoMo sales is ${platformFeePercent}% — always shown from live config.`}
+          eyebrow={t('how.eyebrow')}
+          title={t('how.title')}
+          subtitle={t('how.subtitle', { fee: platformFeePercent })}
         />
       </MarketingSection>
 
@@ -82,25 +54,30 @@ export default function HowItWorks() {
             );
           })}
         </ol>
+        <p className="mt-8 text-sm text-navy/50 max-w-2xl">
+          <LocaleLink to="/help/tutorials" className="text-brand font-medium hover:text-brand-dark">
+            {t('how.helpLink')}
+          </LocaleLink>
+        </p>
       </MarketingSection>
 
       <MarketingSection tone="muted" className="py-14 sm:py-16">
         <MarketingHeading
-          title="Two scripts, not a new fleet."
-          subtitle="Script 1 installs SpaiHub on an existing hotspot — or creates a guest network if you choose that path. Script 2 keeps heartbeat and GRANT_ACCESS polling. Re-open Setup anytime to re-copy."
+          title={t('how.scriptsTitle')}
+          subtitle={t('how.scriptsBody')}
         />
         <p className="mt-6 text-sm text-navy/50 max-w-2xl">
-          Have spare uplink near a site instead?{' '}
-          <Link to="/for/contributors" className="text-brand font-medium hover:text-brand-dark">
-            Contribute bandwidth
-          </Link>{' '}
-          — SpaiHub technicians wire that separately; it is not part of Scripts 1–2.
+          {t('how.contributorBefore')}{' '}
+          <LocaleLink to="/for/contributors" className="text-brand font-medium hover:text-brand-dark">
+            {t('how.contributorLink')}
+          </LocaleLink>{' '}
+          {t('how.contributorAfter')}
         </p>
       </MarketingSection>
 
       <FinalCta
-        title="Walk it with your own router."
-        subtitle="Create an account and open Locations to copy the scripts."
+        title={t('how.ctaTitle')}
+        subtitle={t('how.ctaSubtitle')}
         whatsappHref={wa}
       />
     </>

@@ -2,6 +2,11 @@ import { Navigate, Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContributorAuth } from '../../context/ContributorAuthContext';
 import BrandLogo from '../BrandLogo';
 import { Skeleton } from '../ui';
+import LanguageToggle from '../LanguageToggle';
+import { LocaleLink } from '../LocaleLink';
+import { helpHref } from '../../i18n/paths';
+import { useLocale } from '../../i18n/useLocale';
+import { useTranslation } from 'react-i18next';
 
 export function ContributorProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useContributorAuth();
@@ -19,12 +24,15 @@ export function ContributorProtectedRoute({ children }) {
 export default function ContributorLayout() {
   const { contributor, logout } = useContributorAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('contributor');
+  const { t: tc } = useTranslation('common');
+  const { lang } = useLocale();
 
   const links = [
-    { to: '/contributor', end: true, label: 'Home' },
-    { to: '/contributor/links', label: 'Links' },
-    { to: '/contributor/wallet', label: 'Wallet' },
-    { to: '/contributor/settings', label: 'Settings' },
+    { to: '/contributor', end: true, label: t('nav.home') },
+    { to: '/contributor/links', label: t('nav.links') },
+    { to: '/contributor/wallet', label: t('nav.wallet') },
+    { to: '/contributor/settings', label: t('nav.settings') },
   ];
 
   function handleLogout() {
@@ -38,17 +46,21 @@ export default function ContributorLayout() {
         <div className="flex items-center gap-3">
           <BrandLogo theme="dark" textClassName="text-lg" />
           <span className="hidden sm:inline text-white/35 text-xs font-medium tracking-wide uppercase">
-            Contributor
+            {t('badge')}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <LanguageToggle compact className="text-white" />
+          <LocaleLink to={helpHref('contributors', lang)} className="text-sm text-white/60 hover:text-white font-medium">
+            {tc('nav.help')}
+          </LocaleLink>
           <span className="hidden sm:inline text-sm text-white/60">{contributor?.name}</span>
           <button
             type="button"
             onClick={handleLogout}
             className="text-sm text-white/60 hover:text-white font-medium transition-colors"
           >
-            Sign out
+            {tc('nav.signOut')}
           </button>
         </div>
       </header>

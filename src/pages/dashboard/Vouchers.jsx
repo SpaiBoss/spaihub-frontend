@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Download, Copy, Ban, Ticket, FileText, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { StatusBadge, Button, Card, EmptyState, Pagination, TableShell } from '../../components/ui';
 import VoucherFormModal from '../../components/VoucherFormModal';
@@ -10,6 +11,8 @@ import { formatOwnerPackageSummary } from '../../utils/packages';
 const STATUS_OPTIONS = ['', 'UNUSED', 'REDEEMED', 'EXPIRED', 'REVOKED'];
 
 export default function Vouchers() {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [locations, setLocations] = useState([]);
   const [packagesByLocation, setPackagesByLocation] = useState({});
   const [stats, setStats] = useState(null);
@@ -36,7 +39,7 @@ export default function Vouchers() {
       );
       setPackagesByLocation(pkgMap);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load locations');
+      toast.error(err.response?.data?.error || t('toast.loadLocations'));
     }
   }
 
@@ -53,7 +56,7 @@ export default function Vouchers() {
       setData(listRes.data);
       setStats(statsRes.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load vouchers');
+      setError(err.response?.data?.error || t('vouchers.loadFailed'));
       setData({ vouchers: [], pagination: {} });
     } finally {
       setLoading(false);
@@ -77,7 +80,7 @@ export default function Vouchers() {
 
   async function syncUnusedToRouter() {
     if (!filters.locationId) {
-      toast.error('Select a location first');
+      toast.error(t('vouchers.selectLocation'));
       return;
     }
     setSyncing(true);
@@ -85,12 +88,12 @@ export default function Vouchers() {
       const { data: result } = await api.post(
         `/api/owner/locations/${filters.locationId}/vouchers/sync`
       );
-      toast.success(result.message || 'Sync queued');
+      toast.success(result.message || t('vouchers.syncOk'));
       if (result.queued > 0) {
-        toast.success('Wait ~15s for spaihub-commands to import, then check Hotspot users');
+        toast.success(t('vouchers.syncQueued'));
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Could not sync vouchers to router');
+      toast.error(err.response?.data?.error || t('vouchers.syncFailed'));
     } finally {
       setSyncing(false);
     }
@@ -99,10 +102,10 @@ export default function Vouchers() {
   async function revokeVoucher(id) {
     try {
       await api.post(`/api/owner/vouchers/${id}/revoke`);
-      toast.success('Voucher revoked');
+      toast.success(t('vouchers.revoked'));
       loadVouchers();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to revoke voucher');
+      toast.error(err.response?.data?.error || t('vouchers.revokeFailed'));
     }
   }
 
@@ -118,9 +121,9 @@ export default function Vouchers() {
       a.download = `spaihub-vouchers-${perPage}up.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('PDF ready to print');
+      toast.success(t('vouchers.pdfReady'));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'PDF export failed');
+      toast.error(err.response?.data?.error || t('vouchers.pdfFailed'));
     }
   }
 
@@ -136,26 +139,32 @@ export default function Vouchers() {
       a.download = 'vouchers.csv';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('CSV exported');
+      toast.success(t('tx.csv'));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'CSV export failed');
+      toast.error(err.response?.data?.error || t('vouchers.csvFailed'));
     }
   }
 
   function copyCode(code) {
     navigator.clipboard.writeText(code);
-    toast.success('Code copied');
+    toast.success(t('vouchers.codeCopied'));
   }
+
+  const emptyAction = (
+    <Button onClick={() => setShowCreate(true)}>
+      <Plus className="w-4 h-4" /> {t('vouchers.generate')}
+    </Button>
+  );
 
   return (
     <div>
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Unused', value: stats.unused, color: 'text-brand' },
-            { label: 'Redeemed', value: stats.redeemed, color: 'text-emerald-600' },
-            { label: 'Expired', value: stats.expired, color: 'text-amber-600' },
-            { label: 'Revoked', value: stats.revoked, color: 'text-red-500' },
+            { label: t('vouchers.unused'), value: stats.unused, color: 'text-brand' },
+            { label: t('vouchers.redeemed'), value: stats.redeemed, color: 'text-emerald-600' },
+            { label: t('vouchers.expired'), value: stats.expired, color: 'text-amber-600' },
+            { label: t('vouchers.revokedStat'), value: stats.revoked, color: 'text-red-500' },
           ].map((s) => (
             <Card key={s.label} bodyClassName="p-4">
               <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide">{s.label}</p>
@@ -171,7 +180,7 @@ export default function Vouchers() {
           onChange={(e) => setFilters({ ...filters, locationId: e.target.value, page: 1 })}
           className="select-field w-full sm:w-auto sm:min-w-[160px] py-2.5 min-h-[44px]"
         >
-          <option value="">All locations</option>
+          <option value="">{t('vouchers.allLocations')}</option>
           {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
         <select
@@ -179,30 +188,30 @@ export default function Vouchers() {
           onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
           className="select-field w-full sm:w-auto sm:min-w-[140px] py-2.5 min-h-[44px]"
         >
-          <option value="">All statuses</option>
+          <option value="">{t('vouchers.allStatuses')}</option>
           {STATUS_OPTIONS.filter(Boolean).map((s) => (
-            <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+            <option key={s} value={s}>{tc(`status.${s}`)}</option>
           ))}
         </select>
         <Button onClick={() => setShowCreate(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
-          <Plus className="w-4 h-4" /> Generate vouchers
+          <Plus className="w-4 h-4" /> {t('vouchers.generate')}
         </Button>
         <Button
           variant="secondary"
           onClick={syncUnusedToRouter}
           disabled={syncing || !filters.locationId}
           className="gap-2 w-full sm:w-auto min-h-[44px]"
-          title={!filters.locationId ? 'Select a location first' : 'Queue unused vouchers onto the MikroTik'}
+          title={!filters.locationId ? t('vouchers.selectLocation') : t('vouchers.syncTitle')}
         >
           <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-          {syncing ? 'Syncing…' : 'Sync to router'}
+          {syncing ? t('vouchers.syncing') : t('vouchers.syncShort')}
         </Button>
         <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
           <Button variant="secondary" onClick={() => setShowPdfExport(true)} className="gap-2 flex-1 sm:flex-none min-h-[44px]">
-            <FileText className="w-4 h-4" /> PDF
+            <FileText className="w-4 h-4" /> {t('vouchers.pdfShort')}
           </Button>
           <Button variant="secondary" onClick={exportCsv} className="gap-2 flex-1 sm:flex-none min-h-[44px]">
-            <Download className="w-4 h-4" /> CSV
+            <Download className="w-4 h-4" /> {t('vouchers.csvShort')}
           </Button>
         </div>
       </div>
@@ -210,9 +219,9 @@ export default function Vouchers() {
       {error && (
         <Card className="mb-6">
           <EmptyState
-            title="Could not load vouchers"
+            title={t('vouchers.loadTitle')}
             description={error}
-            action={<Button onClick={loadVouchers}>Retry</Button>}
+            action={<Button onClick={loadVouchers}>{tc('actions.retry')}</Button>}
           />
         </Card>
       )}
@@ -220,18 +229,14 @@ export default function Vouchers() {
       {/* Phone-friendly cards */}
       <div className="md:hidden space-y-3">
         {loading ? (
-          <Card bodyClassName="p-6 text-center text-navy/40 text-sm">Loading vouchers...</Card>
+          <Card bodyClassName="p-6 text-center text-navy/40 text-sm">{t('vouchers.loading')}</Card>
         ) : data.vouchers.length === 0 ? (
           <Card>
             <EmptyState
               icon={Ticket}
-              title="No vouchers yet"
-              description="Generate prepaid codes for subscribers to redeem on your captive portal."
-              action={
-                <Button onClick={() => setShowCreate(true)}>
-                  <Plus className="w-4 h-4" /> Generate vouchers
-                </Button>
-              }
+              title={t('vouchers.emptyTitle')}
+              description={t('vouchers.emptyBody')}
+              action={emptyAction}
             />
           </Card>
         ) : (
@@ -253,7 +258,7 @@ export default function Vouchers() {
                   onClick={() => copyCode(v.code)}
                   className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand/10 text-brand text-sm font-medium"
                 >
-                  <Copy className="w-4 h-4" /> Copy
+                  <Copy className="w-4 h-4" /> {tc('actions.copy')}
                 </button>
                 {v.status === 'UNUSED' && (
                   <button
@@ -261,7 +266,7 @@ export default function Vouchers() {
                     onClick={() => revokeVoucher(v.id)}
                     className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-50 text-red-600 text-sm font-medium"
                   >
-                    <Ban className="w-4 h-4" /> Revoke
+                    <Ban className="w-4 h-4" /> {t('vouchers.revoke')}
                   </button>
                 )}
               </div>
@@ -275,31 +280,27 @@ export default function Vouchers() {
         <table>
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Location</th>
-              <th>Package</th>
-              <th>Batch</th>
-              <th>Status</th>
-              <th>Expires</th>
-              <th>Redeemed</th>
-              <th className="sticky-actions">Actions</th>
+              <th>{t('vouchers.code')}</th>
+              <th>{t('vouchers.location')}</th>
+              <th>{t('vouchers.package')}</th>
+              <th>{t('vouchers.batch')}</th>
+              <th>{t('vouchers.status')}</th>
+              <th>{t('vouchers.expires')}</th>
+              <th>{t('vouchers.redeemedAt')}</th>
+              <th className="sticky-actions">{t('locations.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="p-12 text-center text-navy/40">Loading vouchers...</td></tr>
+              <tr><td colSpan={8} className="p-12 text-center text-navy/40">{t('vouchers.loading')}</td></tr>
             ) : data.vouchers.length === 0 ? (
               <tr>
                 <td colSpan={8}>
                   <EmptyState
                     icon={Ticket}
-                    title="No vouchers yet"
-                    description="Generate prepaid codes for subscribers to redeem on your captive portal."
-                    action={
-                      <Button onClick={() => setShowCreate(true)}>
-                        <Plus className="w-4 h-4" /> Generate vouchers
-                      </Button>
-                    }
+                    title={t('vouchers.emptyTitle')}
+                    description={t('vouchers.emptyBody')}
+                    action={emptyAction}
                   />
                 </td>
               </tr>
@@ -322,11 +323,11 @@ export default function Vouchers() {
                   </td>
                   <td className="sticky-actions whitespace-nowrap">
                     <button onClick={() => copyCode(v.code)} className="text-brand text-xs mr-3 hover:text-brand-dark font-medium">
-                      <Copy className="w-3.5 h-3.5 inline" /> Copy
+                      <Copy className="w-3.5 h-3.5 inline" /> {tc('actions.copy')}
                     </button>
                     {v.status === 'UNUSED' && (
                       <button onClick={() => revokeVoucher(v.id)} className="text-red-500 text-xs hover:text-red-700 font-medium">
-                        <Ban className="w-3.5 h-3.5 inline" /> Revoke
+                        <Ban className="w-3.5 h-3.5 inline" /> {t('vouchers.revoke')}
                       </button>
                     )}
                   </td>

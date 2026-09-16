@@ -12,50 +12,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../BrandLogo';
-
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/dashboard/locations', label: 'Locations', icon: MapPin },
-  { to: '/dashboard/vouchers', label: 'Vouchers', icon: Ticket },
-  { to: '/dashboard/transactions', label: 'Transactions', icon: Receipt },
-  { to: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
-  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
-];
-
-const bottomNavItems = [
-  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, end: true },
-  { to: '/dashboard/locations', label: 'Sites', icon: MapPin },
-  { to: '/dashboard/vouchers', label: 'Codes', icon: Ticket },
-  { to: '/dashboard/wallet', label: 'Cash', icon: Wallet },
-  { to: '/dashboard/transactions', label: 'Sales', icon: Receipt },
-];
-
-const pageMeta = {
-  '/dashboard': {
-    title: 'Dashboard',
-    description: 'Revenue, sessions, and network health.',
-  },
-  '/dashboard/locations': {
-    title: 'Locations',
-    description: 'Hotspots, routers, and packages.',
-  },
-  '/dashboard/vouchers': {
-    title: 'Vouchers',
-    description: 'Prepaid access codes.',
-  },
-  '/dashboard/transactions': {
-    title: 'Transactions',
-    description: 'Payment history across locations.',
-  },
-  '/dashboard/wallet': {
-    title: 'Wallet',
-    description: 'Balance and withdrawals.',
-  },
-  '/dashboard/settings': {
-    title: 'Settings',
-    description: 'Account and portal branding.',
-  },
-};
+import LanguageToggle from '../LanguageToggle';
+import { LocaleLink } from '../LocaleLink';
+import { helpHref } from '../../i18n/paths';
+import { useLocale } from '../../i18n/useLocale';
+import { useTranslation } from 'react-i18next';
 
 function UserAvatar({ name }) {
   const initial = (name || 'O').charAt(0).toUpperCase();
@@ -71,8 +32,36 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
+  const { lang } = useLocale();
 
-  const meta = pageMeta[location.pathname] || pageMeta['/dashboard'];
+  const navItems = [
+    { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard, end: true },
+    { to: '/dashboard/locations', label: t('nav.locations'), icon: MapPin },
+    { to: '/dashboard/vouchers', label: t('nav.vouchers'), icon: Ticket },
+    { to: '/dashboard/transactions', label: t('nav.transactions'), icon: Receipt },
+    { to: '/dashboard/wallet', label: t('nav.wallet'), icon: Wallet },
+    { to: '/dashboard/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  const bottomNavItems = [
+    { to: '/dashboard', label: t('nav.homeShort'), icon: LayoutDashboard, end: true },
+    { to: '/dashboard/locations', label: t('nav.sitesShort'), icon: MapPin },
+    { to: '/dashboard/vouchers', label: t('nav.codesShort'), icon: Ticket },
+    { to: '/dashboard/wallet', label: t('nav.cashShort'), icon: Wallet },
+    { to: '/dashboard/transactions', label: t('nav.salesShort'), icon: Receipt },
+  ];
+
+  const metaKey = {
+    '/dashboard': 'dashboard',
+    '/dashboard/locations': 'locations',
+    '/dashboard/vouchers': 'vouchers',
+    '/dashboard/transactions': 'transactions',
+    '/dashboard/wallet': 'wallet',
+    '/dashboard/settings': 'settings',
+  }[location.pathname] || 'dashboard';
+  const meta = { title: t(`meta.${metaKey}.title`), description: t(`meta.${metaKey}.description`) };
 
   function handleLogout() {
     logout();
@@ -84,7 +73,7 @@ export default function DashboardLayout() {
       <div className="px-5 py-6 border-b border-white/10">
         <BrandLogo theme="dark" textClassName="text-xl" />
         <p className="text-white/40 text-xs mt-2.5 font-medium tracking-wide">
-          Operations
+          {tc('nav.operations')}
         </p>
       </div>
 
@@ -107,15 +96,25 @@ export default function DashboardLayout() {
             {label}
           </NavLink>
         ))}
+        <LocaleLink
+          to={helpHref('owners', lang)}
+          onClick={() => setMobileOpen(false)}
+          className="group flex items-center gap-3 pl-3 pr-3 py-3 text-sm border-l-2 border-transparent text-white/60 hover:text-white hover:bg-white/[0.04] min-h-[44px]"
+        >
+          {tc('nav.help')}
+        </LocaleLink>
       </nav>
 
       <div className="p-3 m-3 border border-white/10 rounded-lg">
         <div className="flex items-center gap-3">
           <UserAvatar name={currentOwner?.name} />
           <div className="min-w-0 flex-1">
-            <p className="text-white text-sm font-medium truncate">{currentOwner?.name || 'Owner'}</p>
+            <p className="text-white text-sm font-medium truncate">{currentOwner?.name || '—'}</p>
             <p className="text-white/45 text-xs truncate">{currentOwner?.email}</p>
           </div>
+        </div>
+        <div className="mt-3 text-white">
+          <LanguageToggle compact className="w-full justify-center text-white" />
         </div>
         <button
           type="button"
@@ -123,7 +122,7 @@ export default function DashboardLayout() {
           className="flex items-center justify-center gap-2 w-full mt-3 min-h-[44px] py-2 rounded-lg text-white/65 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          Sign out
+          {tc('nav.signOut')}
         </button>
       </div>
     </div>
@@ -158,13 +157,21 @@ export default function DashboardLayout() {
               <p className="text-xs text-navy/50 hidden sm:block truncate">{meta.description}</p>
             </div>
           </div>
-          <NavLink
-            to="/dashboard/settings"
-            className="lg:hidden p-2.5 rounded-lg text-navy/55 hover:text-navy hover:bg-navy/[0.04] min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </NavLink>
+          <div className="flex items-center gap-1">
+            <LocaleLink
+              to={helpHref('owners', lang)}
+              className="hidden sm:inline-flex px-3 py-2 text-sm font-medium text-navy/55 hover:text-navy"
+            >
+              {tc('nav.help')}
+            </LocaleLink>
+            <NavLink
+              to="/dashboard/settings"
+              className="lg:hidden p-2.5 rounded-lg text-navy/55 hover:text-navy hover:bg-navy/[0.04] min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+              aria-label={t('nav.settings')}
+            >
+              <Settings className="w-5 h-5" />
+            </NavLink>
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 animate-fade-in pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6">

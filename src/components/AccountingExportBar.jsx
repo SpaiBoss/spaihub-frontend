@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { Button } from './ui';
 
@@ -15,6 +16,8 @@ function defaultRange() {
 }
 
 export default function AccountingExportBar({ mode = 'owner' }) {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [range, setRange] = useState(defaultRange);
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +34,9 @@ export default function AccountingExportBar({ mode = 'owner' }) {
       a.download = `accounting-${range.dateFrom}-${range.dateTo}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('CSV downloaded');
+      toast.success(t('toast.csvDownloaded'));
     } catch {
-      toast.error('Export failed');
+      toast.error(tc('errors.exportFailed'));
     } finally {
       setLoading(false);
     }
@@ -55,7 +58,7 @@ export default function AccountingExportBar({ mode = 'owner' }) {
       />
       <Button onClick={exportAccounting} disabled={loading} variant="secondary" className="gap-2 w-full sm:w-auto min-h-[44px]">
         <Download className="w-4 h-4" />
-        {loading ? 'Exporting...' : 'Export CSV'}
+        {loading ? tc('actions.exporting') : tc('actions.export')}
       </Button>
     </div>
   );

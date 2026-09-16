@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import AuthLayout from '../../components/AuthLayout';
 
 export default function VerifyEmail() {
+  const { t } = useTranslation('auth');
   const [params] = useSearchParams();
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
@@ -13,7 +15,7 @@ export default function VerifyEmail() {
     const token = params.get('token');
     if (!token) {
       setStatus('error');
-      setMessage('No verification token provided');
+      setMessage(t('verify.noToken'));
       return;
     }
 
@@ -25,12 +27,12 @@ export default function VerifyEmail() {
       })
       .catch((err) => {
         setStatus('error');
-        setMessage(err.response?.data?.error || 'Verification failed');
+        setMessage(err.response?.data?.error || t('verify.failed'));
       });
-  }, [params]);
+  }, [params, t]);
 
   return (
-    <AuthLayout title="Email Verification">
+    <AuthLayout title={t('verify.title')}>
       <div className="text-center py-4">
         {status === 'loading' && <Loader className="w-12 h-12 text-brand animate-spin mx-auto" />}
         {status === 'success' && <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />}
@@ -38,7 +40,7 @@ export default function VerifyEmail() {
         <p className="mt-4 text-gray-600">{message}</p>
         {status !== 'loading' && (
           <Link to="/login" className="inline-block mt-6 text-brand hover:text-brand/80 font-medium">
-            Go to login
+            {t('verify.goLogin')}
           </Link>
         )}
       </div>

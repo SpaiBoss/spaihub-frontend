@@ -1,16 +1,53 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Loader, Clock, Ticket, KeyRound, LogOut } from 'lucide-react';
 import api from '../../services/api';
-import { formatPortalPackageSummary, formatDataCap } from '../../utils/packages';
 import { getPortalDeviceId, getPortalSubscriberPhone, savePortalSubscriberPhone, clearPortalSubscriberPhone } from '../../utils/portalDevice';
 import { savePendingPayment, loadPendingPayment, clearPendingPayment } from '../../utils/portalPayment';
 import PortalBrand, { PortalCredit } from '../../components/PortalBrand';
+import LanguageToggle from '../../components/LanguageToggle';
 
 function detectOperator(phone) {
   if (phone.startsWith('69')) return 'Orange';
   if (['65', '67', '68'].some((p) => phone.startsWith(p))) return 'MTN';
   return null;
+}
+
+function formatPortalDuration(t, minutes) {
+  if (!minutes || minutes <= 0) return t('durZero');
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  const parts = [];
+  if (days) parts.push(t('durDay', { count: days }));
+  if (hours) parts.push(t('durHour', { count: hours }));
+  if (mins) parts.push(t('durMinute', { count: mins }));
+  return parts.join(' ');
+}
+
+function formatPortalCap(t, mb) {
+  if (!mb) return t('unlimited');
+  if (mb >= 1024 && mb % 1024 === 0) return t('gb', { n: mb / 1024 });
+  if (mb >= 1024) return t('gb', { n: Number((mb / 1024).toFixed(1)) });
+  return t('mb', { n: mb });
+}
+
+function formatTranslatedPortalPackageSummary(t, pkg, { showUploadSpeed = false } = {}) {
+  const extra = [
+    showUploadSpeed ? t('uploadSpeed', { n: pkg.uploadSpeedMbPerSec ?? 1 }) : '',
+    Number(pkg.maxSharedDevices) > 1 ? t('upToDevices', { n: pkg.maxSharedDevices }) : '',
+  ].filter(Boolean);
+  const extraStr = extra.length ? ` · ${extra.join(' · ')}` : '';
+  if (pkg.type === 'DATA_BASED') {
+    return t('pkgData', {
+      cap: formatPortalCap(t, pkg.dataCapMb),
+      duration: formatPortalDuration(t, pkg.durationMinutes),
+    }) + extraStr;
+  }
+  return t('pkgTime', {
+    duration: formatPortalDuration(t, pkg.durationMinutes),
+  }) + extraStr;
 }
 
 function buildMikrotikLoginUrl(linkLogin, username, password) {
@@ -87,25 +124,26 @@ function navigateToMikrotikLogin(linkLogin, username, pin, routerToken) {
 }
 
 function Countdown({ endTime, onExpired }) {
+  const { t } = useTranslation('portal');
   const [remaining, setRemaining] = useState('');
 
   useEffect(() => {
     const tick = () => {
       const diff = new Date(endTime) - Date.now();
       if (diff <= 0) {
-        setRemaining('Expired');
+        setRemaining(t('expired'));
         onExpired?.();
         return;
       }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setRemaining(`${h}h ${m}m ${s}s`);
+      setRemaining(t('remainingFmt', { h, m, s }));
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [endTime, onExpired]);
+  }, [endTime, onExpired, t]);
 
   return <span className="font-mono font-semibold">{remaining}</span>;
 }
@@ -125,6 +163,9 @@ function PortalShell({ children, branding }) {
       >
         <div className="relative z-10 flex min-h-[5rem] items-center justify-center">
           <PortalBrand branding={branding} theme="dark" className="mx-auto" textClassName="text-2xl" />
+          <div className="absolute right-0 top-0">
+            <LanguageToggle compact className="text-white" />
+          </div>
         </div>
       </header>
 
@@ -145,6 +186,7 @@ function PortalCard({ children, className = '' }) {
 }
 
 function CredentialsPanel({ username, pin, linkLogin, accentColor, routerToken, readyAt }) {
+  const { t } = useTranslation('portal');
   const loginUrl = buildMikrotikLoginUrl(linkLogin, username, pin);
   const accentStyle = accentColor ? { backgroundColor: accentColor } : undefined;
   const [secondsLeft, setSecondsLeft] = useState(() => {
@@ -179,15 +221,15 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor, routerToken, 
     <div className="mt-5 p-4 rounded-lg bg-surface-muted border border-gray-200 text-left">
       <div className="flex items-center gap-2 mb-3">
         <KeyRound className="w-4 h-4 text-brand" style={accentColor ? { color: accentColor } : undefined} />
-        <p className="text-xs font-medium text-navy/50 tracking-wide">WiFi login — save these</p>
+        <p className="text-xs font-medium text-navy/50 tracking-wide">{t('saveThese')}</p>
       </div>
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-navy/45">Username</p>
+          <p className="text-xs text-navy/45">{t('username')}</p>
           <p className="font-mono font-semibold text-navy break-all text-sm">{username}</p>
         </div>
         <div>
-          <p className="text-xs text-navy/45">PIN</p>
+          <p className="text-xs text-navy/45">{t('pin')}</p>
           <p
             className="font-mono font-semibold text-brand text-lg tracking-widest"
             style={accentColor ? { color: accentColor } : undefined}
@@ -205,18 +247,18 @@ function CredentialsPanel({ username, pin, linkLogin, accentColor, routerToken, 
             style={accentStyle}
           >
             {routerReady
-              ? 'Connect to WiFi now'
-              : `Preparing router… ${secondsLeft}s (tap to try anyway)`}
+              ? t('connectNow')
+              : t('preparing', { s: secondsLeft })}
           </button>
           <p className="text-xs text-navy/50 mt-2">
             {routerReady
-              ? 'If connect fails, wait a few seconds and tap again.'
-              : 'Your credentials stay here. Wait for the router to import access, then connect.'}
+              ? t('connectFailHint')
+              : t('waitImport')}
           </p>
         </>
       ) : (
         <p className="text-xs text-navy/50 mt-3">
-          Open this portal from the WiFi captive page so Connect is available, or enter these credentials on the hotspot login.
+          {t('connectFromCaptive')}
         </p>
       )}
     </div>
@@ -265,6 +307,7 @@ function applyPaidSession(data, { routerToken, phone: paidPhone, setSession, set
 }
 
 export default function Portal() {
+  const { t } = useTranslation('portal');
   const { routerToken } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryMac = searchParams.get('mac') || '';
@@ -331,11 +374,11 @@ export default function Portal() {
       const sessionData = await checkSession();
       if (!sessionData?.active) {
         setSession(null);
-        setError('Your session has expired. Choose a package to renew.');
+        setError('sessionExpired');
       }
     } catch {
       setSession(null);
-      setError('Your session has expired. Choose a package to renew.');
+      setError('sessionExpired');
     }
   }, [checkSession]);
 
@@ -383,7 +426,7 @@ export default function Portal() {
         if (data.status === 'FAILED') {
           setWaiting(false);
           setPaymentTimedOut(false);
-          setError(data.error || 'Payment failed. Please try again.');
+          setError(data.error || 'payRetry');
           clearPendingPayment(routerToken);
           return true;
         }
@@ -494,8 +537,8 @@ export default function Portal() {
         const aborted = controller.signal.aborted || isAbortError(err);
         setError(
           aborted
-            ? 'Portal is taking too long to load. Retry or open in your browser.'
-            : 'Router not found or unavailable'
+            ? 'loadSlow'
+            : 'notFound'
         );
       } finally {
         clearTimeout(timeoutId);
@@ -525,7 +568,7 @@ export default function Portal() {
 
       if (attempts >= PAYMENT_SOFT_TIMEOUT_ATTEMPTS) {
         setPaymentTimedOut(true);
-        setError('Still waiting for MoMo approval. Tap “Check payment status” if you already paid.');
+        setError('stillWaiting');
       }
       return false;
     };
@@ -550,7 +593,7 @@ export default function Portal() {
         const sessionData = await checkSession();
         if (!sessionData?.active) {
           setSession(null);
-          setError('Your session has expired. Choose a package to renew.');
+          setError('sessionExpired');
         }
       } catch {
         // Ignore transient poll errors.
@@ -579,7 +622,7 @@ export default function Portal() {
         return;
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Could not log out. Try again.');
+      setError(err.response?.data?.error || 'logoutFailed');
     } finally {
       setLoggingOut(false);
     }
@@ -602,7 +645,7 @@ export default function Portal() {
         window.location.href = linkLogout;
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Could not disconnect this device. Try again.');
+      setError(err.response?.data?.error || 'disconnectFailed');
     } finally {
       setDisconnecting(false);
     }
@@ -631,7 +674,7 @@ export default function Portal() {
       saveWifiCredentials(routerToken, nextSession.hotspotUsername, nextSession.hotspotPin, readyAt);
       setSession(nextSession);
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid voucher code');
+      setError(err.response?.data?.error || 'invalidVoucher');
     } finally {
       setRedeeming(false);
     }
@@ -673,7 +716,7 @@ export default function Portal() {
       setPaymentReference('');
       clearPendingPayment(routerToken);
     } catch (err) {
-      setError(err.response?.data?.error || 'Could not cancel payment. Try again.');
+      setError(err.response?.data?.error || 'cancelFailed');
     } finally {
       setCancellingPayment(false);
     }
@@ -708,7 +751,7 @@ export default function Portal() {
         });
         return;
       }
-      setError(data?.error || 'Payment failed');
+      setError(data?.error || 'payFailed');
     } finally {
       setPaying(false);
     }
@@ -718,7 +761,7 @@ export default function Portal() {
     return (
       <div className="min-h-[100dvh] bg-portal-gradient flex flex-col items-center justify-center gap-3 px-4 text-center">
         <Loader className="w-8 h-8 animate-spin text-brand" />
-        <p className="text-sm text-navy/60">Loading portal…</p>
+        <p className="text-sm text-navy/60">{t('loading')}</p>
       </div>
     );
   }
@@ -727,10 +770,10 @@ export default function Portal() {
     return (
       <PortalShell branding={null}>
         <PortalCard className="text-center">
-          <p className="text-red-600 font-medium">{error}</p>
+          <p className="text-red-600 font-medium">{t(error, { defaultValue: error })}</p>
           <div className="mt-5 flex flex-col gap-2">
             <button type="button" className="btn-primary w-full py-3 text-sm" onClick={retryPortalBootstrap}>
-              Retry
+              {t('retry')}
             </button>
             <a
               href={typeof window !== 'undefined' ? window.location.href : '#'}
@@ -738,7 +781,7 @@ export default function Portal() {
               rel="noopener noreferrer"
               className="btn-secondary w-full py-3 text-center text-sm"
             >
-              Open in browser
+              {t('openBrowser')}
             </a>
           </div>
         </PortalCard>
@@ -747,7 +790,7 @@ export default function Portal() {
   }
 
   const branding = portal?.branding;
-  const welcomeText = branding?.welcomeText || 'Pay with Mobile Money to get online instantly';
+  const welcomeText = branding?.welcomeText || t('welcomeDefault');
   const accentStyle = branding?.accentColor ? { backgroundColor: branding.accentColor } : undefined;
   const familyPlan = (session?.maxSharedDevices ?? 1) > 1;
 
@@ -756,13 +799,13 @@ export default function Portal() {
       <PortalShell branding={branding}>
         <PortalCard className="text-center">
           <CheckCircle className="w-8 h-8 text-signal mx-auto" strokeWidth={1.75} />
-          <h1 className="text-xl font-semibold text-navy mt-4">Access ready</h1>
+          <h1 className="text-xl font-semibold text-navy mt-4">{t('accessReady')}</h1>
           <p className="text-navy/55 mt-1 text-sm">{session.packageName}</p>
           <p className="text-navy/50 mt-2 text-sm">
-            Save your username and PIN below, then connect to WiFi when the router is ready.
+            {t('saveCreds')}
           </p>
           <div className="mt-6 p-4 rounded-lg bg-surface-muted border border-gray-200">
-            <p className="text-xs text-navy/50 tracking-wide font-medium">Time remaining</p>
+            <p className="text-xs text-navy/50 tracking-wide font-medium">{t('timeLeft')}</p>
             <div className="flex items-center justify-center gap-2 mt-1 text-brand text-lg font-mono">
               <Clock className="w-4 h-4" />
               <Countdown endTime={session.sessionEnd} onExpired={handleSessionExpired} />
@@ -770,15 +813,15 @@ export default function Portal() {
           </div>
           {familyPlan && (
             <p className="text-xs text-navy/50 mt-3">
-              Family plan — up to {session.maxSharedDevices} devices can share this access code.
+              {t('family', { n: session.maxSharedDevices })}
             </p>
           )}
           {session.packageType === 'DATA_BASED' && session.dataCapMb ? (
             <p className="text-sm text-navy/50 mt-4">
-              Download allowance: {formatDataCap(session.dataCapMb)}
+              {t('allowance', { cap: formatPortalCap(t, session.dataCapMb) })}
             </p>
           ) : session.packageType === 'TIME_BASED' ? (
-            <p className="text-sm text-navy/50 mt-4">Unlimited data for this browse period</p>
+            <p className="text-sm text-navy/50 mt-4">{t('unlimitedTime')}</p>
           ) : null}
           {session.hotspotUsername && session.hotspotPin && (
             <CredentialsPanel
@@ -790,7 +833,7 @@ export default function Portal() {
               readyAt={session.connectReadyAt}
             />
           )}
-          {error && <p className="text-red-600 text-sm text-center mt-4 font-medium">{error}</p>}
+          {error && <p className="text-red-600 text-sm text-center mt-4 font-medium">{t(error, { defaultValue: error })}</p>}
           {familyPlan ? (
             <div className="mt-5 space-y-2">
               <button
@@ -800,7 +843,7 @@ export default function Portal() {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
               >
                 <LogOut className="w-4 h-4" />
-                {disconnecting ? 'Disconnecting...' : 'Disconnect this device'}
+                {disconnecting ? t('disconnecting') : t('disconnectDevice')}
               </button>
               <button
                 type="button"
@@ -808,7 +851,7 @@ export default function Portal() {
                 disabled={loggingOut}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
               >
-                {loggingOut ? 'Ending session...' : 'End session for all devices'}
+                {loggingOut ? t('ending') : t('endAll')}
               </button>
             </div>
           ) : (
@@ -819,7 +862,7 @@ export default function Portal() {
               className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
             >
               <LogOut className="w-4 h-4" />
-              {loggingOut ? 'Logging out...' : 'Log out'}
+              {loggingOut ? t('loggingOut') : t('logout')}
             </button>
           )}
         </PortalCard>
@@ -832,16 +875,16 @@ export default function Portal() {
       <PortalShell branding={branding}>
         <PortalCard className="text-center py-8">
           <Loader className="w-10 h-10 animate-spin text-brand mx-auto" />
-          <h1 className="text-lg font-semibold text-navy mt-5">Approve MoMo on your phone</h1>
+          <h1 className="text-lg font-semibold text-navy mt-5">{t('waitingTitle')}</h1>
           <p className="text-navy/60 mt-2 text-sm">
-            Your WiFi username and PIN appear here instantly once Campay confirms payment.
+            {t('waitingBody')}
           </p>
-          <p className="text-xs text-navy/40 mt-3 font-mono">Username will be {phone || 'your number'}</p>
+          <p className="text-xs text-navy/40 mt-3 font-mono">{t('usernameWillBe', { phone: phone || t('yourNumber') })}</p>
           {paymentTimedOut && (
-            <p className="text-amber-700 text-sm mt-4 font-medium">{error}</p>
+            <p className="text-amber-700 text-sm mt-4 font-medium">{t(error, { defaultValue: error })}</p>
           )}
           {!paymentTimedOut && error && (
-            <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>
+            <p className="text-red-600 text-sm mt-4 font-medium">{t(error, { defaultValue: error })}</p>
           )}
           <div className="mt-6 space-y-3">
             <button
@@ -851,7 +894,7 @@ export default function Portal() {
               className="btn-primary w-full py-3 text-sm"
               style={accentStyle}
             >
-              {checkingPayment ? 'Checking...' : 'Check payment status'}
+              {checkingPayment ? t('checking') : t('checkStatus')}
             </button>
             <button
               type="button"
@@ -859,11 +902,11 @@ export default function Portal() {
               disabled={cancellingPayment}
               className="w-full py-3 rounded-lg border border-gray-200 text-navy/70 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
             >
-              {cancellingPayment ? 'Cancelling...' : 'Cancel and start over'}
+              {cancellingPayment ? t('cancelling') : t('cancel')}
             </button>
           </div>
           <p className="text-xs text-navy/40 mt-4">
-            You can close this page and come back — we&apos;ll pick up where you left off.
+            {t('comeBack')}
           </p>
         </PortalCard>
       </PortalShell>
@@ -876,7 +919,7 @@ export default function Portal() {
         <PortalCard className="text-center py-10">
           <h1 className="text-lg font-semibold text-navy">{portal?.locationName}</h1>
           <p className="text-navy/55 mt-2 text-sm">
-            No internet packages are available at this location yet. Check back soon or ask the staff.
+            {t('noPackages')}
           </p>
         </PortalCard>
       </PortalShell>
@@ -890,36 +933,36 @@ export default function Portal() {
     <PortalShell branding={branding}>
       <PortalCard>
         <div className="text-center mb-6">
-          <p className="text-xs font-medium text-navy/45 tracking-wide mb-2">WiFi hotspot</p>
+          <p className="text-xs font-medium text-navy/45 tracking-wide mb-2">{t('hotspot')}</p>
           <h1 className="text-xl font-semibold text-navy">{portal?.locationName}</h1>
           <p className="text-navy/55 text-sm mt-1">{welcomeText}</p>
           {fairUseNotice && (
             <div className="mt-3 text-left rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
               <p className="text-sm font-medium text-amber-900">
-                Fair use limit reached. Buy another package to continue.
+                {t('fairUse')}
               </p>
               <button
                 type="button"
                 onClick={() => setFairUseNotice(false)}
                 className="mt-2 text-xs font-medium text-amber-800/80 hover:text-amber-950 underline"
               >
-                Dismiss
+                {t('dismiss')}
               </button>
             </div>
           )}
           {routerUnavailable && (
             <p className="mt-3 text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
               {portal?.routerStatus === 'OFFLINE'
-                ? 'Router offline — Mobile Money payments are unavailable until it reconnects.'
-                : 'Router connectivity is degraded — payments may be delayed.'}
+                ? t('offline')
+                : t('degraded')}
             </p>
           )}
         </div>
 
         <div className="flex rounded-lg bg-surface-muted border border-gray-200 p-0.5 mb-6">
           {[
-            { id: 'pay', label: 'Pay with MoMo', icon: null },
-            { id: 'voucher', label: 'I have a voucher', icon: Ticket },
+            { id: 'pay', label: t('payTab'), icon: null },
+            { id: 'voucher', label: t('voucherTab'), icon: Ticket },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -937,29 +980,29 @@ export default function Portal() {
 
         {mode === 'voucher' ? (
           <div>
-            <label className="label-field text-center">Voucher code</label>
+            <label className="label-field text-center">{t('voucherCode')}</label>
             <input
               value={voucherCode}
               onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-              placeholder="SPAI-XXXX-XXXX"
+              placeholder={t('voucherPh')}
               className="input-field text-center font-mono text-lg tracking-widest uppercase mb-3"
             />
-            <label className="label-field text-center">PIN</label>
+            <label className="label-field text-center">{t('pin')}</label>
             <input
               value={voucherPin}
               onChange={(e) => setVoucherPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="6-digit PIN"
+              placeholder={t('pinPh')}
               inputMode="numeric"
               className="input-field text-center font-mono text-lg tracking-widest mb-4"
             />
-            {error && <p className="text-red-600 text-sm text-center mb-3 font-medium">{error}</p>}
+            {error && <p className="text-red-600 text-sm text-center mb-3 font-medium">{t(error, { defaultValue: error })}</p>}
             <button
               onClick={handleRedeemVoucher}
               disabled={!voucherCode.trim() || voucherPin.length < 6 || redeeming}
               className="btn-primary w-full py-3.5 text-base"
               style={accentStyle}
             >
-              {redeeming ? 'Redeeming...' : 'Redeem voucher'}
+              {redeeming ? t('redeeming') : t('redeem')}
             </button>
           </div>
         ) : (
@@ -977,10 +1020,12 @@ export default function Portal() {
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-navy">{pkg.name}</span>
-                    <span className="font-bold text-brand">{pkg.priceXaf.toLocaleString()} XAF</span>
+                    <span className="font-bold text-brand">
+                      {t('priceXaf', { amount: pkg.priceXaf.toLocaleString() })}
+                    </span>
                   </div>
                   <p className="text-sm text-navy/55 mt-1">
-                    {formatPortalPackageSummary(pkg, {
+                    {formatTranslatedPortalPackageSummary(t, pkg, {
                       showUploadSpeed: branding?.showUploadSpeed === true,
                     })}
                   </p>
@@ -991,22 +1036,22 @@ export default function Portal() {
             <div className="mb-4">
               <input
                 type="tel"
-                placeholder="6XX XXX XXX"
+                placeholder={t('phonePh')}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
                 className="input-field text-center text-lg tracking-wide"
               />
               {operator && (
                 <p className="text-xs text-center text-navy/45 mt-2 font-medium">
-                  {operator} Mobile Money detected
+                  {t('operator', { op: operator })}
                 </p>
               )}
               <p className="text-xs text-center text-navy/45 mt-2">
-                Pay via Campay — your phone number becomes your WiFi username. A PIN appears here after payment; then tap Connect.
+                {t('payHint')}
               </p>
             </div>
 
-            {error && <p className="text-red-600 text-sm text-center mb-3 font-medium">{error}</p>}
+            {error && <p className="text-red-600 text-sm text-center mb-3 font-medium">{t(error, { defaultValue: error })}</p>}
 
             <button
               onClick={handlePay}
@@ -1015,10 +1060,10 @@ export default function Portal() {
               style={accentStyle}
             >
               {paying
-                ? 'Processing...'
+                ? t('processing')
                 : selected
-                  ? `Pay ${selected.priceXaf.toLocaleString()} XAF`
-                  : 'Select a package'}
+                  ? t('pay', { amount: selected.priceXaf.toLocaleString() })
+                  : t('selectPackage')}
             </button>
           </>
         )}

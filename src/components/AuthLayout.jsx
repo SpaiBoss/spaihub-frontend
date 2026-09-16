@@ -1,34 +1,46 @@
 import { Link } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
+import LanguageToggle from './LanguageToggle';
+import { useTranslation } from 'react-i18next';
+import { LocaleLink } from './LocaleLink';
 
 export default function AuthLayout({ children, title, subtitle }) {
+  const { t } = useTranslation('auth');
+  const { t: tc } = useTranslation('common');
+
   return (
     <div className="min-h-screen min-h-[100dvh] flex">
       <div className="hidden lg:flex lg:w-[42%] xl:w-[40%] bg-navy relative">
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
-          <Link to="/" className="inline-flex w-fit">
+          <LocaleLink to="/" className="inline-flex w-fit">
             <BrandLogo theme="dark" textClassName="text-2xl" className="justify-start" />
-          </Link>
+          </LocaleLink>
 
           <div className="max-w-sm">
             <h2 className="text-2xl xl:text-[1.75rem] font-semibold leading-snug text-white tracking-tight">
-              Locations, routers, MoMo, and payouts.
+              {t('layout.headline')}
             </h2>
             <p className="text-white/55 mt-4 text-sm leading-relaxed">
-              Network operations for hotspot operators in Cameroon.
+              {t('layout.sub')}
             </p>
           </div>
 
-          <p className="text-white/30 text-xs tracking-wide">Spai-Hub</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-white/30 text-xs tracking-wide">SpaiHub</p>
+            <LanguageToggle compact className="text-white" />
+          </div>
         </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-surface-muted px-4 py-10 sm:px-8">
         <div className="w-full max-w-[400px] animate-slide-up">
           <div className="lg:hidden text-center mb-8">
-            <Link to="/" className="inline-flex justify-center">
+            <LocaleLink to="/" className="inline-flex justify-center">
               <BrandLogo className="mb-4 justify-center" textClassName="text-2xl" />
-            </Link>
+            </LocaleLink>
+            <div className="flex justify-center">
+              <LanguageToggle compact />
+            </div>
           </div>
 
           <div className="text-center lg:text-left mb-7">
@@ -41,7 +53,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           <div className="auth-card">{children}</div>
 
           <p className="text-center text-[11px] text-navy/35 mt-7 tracking-wide">
-            Spai-Hub · Cameroon
+            {t('layout.footer')}
           </p>
         </div>
       </div>

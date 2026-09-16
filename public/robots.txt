@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /fr
+Allow: /help
+Allow: /fr/help
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /portal
+Disallow: /contributor
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://spaihub.net/sitemap.xml

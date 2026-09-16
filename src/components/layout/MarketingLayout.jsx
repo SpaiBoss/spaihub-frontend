@@ -1,31 +1,38 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import BrandLogo from '../BrandLogo';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
+import { useTranslation } from 'react-i18next';
+import { LocaleLink, LocaleNavLink } from '../LocaleLink';
+import LanguageToggle from '../LanguageToggle';
+import { useLocale } from '../../i18n/useLocale';
+import { helpHref } from '../../i18n/paths';
 
-const NAV = [
-  { to: '/features', label: 'Features' },
-  { to: '/how-it-works', label: 'How it works' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/faq', label: 'FAQ' },
+const NAV_KEYS = [
+  { to: '/features', key: 'nav.features' },
+  { to: '/how-it-works', key: 'nav.howItWorks' },
+  { to: '/pricing', key: 'nav.pricing' },
+  { to: '/help', key: 'nav.help' },
+  { to: '/faq', key: 'nav.faq' },
 ];
 
 const FOOTER_PRODUCT = [
-  { to: '/features', label: 'Features' },
-  { to: '/how-it-works', label: 'How it works' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/for/mikrotik', label: 'MikroTik' },
-  { to: '/for/mobile-money', label: 'Mobile Money' },
-  { to: '/for/vouchers', label: 'Vouchers' },
-  { to: '/for/contributors', label: 'Contributors' },
+  { to: '/features', key: 'nav.features' },
+  { to: '/how-it-works', key: 'nav.howItWorks' },
+  { to: '/pricing', key: 'nav.pricing' },
+  { to: '/for/mikrotik', key: 'nav.mikrotik' },
+  { to: '/for/mobile-money', key: 'nav.mobileMoney' },
+  { to: '/for/vouchers', key: 'nav.vouchers' },
+  { to: '/for/contributors', key: 'nav.contributors' },
 ];
 
 const FOOTER_COMPANY = [
-  { to: '/faq', label: 'FAQ' },
-  { to: '/contact', label: 'Contact' },
-  { to: '/login', label: 'Sign in' },
-  { to: '/register', label: 'Start free' },
+  { to: '/help', key: 'nav.help' },
+  { to: '/faq', key: 'nav.faq' },
+  { to: '/contact', key: 'nav.contact' },
+  { to: '/login', key: 'nav.signIn' },
+  { to: '/register', key: 'nav.startFree' },
 ];
 
 function ScrollToTop() {
@@ -40,9 +47,12 @@ export default function MarketingLayout() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
-  const isHome = pathname === '/';
+  const { t } = useTranslation();
+  const { t: tm } = useTranslation('marketing');
+  const { lang } = useLocale();
+  const isHome = pathname === '/' || pathname === '/fr';
   const { contactWhatsApp } = usePublicConfig();
-  const wa = whatsappUrl(contactWhatsApp, 'Hi — I want to learn about Spai-Hub for my hotspot.');
+  const wa = whatsappUrl(contactWhatsApp, tm('waLearn'));
 
   useEffect(() => {
     setOpen(false);
@@ -59,8 +69,6 @@ export default function MarketingLayout() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [isHome]);
 
-  // Keep dark overlay chrome while the mobile menu is open at the top of home
-  // so the header does not flash to white over the navy drawer.
   const overlayNav = isHome && !scrolled;
   const darkChrome = overlayNav;
 
@@ -95,40 +103,42 @@ export default function MarketingLayout() {
     };
   }, [open]);
 
+  const toggleClass = darkChrome ? 'text-white' : 'text-navy';
+
   return (
     <div className="min-h-[100dvh] flex flex-col bg-white text-navy">
       <ScrollToTop />
       <header className={headerClass} aria-hidden={open || undefined}>
         <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          {/* Hero carries the brand on unscrolled home; scrolled/other pages show the nav wordmark. */}
           {overlayNav ? (
-            <Link to="/" onClick={() => setOpen(false)} className="sr-only">
-              Spai-Hub home
-            </Link>
+            <LocaleLink to="/" onClick={() => setOpen(false)} className="sr-only">
+              SpaiHub home
+            </LocaleLink>
           ) : (
-            <Link to="/" onClick={() => setOpen(false)} className="shrink-0">
+            <LocaleLink to="/" onClick={() => setOpen(false)} className="shrink-0">
               <BrandLogo theme="light" textClassName="text-xl" />
-            </Link>
+            </LocaleLink>
           )}
 
           <nav className="hidden md:flex items-center gap-6">
-            {NAV.map((item) => (
-              <NavLink key={item.to} to={item.to} className={navLinkClass}>
-                {item.label}
-              </NavLink>
+            {NAV_KEYS.map((item) => (
+              <LocaleNavLink key={item.to} to={item.to === '/help' ? helpHref('', lang) : item.to} className={navLinkClass}>
+                {t(item.key)}
+              </LocaleNavLink>
             ))}
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
-            <Link
+            <LanguageToggle compact className={toggleClass} />
+            <LocaleLink
               to="/login"
               className={`text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
                 darkChrome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'btn-ghost'
               }`}
             >
-              Sign in
-            </Link>
-            <Link
+              {t('nav.signIn')}
+            </LocaleLink>
+            <LocaleLink
               to="/register"
               className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
                 darkChrome
@@ -136,14 +146,14 @@ export default function MarketingLayout() {
                   : 'btn-primary'
               }`}
             >
-              Start free
-            </Link>
+              {t('nav.startFree')}
+            </LocaleLink>
           </div>
 
           <button
             type="button"
             className={`md:hidden p-2 ${overlayNav && !open ? 'ml-auto' : ''} ${darkChrome ? 'text-white/80 hover:text-white' : 'text-navy/70 hover:text-navy'}`}
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -158,26 +168,26 @@ export default function MarketingLayout() {
           }`}
           role="dialog"
           aria-modal="true"
-          aria-label="Menu"
+          aria-label={t('nav.openMenu')}
         >
           <div className="mx-auto flex h-14 sm:h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 shrink-0">
-            <Link to="/" onClick={() => setOpen(false)} className="shrink-0">
+            <LocaleLink to="/" onClick={() => setOpen(false)} className="shrink-0">
               <BrandLogo theme={darkChrome ? 'dark' : 'light'} textClassName="text-xl" />
-            </Link>
+            </LocaleLink>
             <button
               type="button"
               className={`p-2 ${darkChrome ? 'text-white/80 hover:text-white' : 'text-navy/70 hover:text-navy'}`}
-              aria-label="Close menu"
+              aria-label={t('nav.closeMenu')}
               onClick={() => setOpen(false)}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
           <nav className="flex-1 overflow-y-auto px-4 sm:px-6 pb-8 pt-2 space-y-1">
-            {NAV.map((item) => (
-              <NavLink
+            {NAV_KEYS.map((item) => (
+              <LocaleNavLink
                 key={item.to}
-                to={item.to}
+                to={item.to === '/help' ? helpHref('', lang) : item.to}
                 className={({ isActive }) =>
                   `block py-2.5 text-sm font-medium ${
                     darkChrome
@@ -191,28 +201,31 @@ export default function MarketingLayout() {
                 }
                 onClick={() => setOpen(false)}
               >
-                {item.label}
-              </NavLink>
+                {t(item.key)}
+              </LocaleNavLink>
             ))}
+            <div className={`pt-3 ${toggleClass}`}>
+              <LanguageToggle />
+            </div>
             <div className="flex gap-2 pt-3">
-              <Link
+              <LocaleLink
                 to="/login"
                 className={`flex-1 py-2.5 text-center text-sm font-medium rounded-lg border ${
                   darkChrome ? 'border-white/20 text-white' : 'btn-secondary'
                 }`}
                 onClick={() => setOpen(false)}
               >
-                Sign in
-              </Link>
-              <Link
+                {t('nav.signIn')}
+              </LocaleLink>
+              <LocaleLink
                 to="/register"
                 className={`flex-1 py-2.5 text-center text-sm font-medium rounded-lg ${
                   darkChrome ? 'bg-white text-navy' : 'btn-primary'
                 }`}
                 onClick={() => setOpen(false)}
               >
-                Start free
-              </Link>
+                {t('nav.startFree')}
+              </LocaleLink>
             </div>
           </nav>
         </div>
@@ -228,29 +241,29 @@ export default function MarketingLayout() {
             <div className="sm:col-span-2 lg:col-span-1">
               <BrandLogo textClassName="text-lg" />
               <p className="mt-3 text-sm text-navy/50 leading-relaxed max-w-xs">
-                Sell WiFi with Mobile Money. MikroTik-ready. Built for Cameroon hotspot owners.
+                {tm('footerTagline')}
               </p>
             </div>
             <div>
-              <p className="mkt-eyebrow text-navy/40 mb-3">Product</p>
+              <p className="mkt-eyebrow text-navy/40 mb-3">{t('nav.product')}</p>
               <ul className="space-y-2">
                 {FOOTER_PRODUCT.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
-                      {item.label}
-                    </Link>
+                    <LocaleLink to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
+                      {t(item.key)}
+                    </LocaleLink>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <p className="mkt-eyebrow text-navy/40 mb-3">Company</p>
+              <p className="mkt-eyebrow text-navy/40 mb-3">{t('nav.company')}</p>
               <ul className="space-y-2">
                 {FOOTER_COMPANY.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
-                      {item.label}
-                    </Link>
+                    <LocaleLink to={item.to} className="text-sm text-navy/60 hover:text-navy transition-colors duration-200">
+                      {t(item.key)}
+                    </LocaleLink>
                   </li>
                 ))}
                 {wa && (
@@ -261,7 +274,7 @@ export default function MarketingLayout() {
                       rel="noopener noreferrer"
                       className="text-sm text-navy/60 hover:text-navy transition-colors duration-200"
                     >
-                      WhatsApp
+                      {t('nav.whatsapp')}
                     </a>
                   </li>
                 )}
@@ -269,14 +282,14 @@ export default function MarketingLayout() {
             </div>
           </div>
           <div className="mt-10 pt-6 border-t border-navy/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <p className="font-mono text-[11px] tracking-wide text-navy/40">Spai-Hub · Cameroon</p>
+            <p className="font-mono text-[11px] tracking-wide text-navy/40">SpaiHub · {t('cameroon')}</p>
             <a
               href="https://www.spaitrace.com"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-[11px] tracking-wide text-navy/40 hover:text-navy/70 transition-colors duration-200"
             >
-              Powered by www.spaitrace.com
+              {t('poweredBy')}
             </a>
           </div>
         </div>

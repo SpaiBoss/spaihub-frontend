@@ -1,5 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import BrandLogo from '../BrandLogo';
+import LanguageToggle from '../LanguageToggle';
+import { useTranslation } from 'react-i18next';
 
 export function AdminGuard({ children }) {
   const token = localStorage.getItem('adminToken');
@@ -9,20 +11,6 @@ export function AdminGuard({ children }) {
   }
   return children;
 }
-
-const PRIMARY_LINKS = [
-  { to: '/admin/dashboard', label: 'Overview', short: 'Home' },
-  { to: '/admin/owners', label: 'Owners' },
-  { to: '/admin/locations', label: 'Locations', short: 'Sites' },
-  { to: '/admin/transactions', label: 'Transactions', short: 'Txns' },
-  { to: '/admin/withdrawals', label: 'Withdrawals', short: 'W/D' },
-];
-
-const CONTRIBUTOR_LINKS = [
-  { to: '/admin/contributors', label: 'People' },
-  { to: '/admin/contributor-links', label: 'Links' },
-  { to: '/admin/contributor-withdrawals', label: 'Payouts' },
-];
 
 function NavTabs({ links }) {
   const location = useLocation();
@@ -56,7 +44,23 @@ function NavTabs({ links }) {
 export function AdminLayout({ children, title, description }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const onContributorSection = location.pathname.startsWith('/admin/contributor');
+
+  const PRIMARY_LINKS = [
+    { to: '/admin/dashboard', label: t('nav.overview'), short: t('nav.home') },
+    { to: '/admin/owners', label: t('nav.owners') },
+    { to: '/admin/locations', label: t('nav.locations'), short: t('nav.sites') },
+    { to: '/admin/transactions', label: t('nav.transactions'), short: t('nav.txns') },
+    { to: '/admin/withdrawals', label: t('nav.withdrawals'), short: t('nav.wd') },
+  ];
+
+  const CONTRIBUTOR_LINKS = [
+    { to: '/admin/contributors', label: t('nav.people') },
+    { to: '/admin/contributor-links', label: t('nav.links') },
+    { to: '/admin/contributor-withdrawals', label: t('nav.payouts') },
+  ];
 
   function logout() {
     localStorage.removeItem('adminToken');
@@ -69,16 +73,19 @@ export function AdminLayout({ children, title, description }) {
         <div className="flex items-center gap-3 min-w-0">
           <BrandLogo theme="dark" textClassName="text-lg" />
           <span className="hidden sm:inline text-white/35 text-xs font-medium tracking-wide uppercase shrink-0">
-            Admin
+            {t('badge')}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={logout}
-          className="text-sm text-white/60 hover:text-white font-medium transition-colors shrink-0"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-3">
+          <LanguageToggle compact className="text-white" />
+          <button
+            type="button"
+            onClick={logout}
+            className="text-sm text-white/60 hover:text-white font-medium transition-colors shrink-0"
+          >
+            {t('signOut')}
+          </button>
+        </div>
       </header>
 
       <nav className="bg-white border-b border-gray-200">
@@ -91,7 +98,7 @@ export function AdminLayout({ children, title, description }) {
                 onContributorSection ? 'text-brand' : 'text-navy/35'
               }`}
             >
-              Contrib.
+              {t('contrib')}
             </span>
             <NavTabs links={CONTRIBUTOR_LINKS} />
           </div>

@@ -1,10 +1,13 @@
 import { useEffect, useState, Fragment } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Pagination, StatusBadge, EmptyState, Skeleton, Button, Input, Modal } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminLocations() {
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const [locations, setLocations] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
@@ -30,7 +33,7 @@ export default function AdminLocations() {
       setLocations(data.locations);
       setPagination(data.pagination);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load locations');
+      setError(err.response?.data?.error || t('locations.loadError'));
       setLocations([]);
     } finally {
       setLoading(false);
@@ -53,7 +56,7 @@ export default function AdminLocations() {
       const { data } = await api.get(`/api/admin/managed-locations/${id}`);
       setDetail(data);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load location detail');
+      toast.error(err.response?.data?.error || t('locations.detailFailed'));
       setExpanded(null);
     } finally {
       setDetailLoading(false);
@@ -64,14 +67,14 @@ export default function AdminLocations() {
     setBusyId(id);
     try {
       await api.patch(`/api/admin/managed-locations/${id}/status`, { isActive });
-      toast.success(isActive ? 'Location activated' : 'Location deactivated');
+      toast.success(isActive ? t('locations.activated') : t('locations.deactivated'));
       await load(page);
       if (expanded === id) {
         const { data } = await api.get(`/api/admin/managed-locations/${id}`);
         setDetail(data);
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update location');
+      toast.error(err.response?.data?.error || t('locations.updateFailed'));
     } finally {
       setBusyId(null);
     }
@@ -81,14 +84,14 @@ export default function AdminLocations() {
     setBusyId(packageId);
     try {
       await api.patch(`/api/admin/packages/${packageId}/status`, { isActive });
-      toast.success(isActive ? 'Package activated' : 'Package deactivated');
+      toast.success(isActive ? t('locations.pkgActivated') : t('locations.pkgDeactivated'));
       if (expanded) {
         const { data } = await api.get(`/api/admin/managed-locations/${expanded}`);
         setDetail(data);
       }
       await load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update package');
+      toast.error(err.response?.data?.error || t('locations.pkgUpdateFailed'));
     } finally {
       setBusyId(null);
     }
@@ -100,12 +103,12 @@ export default function AdminLocations() {
     try {
       if (confirmDelete.kind === 'location') {
         await api.delete(`/api/admin/managed-locations/${confirmDelete.id}`);
-        toast.success('Location permanently deleted');
+        toast.success(t('locations.locDeleted'));
         setExpanded(null);
         setDetail(null);
       } else {
         await api.delete(`/api/admin/packages/${confirmDelete.id}`);
-        toast.success('Package permanently deleted');
+        toast.success(t('locations.pkgDeleted'));
         if (expanded) {
           const { data } = await api.get(`/api/admin/managed-locations/${expanded}`);
           setDetail(data);
@@ -114,7 +117,7 @@ export default function AdminLocations() {
       setConfirmDelete(null);
       await load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Delete failed');
+      toast.error(err.response?.data?.error || t('locations.deleteFailed'));
     } finally {
       setBusyId(null);
     }
@@ -123,16 +126,16 @@ export default function AdminLocations() {
   return (
     <AdminGuard>
       <AdminLayout
-        title="Locations"
-        description="Deactivate sites or remove empty ones; manage packages and routers per location."
+        title={t('locations.title')}
+        description={t('locations.description')}
       >
         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3 mb-5">
           <div className="w-full sm:max-w-sm min-w-0">
-            <label className="label-field">Search</label>
+            <label className="label-field">{tc('actions.search')}</label>
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Name, address, owner…"
+              placeholder={t('locations.searchPh')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   setPage(1);
@@ -142,7 +145,7 @@ export default function AdminLocations() {
             />
           </div>
           <div className="w-full sm:w-40">
-            <label className="label-field">Status</label>
+            <label className="label-field">{t('cols.status')}</label>
             <select
               className="select-field"
               value={statusFilter}
@@ -151,9 +154,9 @@ export default function AdminLocations() {
                 setStatusFilter(e.target.value);
               }}
             >
-              <option value="">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="">{t('all')}</option>
+              <option value="active">{tc('status.ACTIVE')}</option>
+              <option value="inactive">{t('inactive')}</option>
             </select>
           </div>
           <Button
@@ -163,28 +166,28 @@ export default function AdminLocations() {
               load(1);
             }}
           >
-            Search
+            {tc('actions.search')}
           </Button>
         </div>
 
         {error ? (
           <EmptyState
-            title="Could not load locations"
+            title={t('locations.couldNotLoad')}
             description={error}
-            action={<Button onClick={() => load(page)}>Retry</Button>}
+            action={<Button onClick={() => load(page)}>{tc('actions.retry')}</Button>}
           />
         ) : (
           <div className="table-shell overflow-x-auto">
             <table>
               <thead>
                 <tr>
-                  <th>Location</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                  <th>Routers</th>
-                  <th>Packages</th>
-                  <th>Txns</th>
-                  <th className="sticky-actions">Actions</th>
+                  <th>{t('cols.location')}</th>
+                  <th>{t('cols.owner')}</th>
+                  <th>{t('cols.status')}</th>
+                  <th>{t('cols.routers')}</th>
+                  <th>{t('cols.packages')}</th>
+                  <th>{t('cols.txns')}</th>
+                  <th className="sticky-actions">{t('cols.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,7 +202,7 @@ export default function AdminLocations() {
                 ) : locations.length === 0 ? (
                   <tr>
                     <td colSpan={7}>
-                      <EmptyState title="No locations" description="Owner sites will appear here." />
+                      <EmptyState title={t('locations.emptyTitle')} description={t('locations.emptyBody')} />
                     </td>
                   </tr>
                 ) : (
@@ -229,7 +232,7 @@ export default function AdminLocations() {
                               className="admin-action-neutral"
                               onClick={() => openDetail(loc.id)}
                             >
-                              {expanded === loc.id ? 'Hide' : 'Manage'}
+                              {expanded === loc.id ? t('actions.hide') : t('actions.manage')}
                             </button>
                             <button
                               type="button"
@@ -237,15 +240,15 @@ export default function AdminLocations() {
                               className={loc.isActive ? 'admin-action-warn' : 'admin-action-success'}
                               onClick={() => setLocationActive(loc.id, !loc.isActive)}
                             >
-                              {loc.isActive ? 'Deactivate' : 'Activate'}
+                              {loc.isActive ? t('actions.deactivate') : t('actions.activate')}
                             </button>
                             <button
                               type="button"
                               disabled={busyId === loc.id || !loc.canHardDelete}
                               title={
                                 loc.canHardDelete
-                                  ? 'Permanently delete empty location'
-                                  : 'Has history — deactivate instead'
+                                  ? t('locations.deleteEmptyTitle')
+                                  : t('locations.hasHistory')
                               }
                               className="admin-action-danger"
                               onClick={() =>
@@ -257,7 +260,7 @@ export default function AdminLocations() {
                                 })
                               }
                             >
-                              Delete
+                              {tc('actions.delete')}
                             </button>
                           </div>
                         </td>
@@ -271,10 +274,10 @@ export default function AdminLocations() {
                               <div className="grid gap-5 lg:grid-cols-2">
                                 <div>
                                   <p className="text-xs font-semibold uppercase tracking-wide text-navy/50 mb-2">
-                                    Packages
+                                    {t('cols.packages')}
                                   </p>
                                   {detail.packages?.length === 0 ? (
-                                    <p className="text-sm text-navy/45">No packages</p>
+                                    <p className="text-sm text-navy/45">{t('locations.noPackages')}</p>
                                   ) : (
                                     <div className="space-y-2">
                                       {detail.packages.map((pkg) => (
@@ -296,7 +299,7 @@ export default function AdminLocations() {
                                               className="text-xs px-2.5 py-1 rounded-md bg-navy/5 text-navy"
                                               onClick={() => setPackageActive(pkg.id, !pkg.isActive)}
                                             >
-                                              {pkg.isActive ? 'Deactivate' : 'Activate'}
+                                              {pkg.isActive ? t('actions.deactivate') : t('actions.activate')}
                                             </button>
                                             <button
                                               type="button"
@@ -311,7 +314,7 @@ export default function AdminLocations() {
                                                 })
                                               }
                                             >
-                                              Delete
+                                              {tc('actions.delete')}
                                             </button>
                                           </div>
                                         </div>
@@ -321,10 +324,10 @@ export default function AdminLocations() {
                                 </div>
                                 <div>
                                   <p className="text-xs font-semibold uppercase tracking-wide text-navy/50 mb-2">
-                                    Routers
+                                    {t('cols.routers')}
                                   </p>
                                   {detail.routers?.length === 0 ? (
-                                    <p className="text-sm text-navy/45">No routers</p>
+                                    <p className="text-sm text-navy/45">{t('locations.noRouters')}</p>
                                   ) : (
                                     <div className="space-y-2">
                                       {detail.routers.map((r) => (
@@ -335,9 +338,9 @@ export default function AdminLocations() {
                                           <p className="font-medium text-navy text-sm">{r.name}</p>
                                           <p className="text-xs text-navy/45 mt-0.5 flex flex-wrap items-center gap-2">
                                             <StatusBadge status={r.status} />
-                                            <span>{r.isActive ? 'Enabled' : 'Disabled'}</span>
+                                            <span>{r.isActive ? t('locations.enabled') : t('locations.disabled')}</span>
                                             {r.lastSeenAt ? (
-                                              <span>seen {new Date(r.lastSeenAt).toLocaleString()}</span>
+                                              <span>{t('locations.seen', { date: new Date(r.lastSeenAt).toLocaleString() })}</span>
                                             ) : null}
                                           </p>
                                         </div>
@@ -368,20 +371,20 @@ export default function AdminLocations() {
         <Modal
           open={!!confirmDelete}
           onClose={() => !busyId && setConfirmDelete(null)}
-          title={confirmDelete?.kind === 'location' ? 'Delete location' : 'Delete package'}
+          title={confirmDelete?.kind === 'location' ? t('locations.deleteLoc') : t('locations.deletePkg')}
           description={
             confirmDelete?.canHardDelete
-              ? `Permanently remove “${confirmDelete?.name}”? This cannot be undone.`
-              : 'This item has history and cannot be permanently deleted. Deactivate it instead.'
+              ? t('locations.confirmRemove', { name: confirmDelete?.name })
+              : t('locations.cannotHardDelete')
           }
         >
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setConfirmDelete(null)} disabled={!!busyId}>
-              Cancel
+              {tc('actions.cancel')}
             </Button>
             {confirmDelete?.canHardDelete && (
               <Button onClick={runDelete} disabled={!!busyId} className="!bg-red-600 hover:!bg-red-700">
-                Delete permanently
+                {t('actions.deletePermanently')}
               </Button>
             )}
           </div>

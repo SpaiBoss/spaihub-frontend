@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import Seo from '../../components/Seo';
+import { LocaleLink } from '../../components/LocaleLink';
 import {
   Wallet,
   Ticket,
@@ -25,164 +27,49 @@ import {
   TestimonialGrid,
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
+import { getMarketingFaq } from './faqData';
 
-const NIGHT_EVENTS = [
-  {
-    time: '00:47',
-    title: 'Voucher sold in Douala',
-    detail: 'Campay MoMo approved. PIN delivered on the portal instantly.',
-    tag: 'Mobile Money',
-  },
-  {
-    time: '00:48',
-    title: 'Hotspot user granted on MikroTik',
-    detail: 'SpaiHub queued GRANT_ACCESS. The Hex polled and imported within seconds.',
-    tag: 'MikroTik',
-  },
-  {
-    time: '02:15',
-    title: 'Router heartbeat — still online',
-    detail: 'Your location stayed green while you slept. A silent router would have shown offline.',
-    tag: 'Monitoring',
-  },
-  {
-    time: '05:02',
-    title: 'Family plan session still active',
-    detail: 'Shared devices stayed online under the same access code.',
-    tag: 'Sessions',
-  },
-  {
-    time: '06:30',
-    title: 'Wallet credited',
-    detail: 'Owner share landed in the SpaiHub wallet, ready to withdraw to MoMo.',
-    tag: 'Wallet',
-  },
-  {
-    time: '07:00',
-    title: 'You check the dashboard',
-    detail: 'Sales, sessions, and router health — already totalled.',
-    tag: 'Reports',
-  },
+const PROBLEM_META = [
+  { icon: Wallet, accent: 'from-[#0F766E] via-[#0D9488] to-[#115E59]' },
+  { icon: Router, accent: 'from-[#0E7490] via-[#0F766E] to-[#134E4A]' },
+  { icon: Activity, accent: 'from-[#B45309] via-[#C2410C] to-[#7C2D12]' },
 ];
 
-const FEATURES = [
-  {
-    title: 'MoMo payments',
-    body: 'Subscribers pay with MTN or Orange via Campay. Approve on the phone, get WiFi credentials instantly.',
-    icon: Smartphone,
-  },
-  {
-    title: 'Vouchers & PDFs',
-    body: 'Print batches with PIN codes for cafés, hostels, and events. Revoke when you need to.',
-    icon: Ticket,
-  },
-  {
-    title: 'MikroTik commands',
-    body: 'Heartbeat, grant, and kick run through schedulers on the router you already own.',
-    icon: Terminal,
-  },
-  {
-    title: 'Locations & packages',
-    body: 'One location, one router. Time or data packages, family shared devices, your branding.',
-    icon: MapPin,
-  },
-  {
-    title: 'Wallet withdrawals',
-    body: 'Earn from every MoMo sale. Withdraw to your Mobile Money number when you need cash.',
-    icon: Wallet,
-  },
-  {
-    title: 'Reliable sessions',
-    body: 'Expiry kicks, payment recovery, and admin reconcile — so money and access stay aligned.',
-    icon: ShieldCheck,
-  },
-];
+const STEP_ICONS = [Router, Radio, Ticket, Wallet];
+const FEATURE_ICONS = [Smartphone, Ticket, Terminal, MapPin, Wallet, ShieldCheck];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      'We stopped printing random vouchers in Excel. MoMo pays, the Hex gets the user, and the wallet updates.',
-    name: 'Illustrative owner',
-    role: 'Compound hotspot · Douala',
-  },
-  {
-    quote:
-      'Script two was the missing piece. Once commands polled, vouchers actually put people online.',
-    name: 'Illustrative operator',
-    role: 'Café WiFi · Yaoundé',
-  },
-  {
-    quote:
-      'Family packages sell themselves. One code, a few phones, one payout at the end of the week.',
-    name: 'Illustrative host',
-    role: 'Student hostel · Bamenda',
-  },
-];
-
-const FAQ_TEASER_BASE = [
-  {
-    q: 'Do I need new hardware?',
-    a: 'No. SpaiHub is built for MikroTik routers you already run. Paste the hotspot and connection scripts from the dashboard.',
-  },
-  {
-    q: 'How do subscribers pay?',
-    a: 'Through Campay on the captive portal — MTN MoMo or Orange Money. Vouchers work when cash still rules.',
-  },
-  {
-    q: 'When do I get paid?',
-    a: null, // filled from live platformFeePercent
-  },
-];
-
-const PROBLEMS = [
-  {
-    n: '01',
-    t: 'Cash-only sales',
-    d: 'No Campay flow means you miss night sales and walk-in MoMo.',
-    icon: Wallet,
-    accent: 'from-[#0F766E] via-[#0D9488] to-[#115E59]',
-  },
-  {
-    n: '02',
-    t: 'Router out of sync',
-    d: 'Access codes that never hit MikroTik leave people “paid” but offline.',
-    icon: Router,
-    accent: 'from-[#0E7490] via-[#0F766E] to-[#134E4A]',
-  },
-  {
-    n: '03',
-    t: 'Unclear payouts',
-    d: 'Without a wallet and fee line, you cannot tell what you actually earned.',
-    icon: Activity,
-    accent: 'from-[#B45309] via-[#C2410C] to-[#7C2D12]',
-  },
-];
-
-const STEPS = [
-  { n: '01', t: 'Connect MikroTik', d: 'Hotspot setup once, then the SpaiHub connection script.', icon: Router },
-  { n: '02', t: 'Set packages', d: 'Time or data plans, family device limits, portal branding.', icon: Radio },
-  { n: '03', t: 'Sell access', d: 'MoMo on the portal or printed vouchers with PINs.', icon: Ticket },
-  { n: '04', t: 'Withdraw', d: 'Wallet balance to MTN or Orange when you need cash.', icon: Wallet },
-];
+function asList(value) {
+  return Array.isArray(value) ? value : [];
+}
 
 export default function Landing() {
+  const { t } = useTranslation('marketing');
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
-  const wa = whatsappUrl(contactWhatsApp, 'Hi — I want to learn about Spai-Hub for my hotspot.');
-  const faqTeaser = FAQ_TEASER_BASE.map((item) =>
-    item.q === 'When do I get paid?'
-      ? {
-          ...item,
-          a: `Each successful MoMo sale credits your SpaiHub wallet after the ${platformFeePercent}% platform fee. Withdraw to MoMo from the dashboard.`,
-        }
-      : item
-  );
+  const wa = whatsappUrl(contactWhatsApp, t('waLearn'));
+  const faqTeaser = getMarketingFaq(t, platformFeePercent).slice(1, 4);
+
+  const problems = asList(t('landing.problems', { returnObjects: true })).map((item, index) => ({
+    ...item,
+    ...PROBLEM_META[index],
+  }));
+  const nights = asList(t('landing.nights', { returnObjects: true }));
+  const steps = asList(t('landing.steps', { returnObjects: true })).map((step, index) => ({
+    ...step,
+    icon: STEP_ICONS[index],
+  }));
+  const features = asList(t('landing.features', { returnObjects: true })).map((item, index) => ({
+    ...item,
+    icon: FEATURE_ICONS[index],
+  }));
+  const testimonials = asList(t('landing.testimonials', { returnObjects: true }));
 
   return (
     <>
+      <Seo title={t('landing.seoTitle')} description={t('landing.seoDescription')} />
       <section className="relative min-h-[100dvh] min-h-[100svh] overflow-hidden text-white">
         <img
           src="/marketing/landing-hero.jpg"
-          alt="WiFi vouchers, Mobile Money payment, and hotspot router on a shop counter"
+          alt={t('landing.heroAlt')}
           className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-[78%_45%] sm:object-[82%_40%]"
         />
         <div
@@ -205,7 +92,7 @@ export default function Landing() {
         <div className="relative z-10 mx-auto flex min-h-[100dvh] min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-28 pt-28 sm:justify-center sm:px-6 sm:pb-36 sm:pt-32 lg:px-8">
           <div className="max-w-[22rem] sm:max-w-md lg:max-w-lg">
             <div className="animate-hero-in" style={{ animationDelay: '40ms' }}>
-              <p className="mkt-eyebrow text-brand-light/90 mb-5">Hotspot billing · Cameroon</p>
+              <p className="mkt-eyebrow text-brand-light/90 mb-5">{t('landing.heroEyebrow')}</p>
               <BrandLogo
                 theme="dark"
                 textClassName="text-[2.35rem] sm:text-5xl lg:text-6xl tracking-tight"
@@ -216,17 +103,17 @@ export default function Landing() {
               className="mkt-display animate-hero-in text-[1.85rem] leading-[1.12] sm:text-[2.75rem] sm:leading-[1.08] lg:text-[3.35rem] text-white"
               style={{ animationDelay: '140ms' }}
             >
-              Sell WiFi.
+              {t('landing.h1Line1')}
               <br />
-              Get paid on MoMo.
+              {t('landing.h1Line2')}
               <br />
-              <span className="text-brand-light">Then sleep.</span>
+              <span className="text-brand-light">{t('landing.h1Line3')}</span>
             </h1>
             <p
               className="mt-5 animate-hero-in text-sm sm:text-base text-white/65 leading-relaxed max-w-sm"
               style={{ animationDelay: '260ms' }}
             >
-              Campay on the portal. Printed vouchers for walk-ins. Wallet out to MoMo — on the MikroTik you already run.
+              {t('landing.heroLead')}
             </p>
             <div className="animate-hero-in" style={{ animationDelay: '380ms' }}>
               <MarketingCtaGroup className="mt-8 sm:mt-10" />
@@ -251,16 +138,16 @@ export default function Landing() {
           <div className="mx-auto max-w-6xl">
             <MarketingHeading
               light
-              eyebrow="The problem"
-              title="Manual vouchers and chasing MoMo are not a business."
-              subtitle="Spreadsheet codes, offline routers, and unpaid sessions leak revenue. Spai-Hub replaces that stack for hotspot owners who sell by the hour or the megabyte."
+              eyebrow={t('landing.problemEyebrow')}
+              title={t('landing.problemTitle')}
+              subtitle={t('landing.problemSubtitle')}
             />
           </div>
         </div>
 
         <div className="relative mt-2 sm:mt-4">
           <div className="grid sm:grid-cols-3">
-            {PROBLEMS.map((item, index) => {
+            {problems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <Reveal key={item.t} delayMs={index * 70}>
@@ -290,11 +177,11 @@ export default function Landing() {
           <div className="mx-auto max-w-6xl">
             <MarketingHeading
               light
-              eyebrow="While you sleep"
-              title="Your network worked the night shift."
-              subtitle="Billing, grants, heartbeats, and wallet credits keep moving. This is a quiet Tuesday in Douala."
+              eyebrow={t('landing.sleepEyebrow')}
+              title={t('landing.sleepTitle')}
+              subtitle={t('landing.sleepSubtitle')}
             />
-            <NightTimeline events={NIGHT_EVENTS} />
+            <NightTimeline events={nights} />
           </div>
           <WaveEdge fill="#F0F2F5" accent="#148F86" />
         </div>
@@ -302,34 +189,34 @@ export default function Landing() {
 
       <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#ffffff">
         <MarketingHeading
-          eyebrow="Product"
-          title="Built for how Cameroon hotspots actually sell."
-          subtitle="Portal pay, printed vouchers, and MoMo withdrawals — not a generic ISP console."
+          eyebrow={t('landing.productEyebrow')}
+          title={t('landing.productTitle')}
+          subtitle={t('landing.productSubtitle')}
         />
         <ProductBoard
           panels={[
             {
-              title: 'Portal',
+              title: t('landing.board.portal'),
               lines: [
-                { label: 'Status', value: 'Connected' },
-                { label: 'Remaining', value: '1h 42m' },
-                { label: 'Login', value: 'PIN ready' },
+                { label: t('landing.board.status'), value: t('landing.board.connected') },
+                { label: t('landing.board.remaining'), value: '1h 42m' },
+                { label: t('landing.board.login'), value: t('landing.board.pinReady') },
               ],
             },
             {
-              title: 'Vouchers',
+              title: t('landing.board.vouchers'),
               lines: [
-                { label: 'Batch', value: 'SPAI-….pdf' },
-                { label: 'Unused', value: '48' },
-                { label: 'Layout', value: '6-up' },
+                { label: t('landing.board.batch'), value: 'SPAI-….pdf' },
+                { label: t('landing.board.unused'), value: '48' },
+                { label: t('landing.board.layout'), value: '6-up' },
               ],
             },
             {
-              title: 'Wallet',
+              title: t('landing.board.wallet'),
               lines: [
-                { label: 'Balance', value: '84,200 XAF' },
-                { label: 'Fee', value: `${platformFeePercent}%` },
-                { label: 'Withdraw', value: 'MoMo' },
+                { label: t('landing.board.balance'), value: '84,200 XAF' },
+                { label: t('landing.board.fee'), value: `${platformFeePercent}%` },
+                { label: t('landing.board.withdraw'), value: t('landing.board.momo') },
               ],
             },
           ]}
@@ -340,19 +227,19 @@ export default function Landing() {
         <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <MarketingHeading
             className="mb-0"
-            eyebrow="How it works"
-            title="From Hex to payout in four steps."
-            subtitle="Add a location, paste two scripts, sell packages or vouchers, withdraw when you want."
+            eyebrow={t('landing.howEyebrow')}
+            title={t('landing.howTitle')}
+            subtitle={t('landing.howSubtitle')}
           />
-          <Link
+          <LocaleLink
             to="/how-it-works"
             className="shrink-0 text-sm font-semibold text-brand transition-colors duration-200 hover:text-brand-dark"
           >
-            Full walkthrough →
-          </Link>
+            {t('landing.fullWalkthrough')}
+          </LocaleLink>
         </div>
         <ol className="grid gap-10 border-t border-navy/10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((step, index) => {
+          {steps.map((step, index) => {
             const Icon = step.icon;
             return (
               <Reveal key={step.n} as="li" delayMs={index * 60}>
@@ -372,52 +259,52 @@ export default function Landing() {
 
       <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#ffffff">
         <MarketingHeading
-          eyebrow="Capabilities"
-          title="Everything that keeps a hotspot business running."
-          subtitle="Payments, vouchers, MikroTik control, and payouts — without bolting on three other tools."
+          eyebrow={t('landing.capabilitiesEyebrow')}
+          title={t('landing.capabilitiesTitle')}
+          subtitle={t('landing.capabilitiesSubtitle')}
         />
-        <FeatureGrid items={FEATURES} />
+        <FeatureGrid items={features} />
       </MarketingSection>
 
       <MarketingSection className="py-16 sm:py-20">
         <MarketingHeading
-          eyebrow="Contributors"
-          title="Grow capacity without another node."
-          subtitle="Neighbors with spare Starlink or fiber can sell unused uplink into an existing SpaiHub hotspot. Local physical link — SpaiHub meters and pays."
+          eyebrow={t('landing.contributorsEyebrow')}
+          title={t('landing.contributorsTitle')}
+          subtitle={t('landing.contributorsSubtitle')}
         />
-        <Link
+        <LocaleLink
           to="/for/contributors"
           className="font-mono text-xs font-medium tracking-wide text-brand transition-colors hover:text-brand-dark"
         >
-          Contribute spare bandwidth →
-        </Link>
+          {t('landing.contributeLink')}
+        </LocaleLink>
       </MarketingSection>
 
       <MarketingSection className="border-t border-navy/[0.06] py-20 sm:py-28" waveBottomFill="#F0F2F5">
         <MarketingHeading
-          eyebrow="From the field"
-          title="Operators who stopped improvising."
-          subtitle="Composite stories based on how Spai-Hub is meant to be used — not paid endorsements."
+          eyebrow={t('landing.fieldEyebrow')}
+          title={t('landing.fieldTitle')}
+          subtitle={t('landing.fieldSubtitle')}
         />
-        <TestimonialGrid items={TESTIMONIALS} />
+        <TestimonialGrid items={testimonials} />
       </MarketingSection>
 
       <MarketingSection tone="muted" className="py-20 sm:py-28" waveBottomFill="#0E141B" waveAccent="#148F86">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <MarketingHeading className="mb-0" eyebrow="FAQ" title="Short answers before you deploy." />
-          <Link
+          <MarketingHeading className="mb-0" eyebrow={t('common:nav.faq')} title={t('landing.faqTitle')} />
+          <LocaleLink
             to="/faq"
             className="text-sm font-semibold text-brand transition-colors duration-200 hover:text-brand-dark"
           >
-            All FAQs →
-          </Link>
+            {t('landing.allFaqs')}
+          </LocaleLink>
         </div>
         <FaqList items={faqTeaser} />
       </MarketingSection>
 
       <FinalCta
-        title="Stand up billing on the routers you already own."
-        subtitle={`Accounts are free. SpaiHub takes ${platformFeePercent}% of each MoMo sale.`}
+        title={t('landing.finalCtaTitle')}
+        subtitle={t('landing.finalCtaSubtitle', { fee: platformFeePercent })}
         whatsappHref={wa}
       />
     </>

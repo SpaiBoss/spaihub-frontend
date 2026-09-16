@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Pagination, StatusBadge, EmptyState, Skeleton, Button } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminContributorWithdrawals() {
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const [withdrawals, setWithdrawals] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
@@ -20,7 +23,7 @@ export default function AdminContributorWithdrawals() {
       setWithdrawals(data.withdrawals);
       setPagination(data.pagination);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load');
+      toast.error(err.response?.data?.error || t('cWithdrawals.loadError'));
     } finally {
       setLoading(false);
     }
@@ -33,16 +36,16 @@ export default function AdminContributorWithdrawals() {
   async function process(id, action) {
     try {
       await api.post(`/api/admin/contributor-withdrawals/${id}/process`, { action });
-      toast.success(action === 'REJECT' ? 'Rejected & refunded' : 'Processed');
+      toast.success(action === 'REJECT' ? t('cWithdrawals.rejected') : t('cWithdrawals.processed'));
       load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed');
+      toast.error(err.response?.data?.error || t('cWithdrawals.failed'));
     }
   }
 
   return (
     <AdminGuard>
-      <AdminLayout title="Contributor withdrawals" description="MoMo payouts for uplink partners">
+      <AdminLayout title={t('cWithdrawals.title')} description={t('cWithdrawals.description')}>
         <div className="mb-4">
           <select
             className="px-3 py-2 border rounded-lg text-sm"
@@ -52,10 +55,10 @@ export default function AdminContributorWithdrawals() {
               setStatus(e.target.value);
             }}
           >
-            <option value="">All</option>
-            <option value="PENDING">PENDING</option>
-            <option value="APPROVED">APPROVED</option>
-            <option value="REJECTED">REJECTED</option>
+            <option value="">{t('all')}</option>
+            <option value="PENDING">{tc('status.PENDING')}</option>
+            <option value="APPROVED">{tc('status.APPROVED')}</option>
+            <option value="REJECTED">{tc('status.REJECTED')}</option>
           </select>
         </div>
         {loading ? (
@@ -65,19 +68,19 @@ export default function AdminContributorWithdrawals() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-500 border-b bg-gray-50">
-                  <th className="p-3">Date</th>
-                  <th className="p-3">Contributor</th>
-                  <th className="p-3">Amount</th>
-                  <th className="p-3">Phone</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Actions</th>
+                  <th className="p-3">{t('cols.date')}</th>
+                  <th className="p-3">{t('cols.contributor')}</th>
+                  <th className="p-3">{t('cols.amount')}</th>
+                  <th className="p-3">{t('cols.phone')}</th>
+                  <th className="p-3">{t('cols.status')}</th>
+                  <th className="p-3">{t('cols.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8">
-                      <EmptyState title="No withdrawals" />
+                      <EmptyState title={t('cWithdrawals.empty')} />
                     </td>
                   </tr>
                 ) : (
@@ -102,21 +105,21 @@ export default function AdminContributorWithdrawals() {
                               onClick={() => process(w.id, 'RETRY_DISBURSE')}
                               className="text-xs px-3 py-1 rounded-lg bg-brand/10 text-brand"
                             >
-                              Retry MoMo
+                              {t('cWithdrawals.retryMomo')}
                             </button>
                             <button
                               type="button"
                               onClick={() => process(w.id, 'APPROVE')}
                               className="text-xs px-3 py-1 rounded-lg bg-green-100 text-green-700"
                             >
-                              Mark paid
+                              {t('cWithdrawals.markPaid')}
                             </button>
                             <button
                               type="button"
                               onClick={() => process(w.id, 'REJECT')}
                               className="text-xs px-3 py-1 rounded-lg bg-red-100 text-red-700"
                             >
-                              Reject
+                              {t('actions.reject')}
                             </button>
                           </div>
                         )}

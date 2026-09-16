@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toMinutes, toMegabytes, formatDuration, formatOwnerPackageSummary } from '../utils/packages.js';
+import HelpTip from './HelpTip';
 
 function durationToParts(minutes) {
   if (minutes % 1440 === 0 && minutes >= 1440) {
@@ -66,37 +68,39 @@ function buildPayload(form) {
   };
 }
 
-function validateForm(form) {
-  if (!form.name?.trim()) return 'Package name is required';
-  if (!form.priceXaf || Number(form.priceXaf) <= 0) return 'Price must be greater than 0';
+function validateForm(form, t) {
+  if (!form.name?.trim()) return t('toast.nameRequired');
+  if (!form.priceXaf || Number(form.priceXaf) <= 0) return t('toast.priceRequired');
 
   const uploadSpeed = Number(form.uploadSpeedMbPerSec);
-  if (!uploadSpeed || uploadSpeed <= 0) return 'Upload speed must be greater than 0';
-  if (uploadSpeed > 100) return 'Upload speed cannot exceed 100 MB/s';
+  if (!uploadSpeed || uploadSpeed <= 0) return t('toast.uploadRequired');
+  if (uploadSpeed > 100) return t('toast.uploadMax');
 
   const sharedDevices = Number(form.maxSharedDevices);
   if (!sharedDevices || sharedDevices < 1 || sharedDevices > 20) {
-    return 'Simultaneous devices must be between 1 and 20';
+    return t('toast.sharedRange');
   }
 
   if (form.type === 'TIME_BASED') {
     const durationMinutes = toMinutes(form.browseDurationValue, form.browseDurationUnit);
-    if (durationMinutes <= 0) return 'Browse duration must be greater than 0';
+    if (durationMinutes <= 0) return t('packages.durationRequired');
     if (form.timeDataCapEnabled) {
       const cap = toMegabytes(form.timeDataCapValue, form.timeDataCapUnit);
-      if (cap <= 0) return 'Data cap must be greater than 0';
+      if (cap <= 0) return t('packages.capRequired');
     }
   } else {
     const dataCapMb = toMegabytes(form.dataAllowanceValue, form.dataAllowanceUnit);
     const expiryMinutes = toMinutes(form.expiryValue, form.expiryUnit);
-    if (dataCapMb <= 0) return 'Download allowance must be greater than 0';
-    if (expiryMinutes <= 0) return 'Expiry period must be greater than 0';
+    if (dataCapMb <= 0) return t('packages.allowanceRequired');
+    if (expiryMinutes <= 0) return t('packages.expiryRequired');
   }
 
   return null;
 }
 
 export default function PackageFormModal({ open, onClose, onSubmit, initialPackage = null }) {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [form, setForm] = useState(defaultForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -129,14 +133,14 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
   }, [open, initialPackage]);
 
   const preview = (() => {
-    const err = validateForm(form);
+    const err = validateForm(form, t);
     if (err) return null;
     return formatOwnerPackageSummary(buildPayload(form));
   })();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const err = validateForm(form);
+    const err = validateForm(form, t);
     if (err) {
       setError(err);
       return;
@@ -147,7 +151,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
       await onSubmit(buildPayload(form));
       onClose();
     } catch (submitErr) {
-      setError(submitErr.response?.data?.error || 'Failed to save package');
+      setError(submitErr.response?.data?.error || t('toast.pkgSaveFailed'));
     } finally {
       setLoading(false);
     }
@@ -167,37 +171,37 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
         <h3 className="text-lg font-bold text-navy mb-1">
-          {initialPackage ? 'Edit Package' : 'Create Package'}
+          {initialPackage ? t('packages.edit') : t('packages.create')}
         </h3>
         <p className="text-sm text-navy/60 mb-5 font-medium">
-          Choose how subscribers pay for internet access at this location.
+          {t('packages.intro')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className={labelClass}>Package name</label>
+            <label className={labelClass}>{t('packages.name')}</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="e.g. 1 Hour Browse, 2 GB Weekly"
+              placeholder={t('packages.namePh')}
               required
               className={inputClass}
             />
           </div>
 
           <div>
-            <label className={labelClass}>Package type</label>
+            <label className={labelClass}>{t('packages.type')}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 {
                   value: 'TIME_BASED',
-                  title: 'Time-based',
-                  desc: 'Subscriber gets internet for a set browse time. Optional data cap.',
+                  title: t('packages.timeTitle'),
+                  desc: t('packages.timeDesc'),
                 },
                 {
                   value: 'DATA_BASED',
-                  title: 'Data-based',
-                  desc: 'Subscriber gets a download allowance that must be used before expiry.',
+                  title: t('packages.dataTitle'),
+                  desc: t('packages.dataDesc'),
                 },
               ].map((option) => (
                 <button
@@ -218,7 +222,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
           </div>
 
           <div>
-            <label className={labelClass}>Price (XAF)</label>
+            <label className={labelClass}>{t('packages.price')}</label>
             <input
               type="number"
               min={1}
@@ -230,7 +234,10 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
           </div>
 
           <div>
-            <label className={labelClass}>Simultaneous devices</label>
+            <label className={labelClass}>
+              {t('packages.shared')}
+              <HelpTip slug="create-family-package" />
+            </label>
             <input
               type="number"
               min={1}
@@ -242,14 +249,12 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               className={inputClass}
             />
             <p className={hintClass}>
-              How many distinct Wi‑Fi MACs can use the same username and PIN at once.
-              Use 1 for a single device, or 4 for a family package. Phones behind a home
-              router in router/NAT mode still count as one MAC.
+              {t('packages.sharedHint')}
             </p>
           </div>
 
           <div>
-            <label className={labelClass}>Upload speed limit (MB/s)</label>
+            <label className={labelClass}>{t('packages.upload')}</label>
             <input
               type="number"
               min={1}
@@ -261,14 +266,14 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               className={inputClass}
             />
             <p className={hintClass}>
-              Maximum upload speed per subscriber. Default is 1 MB/s.
+              {t('packages.uploadHint')}
             </p>
           </div>
 
           {form.type === 'TIME_BASED' && (
             <>
               <div>
-                <label className={labelClass}>Browse duration</label>
+                <label className={labelClass}>{t('packages.duration')}</label>
                 <div className={splitRowClass}>
                   <input
                     type="number"
@@ -282,13 +287,13 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                     onChange={(e) => setForm({ ...form, browseDurationUnit: e.target.value })}
                     className={fieldClass}
                   >
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
+                    <option value="minutes">{t('packages.minutes')}</option>
+                    <option value="hours">{t('packages.hours')}</option>
+                    <option value="days">{t('packages.days')}</option>
                   </select>
                 </div>
                 <p className={hintClass}>
-                  How long the subscriber stays connected after payment.
+                  {t('packages.durationHint')}
                   {form.browseDurationValue
                     ? ` · ${formatDuration(toMinutes(form.browseDurationValue, form.browseDurationUnit))}`
                     : ''}
@@ -296,17 +301,20 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               </div>
 
               <div className="rounded-xl border border-gray-200 p-4 space-y-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.timeDataCapEnabled}
-                    onChange={(e) => setForm({ ...form, timeDataCapEnabled: e.target.checked })}
-                    className="rounded border-gray-300 text-brand focus:ring-brand"
-                  />
-                  <span className="text-sm font-medium text-navy">
-                    Fair use data limit (hidden from subscribers)
-                  </span>
-                </label>
+                <div className="flex items-center gap-1">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.timeDataCapEnabled}
+                      onChange={(e) => setForm({ ...form, timeDataCapEnabled: e.target.checked })}
+                      className="rounded border-gray-300 text-brand focus:ring-brand"
+                    />
+                    <span className="text-sm font-medium text-navy">
+                      {t('packages.fairUse')}
+                    </span>
+                  </label>
+                  <HelpTip slug="hidden-fair-use" />
+                </div>
                 {form.timeDataCapEnabled && (
                   <div className={splitRowClass}>
                     <input
@@ -321,19 +329,17 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                       onChange={(e) => setForm({ ...form, timeDataCapUnit: e.target.value })}
                       className={fieldClass}
                     >
-                      <option value="MB">MB</option>
-                      <option value="GB">GB</option>
+                      <option value="MB">{t('packages.mb')}</option>
+                      <option value="GB">{t('packages.gb')}</option>
                     </select>
                   </div>
                 )}
                 {form.timeDataCapEnabled ? (
                   <p className={hintClass}>
-                    Enforced on the router for abuse prevention (shared with anyone on the same
-                    login, including tether/NAT). Subscribers still see unlimited data. SpaiHub
-                    does not use anti-tether firewall rules.
+                    {t('packages.fairUseOn')}
                   </p>
                 ) : (
-                  <p className={hintClass}>Leave unchecked for unlimited data during the browse period.</p>
+                  <p className={hintClass}>{t('packages.fairUseOff')}</p>
                 )}
               </div>
             </>
@@ -342,7 +348,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
           {form.type === 'DATA_BASED' && (
             <>
               <div>
-                <label className={labelClass}>Download allowance</label>
+                <label className={labelClass}>{t('packages.allowance')}</label>
                 <div className={splitRowClass}>
                   <input
                     type="number"
@@ -356,15 +362,15 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                     onChange={(e) => setForm({ ...form, dataAllowanceUnit: e.target.value })}
                     className={fieldClass}
                   >
-                    <option value="MB">MB</option>
-                    <option value="GB">GB</option>
+                    <option value="MB">{t('packages.mb')}</option>
+                    <option value="GB">{t('packages.gb')}</option>
                   </select>
                 </div>
-                <p className={hintClass}>Total data the subscriber can download after payment.</p>
+                <p className={hintClass}>{t('packages.allowanceHint')}</p>
               </div>
 
               <div>
-                <label className={labelClass}>Expiry period</label>
+                <label className={labelClass}>{t('packages.expiryPeriod')}</label>
                 <div className={splitRowClass}>
                   <input
                     type="number"
@@ -378,13 +384,13 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
                     onChange={(e) => setForm({ ...form, expiryUnit: e.target.value })}
                     className={fieldClass}
                   >
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
+                    <option value="minutes">{t('packages.minutes')}</option>
+                    <option value="hours">{t('packages.hours')}</option>
+                    <option value="days">{t('packages.days')}</option>
                   </select>
                 </div>
                 <p className={hintClass}>
-                  Unused data expires after this period.
+                  {t('packages.expiryHint')}
                   {form.expiryValue
                     ? ` · ${formatDuration(toMinutes(form.expiryValue, form.expiryUnit))}`
                     : ''}
@@ -395,7 +401,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
           {preview && (
             <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-              <p className="text-xs font-medium text-navy/60 uppercase tracking-wide">Preview</p>
+              <p className="text-xs font-medium text-navy/60 uppercase tracking-wide">{t('packages.preview')}</p>
               <p className="text-sm font-medium text-navy mt-1">{preview}</p>
             </div>
           )}
@@ -408,14 +414,14 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
               onClick={onClose}
               className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-navy font-medium hover:bg-gray-50"
             >
-              Cancel
+              {tc('actions.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 px-4 py-2.5 bg-brand text-white rounded-lg font-medium hover:bg-brand/90 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : initialPackage ? 'Save changes' : 'Create package'}
+              {loading ? tc('actions.saving') : initialPackage ? t('locations.saveChanges') : t('packages.createBtn')}
             </button>
           </div>
         </form>

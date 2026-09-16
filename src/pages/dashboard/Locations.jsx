@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Plus, ChevronDown, ChevronUp, Copy, Check, MapPin, ExternalLink, Router, Pencil, Trash2, UserX, Cloud } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Trans, useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Modal, StatusBadge, Button, Card, EmptyState } from '../../components/ui';
 import PackageFormModal from '../../components/PackageFormModal';
 import ChrOnboardingWizard, { DEFAULT_CHR_CONFIG } from '../../components/ChrOnboardingWizard';
-import { formatOwnerPackageSummary, PACKAGE_TYPE_LABELS } from '../../utils/packages';
+import HelpTip from '../../components/HelpTip';
+import { LocaleLink } from '../../components/LocaleLink';
+import { formatOwnerPackageSummary } from '../../utils/packages';
+
+const LOCATION_TABS = [
+  { id: 'routers', labelKey: 'tabRouters', shortKey: 'tabRoutersShort' },
+  { id: 'packages', labelKey: 'tabPackages', shortKey: 'tabPackagesShort' },
+  { id: 'sessions', labelKey: 'tabSessions', shortKey: 'tabSessionsShort' },
+  { id: 'access', labelKey: 'tabAccess', shortKey: 'tabAccessShort' },
+];
 
 export default function Locations() {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
@@ -44,7 +56,7 @@ export default function Locations() {
       const { data } = await api.get('/api/owner/locations');
       setLocations(data);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load locations');
+      toast.error(err.response?.data?.error || t('toast.loadLocations'));
     }
   }
 
@@ -76,7 +88,7 @@ export default function Locations() {
       setPackages(p.data);
       setSessions(s.data.filter((session) => session.location.id === id));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load location details');
+      toast.error(err.response?.data?.error || t('toast.loadDetails'));
     } finally {
       setExpandLoading(false);
     }
@@ -86,10 +98,10 @@ export default function Locations() {
     setSavingPolicy(true);
     try {
       const { data } = await api.patch(`/api/owner/locations/${expanded}`, accessPolicy);
-      toast.success('Access policy saved — routers will apply changes on their next poll');
+      toast.success(t('toast.policySaved'));
       setLocations((prev) => prev.map((loc) => (loc.id === expanded ? { ...loc, ...data } : loc)));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save access policy');
+      toast.error(err.response?.data?.error || t('toast.policyFailed'));
     } finally {
       setSavingPolicy(false);
     }
@@ -99,12 +111,12 @@ export default function Locations() {
     e.preventDefault();
     try {
       await api.post('/api/owner/locations', locForm);
-      toast.success('Location created');
+      toast.success(t('toast.locCreated'));
       setShowAddLocation(false);
       setLocForm({ name: '', address: '' });
       loadLocations();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to create location');
+      toast.error(err.response?.data?.error || t('toast.locCreateFailed'));
     }
   }
 
@@ -112,11 +124,11 @@ export default function Locations() {
     e.preventDefault();
     try {
       const { data } = await api.patch(`/api/owner/locations/${expanded}`, editLocForm);
-      toast.success('Location updated');
+      toast.success(t('toast.locUpdated'));
       setShowEditLocation(false);
       setLocations((prev) => prev.map((loc) => (loc.id === expanded ? { ...loc, ...data } : loc)));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update location');
+      toast.error(err.response?.data?.error || t('toast.locUpdateFailed'));
     }
   }
 
@@ -125,33 +137,33 @@ export default function Locations() {
       const { data } = await api.patch(`/api/owner/locations/${loc.id}`, {
         isActive: !loc.isActive,
       });
-      toast.success(data.isActive ? 'Location activated' : 'Location suspended');
+      toast.success(data.isActive ? t('toast.locActivated') : t('toast.locSuspended'));
       setLocations((prev) => prev.map((l) => (l.id === loc.id ? { ...l, ...data } : l)));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update location status');
+      toast.error(err.response?.data?.error || t('toast.locStatusFailed'));
     }
   }
 
   async function deleteRouter(routerId) {
-    if (!window.confirm('Remove this router? Subscribers will no longer reach the portal through it.')) return;
+    if (!window.confirm(t('toast.removeRouterConfirm'))) return;
     try {
       await api.delete(`/api/owner/locations/${expanded}/routers/${routerId}`);
-      toast.success('Router removed');
+      toast.success(t('toast.routerRemoved'));
       expandLocation(expanded);
       loadLocations();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to remove router');
+      toast.error(err.response?.data?.error || t('toast.routerRemoveFailed'));
     }
   }
 
   async function kickSession(transactionId) {
     try {
       await api.post(`/api/owner/sessions/${transactionId}/kick`);
-      toast.success('Session ended — device should disconnect within 15 seconds');
+      toast.success(t('toast.sessionEnded'));
       expandLocation(expanded);
       loadLocations();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to end session');
+      toast.error(err.response?.data?.error || t('toast.sessionEndFailed'));
     }
   }
 
@@ -166,7 +178,7 @@ export default function Locations() {
         payload.chrConfig = DEFAULT_CHR_CONFIG;
       }
       const { data } = await api.post(`/api/owner/locations/${expanded}/routers`, payload);
-      toast.success('Router added');
+      toast.success(t('toast.routerAdded'));
       setShowAddRouter(false);
       setRouterForm({ name: '', deploymentType: 'PHYSICAL' });
       expandLocation(expanded);
@@ -182,7 +194,7 @@ export default function Locations() {
         setScriptTab('hotspot');
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to add router');
+      toast.error(err.response?.data?.error || t('toast.routerAddFailed'));
     }
   }
 
@@ -190,14 +202,14 @@ export default function Locations() {
     try {
       if (editingPackage) {
         await api.patch(`/api/owner/locations/${expanded}/packages/${editingPackage.id}`, payload);
-        toast.success('Package updated');
+        toast.success(t('toast.pkgUpdated'));
       } else {
         await api.post(`/api/owner/locations/${expanded}/packages`, payload);
-        toast.success('Package created');
+        toast.success(t('toast.pkgCreated'));
       }
       expandLocation(expanded);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save package');
+      toast.error(err.response?.data?.error || t('toast.pkgSaveFailed'));
       throw err;
     }
   }
@@ -205,10 +217,10 @@ export default function Locations() {
   async function deactivatePackage(packageId) {
     try {
       await api.delete(`/api/owner/locations/${expanded}/packages/${packageId}`);
-      toast.success('Package deactivated');
+      toast.success(t('toast.pkgDeactivated'));
       expandLocation(expanded);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to deactivate package');
+      toast.error(err.response?.data?.error || t('toast.pkgDeactivateFailed'));
     }
   }
 
@@ -216,7 +228,7 @@ export default function Locations() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success('Copied to clipboard');
+    toast.success(t('toast.copied'));
   }
 
   function openChrWizard(router) {
@@ -238,7 +250,7 @@ export default function Locations() {
       setShowScript(data);
       setSetupRouterId(routerId);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load setup scripts');
+      toast.error(err.response?.data?.error || t('toast.setupFailed'));
     } finally {
       setScriptLoading(false);
     }
@@ -270,12 +282,12 @@ export default function Locations() {
     <div>
       <div className="flex justify-between items-center gap-3 mb-6">
         <p className="text-sm text-navy/50 font-medium">
-          {locations.length} location{locations.length !== 1 ? 's' : ''}
+          {t('locations.count', { count: locations.length })}
         </p>
         <Button onClick={() => setShowAddLocation(true)} className="gap-2 min-h-[44px] shrink-0">
           <Plus className="w-4 h-4" />
-          <span className="sm:hidden">Add</span>
-          <span className="hidden sm:inline">Add Location</span>
+          <span className="sm:hidden">{tc('actions.add')}</span>
+          <span className="hidden sm:inline">{t('locations.add')}</span>
         </Button>
       </div>
 
@@ -283,12 +295,17 @@ export default function Locations() {
         <Card>
           <EmptyState
             icon={MapPin}
-            title="No locations yet"
-            description="Add your first hotspot location to start deploying routers and selling internet packages."
+            title={t('locations.emptyTitle')}
+            description={t('locations.emptyBody')}
             action={
-              <Button onClick={() => setShowAddLocation(true)}>
-                <Plus className="w-4 h-4" /> Add Location
-              </Button>
+              <div className="flex flex-col items-center gap-3">
+                <Button onClick={() => setShowAddLocation(true)}>
+                  <Plus className="w-4 h-4" /> {t('locations.add')}
+                </Button>
+                <LocaleLink to="/help/add-location" className="text-sm font-medium text-brand hover:text-brand-dark">
+                  {tc('actions.readHelp')}
+                </LocaleLink>
+              </div>
             }
           />
         </Card>
@@ -304,8 +321,8 @@ export default function Locations() {
                 <h3 className="font-semibold text-navy">{loc.name}</h3>
                 <p className="text-sm text-navy/50 mt-0.5">{loc.address}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-navy/40 font-medium">
-                  <span>{loc.onlineRouters}/{loc.routerCount} routers online</span>
-                  <span>{loc.activeSessions} active sessions</span>
+                  <span>{t('locations.routersOnline', { online: loc.onlineRouters, total: loc.routerCount })}</span>
+                  <span>{t('locations.activeSessions', { count: loc.activeSessions })}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
@@ -318,7 +335,7 @@ export default function Locations() {
                   }}
                   className="text-xs px-3 py-2 min-h-[40px] rounded-lg bg-gray-100 text-navy/70 hover:bg-gray-200 font-medium"
                 >
-                  {loc.isActive ? 'Suspend' : 'Activate'}
+                  {loc.isActive ? t('locations.suspend') : t('locations.activate')}
                 </button>
                 {expanded === loc.id ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
               </div>
@@ -328,21 +345,16 @@ export default function Locations() {
               <div className="border-t border-gray-100 p-4 sm:p-5">
                 <div className="flex flex-col gap-3 mb-4">
                   <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
-                  {[
-                    { id: 'routers', label: 'Routers', short: 'Routers' },
-                    { id: 'packages', label: 'Packages', short: 'Plans' },
-                    { id: 'sessions', label: 'Sessions', short: 'Live' },
-                    { id: 'access', label: 'Access policy', short: 'Policy' },
-                  ].map((t) => (
+                  {LOCATION_TABS.map((tabDef) => (
                     <button
-                      key={t.id}
-                      onClick={() => setTab(t.id)}
+                      key={tabDef.id}
+                      onClick={() => setTab(tabDef.id)}
                       className={`px-3.5 py-2 min-h-[40px] rounded-lg text-sm font-medium whitespace-nowrap shrink-0 ${
-                        tab === t.id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'
+                        tab === tabDef.id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      <span className="sm:hidden">{t.short}</span>
-                      <span className="hidden sm:inline">{t.label}</span>
+                      <span className="sm:hidden">{t(`locations.${tabDef.shortKey}`)}</span>
+                      <span className="hidden sm:inline">{t(`locations.${tabDef.labelKey}`)}</span>
                     </button>
                   ))}
                   </div>
@@ -351,7 +363,7 @@ export default function Locations() {
                     onClick={() => setShowEditLocation(true)}
                     className="text-sm text-navy/60 hover:text-navy inline-flex items-center gap-1.5 self-start min-h-[40px]"
                   >
-                    <Pencil className="w-3.5 h-3.5" /> Edit location
+                    <Pencil className="w-3.5 h-3.5" /> {t('locations.edit')}
                   </button>
                 </div>
 
@@ -366,24 +378,24 @@ export default function Locations() {
                         onClick={() => setShowAddRouter(true)}
                         className="flex items-center gap-1 text-sm text-brand hover:text-brand/80"
                       >
-                        <Plus className="w-4 h-4" /> Add Router
+                        <Plus className="w-4 h-4" /> {t('locations.addRouter')}
                       </button>
                     </div>
                     <div className="overflow-x-auto -mx-1 px-1">
                     <table className="w-full text-sm min-w-[36rem]">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
-                          <th className="pb-2">Name</th>
-                          <th className="pb-2">Status</th>
-                          <th className="pb-2">Last Seen</th>
-                          <th className="pb-2 sticky-actions">Actions</th>
+                          <th className="pb-2">{t('locations.name')}</th>
+                          <th className="pb-2">{t('locations.status')}</th>
+                          <th className="pb-2">{t('locations.lastSeen')}</th>
+                          <th className="pb-2 sticky-actions">{t('locations.actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {routers.length === 0 ? (
                           <tr>
                             <td colSpan={4} className="py-6 text-center text-navy/50 text-sm">
-                              No routers yet. Add one to get your captive portal link — no physical router needed to preview.
+                              {t('locations.noRouters')}
                             </td>
                           </tr>
                         ) : (
@@ -393,13 +405,13 @@ export default function Locations() {
                               {r.name}
                               {r.deploymentType === 'CHR' && (
                                 <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-surface-muted text-navy/70 border border-gray-200">
-                                  <Cloud className="w-3 h-3" /> CHR
+                                  <Cloud className="w-3 h-3" /> {t('locations.chr')}
                                 </span>
                               )}
                             </td>
                             <td className="py-2"><StatusBadge status={r.status} /></td>
                             <td className="py-2 text-gray-400">
-                              {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : 'Never (normal without MikroTik)'}
+                              {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : t('locations.neverSeen')}
                             </td>
                             <td className="py-2 sticky-actions">
                               <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-2">
@@ -409,7 +421,7 @@ export default function Locations() {
                                   onClick={() => openChrWizard(r)}
                                   className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-brand/10 sm:bg-transparent sm:px-0 sm:min-h-0"
                                 >
-                                  <Cloud className="w-3.5 h-3.5" /> Setup CHR
+                                  <Cloud className="w-3.5 h-3.5" /> {t('locations.setupChr')}
                                 </button>
                               ) : (
                                 <button
@@ -417,7 +429,7 @@ export default function Locations() {
                                   onClick={() => openRouterSetup(r.id)}
                                   className="text-navy/70 text-xs font-medium hover:text-navy inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-navy/5 sm:bg-transparent sm:px-0 sm:min-h-0"
                                 >
-                                  <Router className="w-3.5 h-3.5" /> Setup script
+                                  <Router className="w-3.5 h-3.5" /> {t('locations.setupScript')}
                                 </button>
                               )}
                               <button
@@ -425,14 +437,14 @@ export default function Locations() {
                                 onClick={() => openPreviewPortal(r)}
                                 className="text-brand text-xs font-medium hover:text-brand-dark inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-brand/10 sm:bg-transparent sm:px-0 sm:min-h-0"
                               >
-                                <ExternalLink className="w-3.5 h-3.5" /> Preview portal
+                                <ExternalLink className="w-3.5 h-3.5" /> {t('locations.previewPortal')}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => deleteRouter(r.id)}
                                 className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center justify-center gap-1 min-h-[40px] px-3 rounded-lg bg-red-50 sm:bg-transparent sm:px-0 sm:min-h-0"
                               >
-                                <Trash2 className="w-3.5 h-3.5" /> Remove
+                                <Trash2 className="w-3.5 h-3.5" /> {tc('actions.remove')}
                               </button>
                               </div>
                             </td>
@@ -448,16 +460,18 @@ export default function Locations() {
                 {tab === 'access' && (
                   <div className="max-w-md">
                     <div className="mb-6">
-                      <h4 className="font-semibold text-navy">Access policy</h4>
+                      <h4 className="font-semibold text-navy">{t('locations.accessTitle')}</h4>
                       <p className="text-sm text-navy/50 mt-0.5">
-                        Simultaneous devices are controlled on each package. This location
-                        setting is only a fallback for vouchers when a package limit is missing.
+                        {t('locations.accessIntro')}
                       </p>
                     </div>
 
                     <div className="space-y-5">
                       <div>
-                        <label className="label-field">Devices per access code (fallback)</label>
+                        <label className="label-field">
+                          {t('locations.devicesFallback')}
+                          <HelpTip slug="reference-access-policy" />
+                        </label>
                         <input
                           type="number"
                           min={0}
@@ -471,19 +485,16 @@ export default function Locations() {
                           className="input-field"
                         />
                         <p className="text-xs text-navy/45 mt-1.5">
-                          0 = one device. Prefer setting <strong>Simultaneous devices</strong> on
-                          each package (e.g. 4 for family plans). Counts distinct Wi‑Fi MACs — not
-                          phones behind a home router in NAT/router mode.
+                          <Trans i18nKey="locations.devicesHint" ns="owner" components={{ strong: <strong /> }} />
                         </p>
                       </div>
 
                       <p className="text-xs text-navy/50 rounded-lg border border-gray-200 bg-surface-muted px-3 py-2.5">
-                        Tip: use 1-device packages with a fair-use data cap, and discourage personal
-                        Wi‑Fi extenders in router mode on this hotspot.
+                        {t('locations.accessTip')}
                       </p>
 
                       <Button onClick={saveAccessPolicy} disabled={savingPolicy} className="w-full sm:w-auto">
-                        {savingPolicy ? 'Saving...' : 'Save access policy'}
+                        {savingPolicy ? tc('actions.saving') : t('locations.savePolicy')}
                       </Button>
                     </div>
                   </div>
@@ -493,27 +504,25 @@ export default function Locations() {
                   <div>
                     {sessions.length === 0 ? (
                       <div className="text-center py-8 space-y-2">
-                        <p className="text-sm text-navy/50">No active sessions at this location.</p>
+                        <p className="text-sm text-navy/50">{t('locations.noSessions')}</p>
                         <p className="text-xs text-navy/40 max-w-sm mx-auto">
-                          After re-pasting the router connection script, live “On router” status
-                          appears here. One seen MAC can still be a NAT gateway.
+                          {t('locations.noSessionsHint')}
                         </p>
                       </div>
                     ) : (
                       <div className="overflow-x-auto -mx-1 px-1">
                       <p className="text-xs text-navy/45 mb-3">
-                        “On router” means the login is in MikroTik active hosts. A single MAC may
-                        still be a Pixlink/phone hotspot sharing with many devices.
+                        {t('locations.onRouterHint')}
                       </p>
                       <table className="w-full text-sm min-w-[36rem]">
                         <thead>
                           <tr className="text-left text-gray-500 border-b">
-                            <th className="pb-2">Device</th>
-                            <th className="pb-2">Package</th>
-                            <th className="pb-2">Router</th>
-                            <th className="pb-2">Status</th>
-                            <th className="pb-2">Ends</th>
-                            <th className="pb-2 sticky-actions">Actions</th>
+                            <th className="pb-2">{t('locations.device')}</th>
+                            <th className="pb-2">{t('locations.package')}</th>
+                            <th className="pb-2">{t('locations.router')}</th>
+                            <th className="pb-2">{t('locations.status')}</th>
+                            <th className="pb-2">{t('locations.ends')}</th>
+                            <th className="pb-2 sticky-actions">{t('locations.actions')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -529,7 +538,7 @@ export default function Locations() {
                                 {s.routerSeen ? (
                                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-signal">
                                     <span className="w-1.5 h-1.5 rounded-sm bg-signal" />
-                                    On router
+                                    {t('locations.onRouter')}
                                     {s.routerMac ? (
                                       <span className="text-navy/40 font-normal">· {s.routerMac}</span>
                                     ) : null}
@@ -537,7 +546,7 @@ export default function Locations() {
                                 ) : (
                                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-navy/45">
                                     <span className="w-1.5 h-1.5 rounded-sm bg-gray-300" />
-                                    Not seen
+                                    {t('locations.notSeen')}
                                   </span>
                                 )}
                               </td>
@@ -548,7 +557,7 @@ export default function Locations() {
                                   onClick={() => kickSession(s.id)}
                                   className="text-red-500 text-xs font-medium hover:text-red-700 inline-flex items-center gap-1"
                                 >
-                                  <UserX className="w-3.5 h-3.5" /> Kick
+                                  <UserX className="w-3.5 h-3.5" /> {t('locations.kick')}
                                 </button>
                               </td>
                             </tr>
@@ -570,26 +579,29 @@ export default function Locations() {
                         }}
                         className="flex items-center gap-1 text-sm text-brand hover:text-brand/80"
                       >
-                        <Plus className="w-4 h-4" /> Add Package
+                        <Plus className="w-4 h-4" /> {t('locations.addPackage')}
                       </button>
                     </div>
                     <div className="overflow-x-auto -mx-1 px-1">
                     <table className="w-full text-sm min-w-[40rem]">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
-                          <th className="pb-2">Name</th>
-                          <th className="pb-2">Type</th>
-                          <th className="pb-2">Details</th>
-                          <th className="pb-2">Price</th>
-                          <th className="pb-2">Status</th>
-                          <th className="pb-2 sticky-actions">Actions</th>
+                          <th className="pb-2">{t('locations.name')}</th>
+                          <th className="pb-2">{t('locations.type')}</th>
+                          <th className="pb-2">{t('locations.details')}</th>
+                          <th className="pb-2">{t('locations.price')}</th>
+                          <th className="pb-2">{t('locations.status')}</th>
+                          <th className="pb-2 sticky-actions">{t('locations.actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {packages.length === 0 ? (
                           <tr>
                             <td colSpan={6} className="py-8 text-center text-navy/50 text-sm">
-                              No packages yet. Add one so subscribers can buy internet on your portal.
+                              {t('locations.noPackages')}{' '}
+                              <LocaleLink to="/help/create-time-package" className="text-brand font-medium hover:text-brand-dark">
+                                {tc('actions.readHelp')}
+                              </LocaleLink>
                             </td>
                           </tr>
                         ) : (
@@ -598,7 +610,7 @@ export default function Locations() {
                             <td className="py-2 font-medium">{p.name}</td>
                             <td className="py-2">
                               <span className="text-xs px-2 py-0.5 rounded bg-surface-muted border border-gray-200 text-navy font-medium whitespace-nowrap">
-                                {PACKAGE_TYPE_LABELS[p.type] || 'Time-based'}
+                                {p.type === 'DATA_BASED' ? t('locations.dataBased') : t('locations.timeBased')}
                               </span>
                             </td>
                             <td className="py-2 text-navy/70">{formatOwnerPackageSummary(p)}</td>
@@ -614,13 +626,13 @@ export default function Locations() {
                                     }}
                                     className="text-brand text-xs hover:text-brand/80"
                                   >
-                                    Edit
+                                    {tc('actions.edit')}
                                   </button>
                                   <button
                                     onClick={() => deactivatePackage(p.id)}
                                     className="text-red-500 text-xs hover:text-red-700"
                                   >
-                                    Deactivate
+                                    {t('locations.deactivate')}
                                   </button>
                                 </>
                               )}
@@ -642,61 +654,61 @@ export default function Locations() {
       </div>
       )}
 
-      <Modal open={showEditLocation} onClose={() => setShowEditLocation(false)} title="Edit location">
+      <Modal open={showEditLocation} onClose={() => setShowEditLocation(false)} title={t('locations.editTitle')}>
         <form onSubmit={updateLocation} className="space-y-4">
           <input
-            placeholder="Location name"
+            placeholder={t('locations.locName')}
             value={editLocForm.name}
             onChange={(e) => setEditLocForm({ ...editLocForm, name: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
           <input
-            placeholder="Address"
+            placeholder={t('locations.address')}
             value={editLocForm.address}
             onChange={(e) => setEditLocForm({ ...editLocForm, address: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
-          <Button type="submit" className="w-full">Save changes</Button>
+          <Button type="submit" className="w-full">{t('locations.saveChanges')}</Button>
         </form>
       </Modal>
 
-      <Modal open={showAddLocation} onClose={() => setShowAddLocation(false)} title="Add Location">
+      <Modal open={showAddLocation} onClose={() => setShowAddLocation(false)} title={t('locations.add')}>
         <form onSubmit={createLocation} className="space-y-4">
           <input
-            placeholder="Location name"
+            placeholder={t('locations.locName')}
             value={locForm.name}
             onChange={(e) => setLocForm({ ...locForm, name: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
           <input
-            placeholder="Address"
+            placeholder={t('locations.address')}
             value={locForm.address}
             onChange={(e) => setLocForm({ ...locForm, address: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
-          <Button type="submit" className="w-full">Create</Button>
+          <Button type="submit" className="w-full">{t('locations.create')}</Button>
         </form>
       </Modal>
 
-      <Modal open={showAddRouter} onClose={() => setShowAddRouter(false)} title="Add Router">
+      <Modal open={showAddRouter} onClose={() => setShowAddRouter(false)} title={t('locations.addRouterTitle')}>
         <form onSubmit={createRouter} className="space-y-4">
           <input
-            placeholder="Router name"
+            placeholder={t('locations.routerName')}
             value={routerForm.name}
             onChange={(e) => setRouterForm({ ...routerForm, name: e.target.value })}
             required
             className="w-full px-3 py-2 border rounded-lg"
           />
           <div>
-            <p className="text-sm font-medium text-navy mb-2">Router type</p>
+            <p className="text-sm font-medium text-navy mb-2">{t('locations.routerType')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { id: 'PHYSICAL', label: 'Physical MikroTik', hint: 'Hex / hAP — choose Existing or Create guest in Setup' },
-                { id: 'CHR', label: 'MikroTik CHR', hint: 'Cloud VM — guided setup wizard' },
+                { id: 'PHYSICAL', label: t('locations.physical'), hint: t('locations.physicalHint'), helpSlug: 'setup-mikrotik-hex-existing' },
+                { id: 'CHR', label: t('locations.chrLabel'), hint: t('locations.chrHint'), helpSlug: 'setup-chr' },
               ].map((type) => (
                 <label
                   key={type.id}
@@ -717,6 +729,7 @@ export default function Locations() {
                     />
                     {type.id === 'CHR' ? <Cloud className="w-4 h-4 text-brand" /> : <Router className="w-4 h-4" />}
                     {type.label}
+                    <HelpTip slug={type.helpSlug} />
                   </span>
                   <span className="text-xs text-navy/50 mt-1 ml-6">{type.hint}</span>
                 </label>
@@ -724,7 +737,7 @@ export default function Locations() {
             </div>
           </div>
           <Button type="submit" className="w-full">
-            {routerForm.deploymentType === 'CHR' ? 'Add CHR & open wizard' : 'Add Router'}
+            {routerForm.deploymentType === 'CHR' ? t('locations.addChr') : t('locations.addRouter')}
           </Button>
         </form>
       </Modal>
@@ -745,16 +758,16 @@ export default function Locations() {
           setShowScript(null);
           setSetupRouterId(null);
         }}
-        title="Router & captive portal setup"
+        title={t('locations.setupTitle')}
         size="lg"
       >
         <p className="text-sm text-navy/60 mb-4">
-          Two pastes on the MikroTik terminal. Test the portal with <strong>Preview portal</strong> anytime.
+          <Trans i18nKey="locations.setupIntro" ns="owner" components={{ strong: <strong /> }} />
         </p>
 
         {showScript?.previewPortalUrl && (
           <div className="rounded-xl bg-brand/5 border border-brand/10 p-4 mb-4">
-            <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide mb-1">Test without a router</p>
+            <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide mb-1">{t('locations.testWithout')}</p>
             <a
               href={showScript.previewPortalUrl}
               target="_blank"
@@ -767,11 +780,11 @@ export default function Locations() {
         )}
 
         <div className="mb-4">
-          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide mb-2">Script 1 path</p>
+          <p className="text-xs font-semibold text-navy/50 uppercase tracking-wide mb-2">{t('locations.script1Path')}</p>
           <div className="flex gap-2 mb-3">
             {[
-              { id: 'existing', label: 'Existing hotspot' },
-              { id: 'create', label: 'Create guest hotspot' },
+              { id: 'existing', label: t('locations.existing') },
+              { id: 'create', label: t('locations.createGuest') },
             ].map((path) => (
               <button
                 key={path.id}
@@ -790,16 +803,16 @@ export default function Locations() {
           </div>
           {physicalSetupMode === 'existing' ? (
             <p className="text-xs text-navy/55 leading-relaxed">
-              Hotspot must already assign IPs and show a login page. Script 1 only installs SpaiHub (walled garden, PAP, captive HTML).
+              {t('locations.existingHint')}
             </p>
           ) : (
             <div className="space-y-3">
               <p className="text-xs text-navy/55 leading-relaxed">
-                Add-if-missing guest network on LAN (<code className="font-mono">10.10.10.0/24</code>). Does not wipe WAN or wireless. Set your guest port below.
+                <Trans i18nKey="locations.createHint" ns="owner" components={{ code: <code className="font-mono" /> }} />
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="label-field">LAN (guest)</label>
+                  <label className="label-field">{t('locations.lanGuest')}</label>
                   <input
                     className="input-field font-mono text-sm"
                     value={lanIf}
@@ -810,7 +823,7 @@ export default function Locations() {
                   />
                 </div>
                 <div>
-                  <label className="label-field">WAN</label>
+                  <label className="label-field">{t('locations.wan')}</label>
                   <input
                     className="input-field font-mono text-sm"
                     value={wanIf}
@@ -827,18 +840,18 @@ export default function Locations() {
 
         <div className="flex gap-2 mb-4">
           {[
-            { id: 'hotspot', label: '1. Hotspot setup (once)' },
-            { id: 'connection', label: '2. Connect to SpaiHub' },
-          ].map((tab) => (
+            { id: 'hotspot', label: t('locations.scriptHotspot') },
+            { id: 'connection', label: t('locations.scriptConnect') },
+          ].map((scriptTabDef) => (
             <button
-              key={tab.id}
+              key={scriptTabDef.id}
               type="button"
-              onClick={() => setScriptTab(tab.id)}
+              onClick={() => setScriptTab(scriptTabDef.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                scriptTab === tab.id ? 'bg-brand text-white' : 'bg-gray-100 text-navy/60'
+                scriptTab === scriptTabDef.id ? 'bg-brand text-white' : 'bg-gray-100 text-navy/60'
               }`}
             >
-              {tab.label}
+              {scriptTabDef.label}
             </button>
           ))}
         </div>
@@ -846,7 +859,7 @@ export default function Locations() {
         <div className="relative">
           <pre className="bg-navy-dark text-green-400 p-4 rounded-xl text-xs overflow-x-auto whitespace-pre-wrap max-h-80">
             {scriptLoading
-              ? 'Loading script…'
+              ? t('locations.loadingScript')
               : scriptTab === 'hotspot'
                 ? showScript?.hotspotSetupScript
                 : showScript?.connectionScript}

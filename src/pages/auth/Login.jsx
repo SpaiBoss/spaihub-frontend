@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import AuthLayout, { AuthLink } from '../../components/AuthLayout.jsx';
 import { Button, Input } from '../../components/ui';
+import { useLocale } from '../../i18n/useLocale';
 
 export default function Login() {
+  const { t } = useTranslation('auth');
+  const { t: te } = useTranslation('common');
+  const { lang } = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,14 +28,14 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await api.post('/api/auth/login', { email, password });
+      const { data } = await api.post('/api/auth/login', { email, password, preferredLocale: lang });
       login(data.token, data.owner);
-      toast.success('Signed in');
+      toast.success(t('login.success'));
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.error || 'Login failed';
+      const msg = err.response?.data?.error || te('errors.loginFailed');
       toast.error(msg);
-      setShowResend(/not active|verify your email/i.test(msg));
+      setShowResend(/not active|verify your email|non actif|e-mail/i.test(msg));
     } finally {
       setLoading(false);
     }
@@ -38,7 +43,7 @@ export default function Login() {
 
   async function handleResendVerification() {
     if (!email.trim()) {
-      toast.error('Enter your email above first');
+      toast.error(t('login.enterEmailFirst'));
       return;
     }
     setResending(true);
@@ -46,17 +51,17 @@ export default function Login() {
       const { data } = await api.post('/api/auth/resend-verification', { email });
       toast.success(data.message);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Could not resend verification email');
+      toast.error(err.response?.data?.error || te('errors.generic'));
     } finally {
       setResending(false);
     }
   }
 
   return (
-    <AuthLayout title="Sign in" subtitle="Access your operations dashboard">
+    <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="Email address"
+          label={t('login.email')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -65,7 +70,7 @@ export default function Login() {
         />
         <div>
           <Input
-            label="Password"
+            label={t('login.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -73,11 +78,11 @@ export default function Login() {
             autoComplete="current-password"
           />
           <div className="text-right mt-2">
-            <AuthLink to="/forgot-password">Forgot password?</AuthLink>
+            <AuthLink to="/forgot-password">{t('login.forgot')}</AuthLink>
           </div>
         </div>
         <Button type="submit" disabled={loading} className="w-full py-3" size="lg">
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? t('login.submitting') : t('login.submit')}
         </Button>
         {showResend && (
           <button
@@ -86,11 +91,11 @@ export default function Login() {
             disabled={resending}
             className="w-full text-sm text-brand hover:text-brand/80 font-medium"
           >
-            {resending ? 'Sending...' : 'Resend verification email'}
+            {resending ? t('login.resending') : t('login.resend')}
           </button>
         )}
         <p className="text-center text-sm text-navy/60">
-          Don&apos;t have an account? <AuthLink to="/register">Create one</AuthLink>
+          {t('login.noAccount')} <AuthLink to="/register">{t('login.createOne')}</AuthLink>
         </p>
       </form>
     </AuthLayout>

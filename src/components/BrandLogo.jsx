@@ -28,15 +28,15 @@ export function TextWordmark({ theme = 'light', className = 'text-2xl', as: Tag 
   return (
     <Tag
       className={`font-display font-bold tracking-tight leading-none ${color} ${className}`}
-      aria-label="Spai-Hub"
+      aria-label="SpaiHub"
     >
-      Spai-Hub
+      SpaiHub
     </Tag>
   );
 }
 
 /**
- * Spai-Hub brand mark.
+ * SpaiHub brand mark.
  * @param {'full'|'icon'|'lockup'} variant
  * @param {'light'|'dark'} theme — light = navy wordmark on light UI; dark = white wordmark / dark lockup
  */
@@ -55,7 +55,7 @@ export default function BrandLogo({
     return (
       <img
         src={src}
-        alt="Spai-Hub"
+        alt="SpaiHub"
         className={`block w-auto object-contain ${className}`}
         style={{ height }}
         draggable={false}
@@ -67,7 +67,7 @@ export default function BrandLogo({
     return (
       <img
         src={ICON_SRC}
-        alt="Spai-Hub"
+        alt="SpaiHub"
         className={`block object-contain ${iconClassName} ${className}`}
         style={{ width: iconPx, height: iconPx }}
         draggable={false}

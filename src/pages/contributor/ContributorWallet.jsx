@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Modal, Pagination, StatusBadge, Button, Input, Skeleton, EmptyState } from '../../components/ui';
 import { detectCameroonOperator, paymentMethodForOperator } from '../../utils/phone';
 import { useContributorAuth } from '../../context/ContributorAuthContext';
 
 export default function ContributorWallet() {
+  const { t } = useTranslation('contributor');
+  const { t: tc } = useTranslation('common');
   const { contributor } = useContributorAuth();
   const [wallet, setWallet] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
@@ -30,7 +33,7 @@ export default function ContributorWallet() {
       setPagination(data.pagination);
     } catch (err) {
       setWallet(null);
-      setError(err.response?.data?.error || 'Failed to load wallet');
+      setError(err.response?.data?.error || t('wallet.failedLoad'));
     }
   }
 
@@ -63,7 +66,7 @@ export default function ContributorWallet() {
         },
         { headers: { 'Idempotency-Key': idempotencyKeyRef.current } }
       );
-      toast.success(data.pendingAdminRetry ? data.message : 'Withdrawal sent to your MoMo');
+      toast.success(data.pendingAdminRetry ? data.message : t('wallet.sent'));
       setShowWithdraw(false);
       setForm({ amountXaf: '', phoneNumber: form.phoneNumber, method: 'MTN_MOMO' });
       idempotencyKeyRef.current = null;
@@ -71,12 +74,12 @@ export default function ContributorWallet() {
     } catch (err) {
       const data = err.response?.data;
       if (data?.pendingAdminRetry) {
-        toast.success(data.message || 'Withdrawal queued');
+        toast.success(data.message || t('wallet.queued'));
         setShowWithdraw(false);
         loadWallet(page);
         return;
       }
-      toast.error(data?.error || 'Withdrawal failed');
+      toast.error(data?.error || t('wallet.failed'));
     } finally {
       setSubmitting(false);
     }
@@ -86,9 +89,9 @@ export default function ContributorWallet() {
   if (error || !wallet) {
     return (
       <EmptyState
-        title="Could not load wallet"
-        description={error || 'Something went wrong'}
-        action={<Button onClick={() => loadWallet(page)}>Retry</Button>}
+        title={t('wallet.loadError')}
+        description={error || tc('errors.generic')}
+        action={<Button onClick={() => loadWallet(page)}>{tc('actions.retry')}</Button>}
       />
     );
   }
@@ -96,29 +99,29 @@ export default function ContributorWallet() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm text-center">
-        <p className="text-gray-500 text-sm">Contributor balance</p>
+        <p className="text-gray-500 text-sm">{t('wallet.balance')}</p>
         <p className="text-4xl font-bold text-navy mt-2">{wallet.walletBalance.toLocaleString()} XAF</p>
         <Button onClick={openWithdrawModal} className="mt-4">
-          Withdraw
+          {t('wallet.withdraw')}
         </Button>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-        <h3 className="p-4 font-semibold border-b">Withdrawal history</h3>
+        <h3 className="p-4 font-semibold border-b">{t('wallet.history')}</h3>
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-gray-500 border-b bg-gray-50">
-              <th className="p-3">Date</th>
-              <th className="p-3">Amount</th>
-              <th className="p-3">Phone</th>
-              <th className="p-3">Status</th>
+              <th className="p-3">{t('wallet.date')}</th>
+              <th className="p-3">{t('wallet.amount')}</th>
+              <th className="p-3">{t('wallet.phone')}</th>
+              <th className="p-3">{t('links.status')}</th>
             </tr>
           </thead>
           <tbody>
             {wallet.withdrawals.length === 0 ? (
               <tr>
                 <td colSpan={4} className="p-8 text-center text-gray-400">
-                  No withdrawals yet
+                  {t('wallet.empty')}
                 </td>
               </tr>
             ) : (
@@ -145,10 +148,10 @@ export default function ContributorWallet() {
         />
       </div>
 
-      <Modal open={showWithdraw} onClose={() => !submitting && setShowWithdraw(false)} title="Withdraw earnings">
+      <Modal open={showWithdraw} onClose={() => !submitting && setShowWithdraw(false)} title={t('wallet.modalTitle')}>
         <form onSubmit={handleWithdraw} className="space-y-4">
           <Input
-            label="Amount (XAF)"
+            label={t('wallet.amountLabel')}
             type="number"
             min={100}
             max={wallet.walletBalance}
@@ -158,9 +161,9 @@ export default function ContributorWallet() {
             disabled={submitting}
           />
           <Input
-            label="Phone Number"
+            label={t('wallet.phoneLabel')}
             type="tel"
-            placeholder="6XXXXXXXX"
+            placeholder={t('wallet.phonePh')}
             value={form.phoneNumber}
             onChange={(e) => {
               const phoneNumber = e.target.value.replace(/\D/g, '').slice(0, 9);
@@ -174,11 +177,11 @@ export default function ContributorWallet() {
           {submitting && (
             <div className="flex items-center justify-center gap-2 text-sm text-navy/60 py-2">
               <Loader className="w-4 h-4 animate-spin text-brand" />
-              Processing…
+              {t('wallet.processing')}
             </div>
           )}
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? 'Processing…' : 'Submit withdrawal'}
+            {submitting ? t('wallet.processing') : t('wallet.submit')}
           </Button>
         </form>
       </Modal>

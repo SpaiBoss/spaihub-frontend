@@ -6,6 +6,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 import MarketingLayout from './components/layout/MarketingLayout';
 import ContributorLayout, { ContributorProtectedRoute } from './components/layout/ContributorLayout';
+import LocaleSync from './i18n/LocaleSync';
+import HelpLayout from './pages/help/HelpLayout';
+import HelpHome from './pages/help/HelpHome';
+import HelpArticle from './pages/help/HelpArticle';
+import HelpSection from './pages/help/HelpSection';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -76,6 +81,7 @@ export default function App() {
               error: { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
             }}
           />
+          <LocaleSync />
           <Routes>
             <Route element={<MarketingLayout />}>
               <Route path="/" element={<Landing />} />
@@ -88,6 +94,41 @@ export default function App() {
               <Route path="/for/mobile-money" element={<ForMobileMoney />} />
               <Route path="/for/vouchers" element={<ForVouchers />} />
               <Route path="/for/contributors" element={<ForContributors />} />
+              <Route path="/help" element={<HelpLayout />}>
+                <Route index element={<HelpHome />} />
+                <Route path="owners" element={<HelpSection />} />
+                <Route path="contributors" element={<HelpSection />} />
+                <Route path="tutorials" element={<HelpSection />} />
+                <Route path="pro-tips" element={<HelpSection />} />
+                <Route path="troubleshooting" element={<HelpSection />} />
+                <Route path="glossary" element={<HelpSection />} />
+                <Route path="reference" element={<HelpSection />} />
+                <Route path=":slug" element={<HelpArticle />} />
+              </Route>
+            </Route>
+
+            <Route path="/fr" element={<MarketingLayout />}>
+              <Route index element={<Landing />} />
+              <Route path="features" element={<Features />} />
+              <Route path="how-it-works" element={<HowItWorks />} />
+              <Route path="pricing" element={<Pricing />} />
+              <Route path="faq" element={<Faq />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="for/mikrotik" element={<ForMikrotik />} />
+              <Route path="for/mobile-money" element={<ForMobileMoney />} />
+              <Route path="for/vouchers" element={<ForVouchers />} />
+              <Route path="for/contributors" element={<ForContributors />} />
+              <Route path="help" element={<HelpLayout />}>
+                <Route index element={<HelpHome />} />
+                <Route path="owners" element={<HelpSection />} />
+                <Route path="contributors" element={<HelpSection />} />
+                <Route path="tutorials" element={<HelpSection />} />
+                <Route path="pro-tips" element={<HelpSection />} />
+                <Route path="troubleshooting" element={<HelpSection />} />
+                <Route path="glossary" element={<HelpSection />} />
+                <Route path="reference" element={<HelpSection />} />
+                <Route path=":slug" element={<HelpArticle />} />
+              </Route>
             </Route>
 
             <Route path="/login" element={<Login />} />

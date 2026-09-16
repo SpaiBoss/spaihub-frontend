@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Check, Copy, ChevronLeft, ChevronRight, Cloud, Loader, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Trans, useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { Button, Input, Modal } from './ui';
 
@@ -14,19 +15,20 @@ export const DEFAULT_CHR_CONFIG = {
   dhcpPool: '192.168.88.10-192.168.88.254',
 };
 
-const STEPS = [
-  { id: 'prerequisites', title: 'Prerequisites' },
-  { id: 'network', title: 'Network layout' },
-  { id: 'bootstrap', title: 'Bootstrap script' },
-  { id: 'hotspot', title: 'SpaiHub hotspot' },
-  { id: 'connect', title: 'Connect to SpaiHub' },
-  { id: 'verify', title: 'Verify connection' },
-  { id: 'done', title: 'Complete' },
-];
+const STEP_IDS = ['prerequisites', 'network', 'bootstrap', 'hotspot', 'connect', 'verify', 'done'];
+const STEP_TITLE_KEYS = {
+  prerequisites: 'chr.stepPrereq',
+  network: 'chr.stepNetwork',
+  bootstrap: 'chr.stepBootstrap',
+  hotspot: 'chr.stepHotspot',
+  connect: 'chr.stepConnect',
+  verify: 'chr.stepVerify',
+  done: 'chr.stepDone',
+};
 
-function ScriptBlock({ script, onCopy, copied }) {
+function ScriptBlock({ script, onCopy, copied, loadingLabel }) {
   if (!script) {
-    return <p className="text-sm text-navy/50">Loading script...</p>;
+    return <p className="text-sm text-navy/50">{loadingLabel}</p>;
   }
   return (
     <div className="relative">
@@ -45,6 +47,8 @@ function ScriptBlock({ script, onCopy, copied }) {
 }
 
 export default function ChrOnboardingWizard({ open, onClose, locationId, router, onComplete }) {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [step, setStep] = useState(0);
   const [chrConfig, setChrConfig] = useState({ ...DEFAULT_CHR_CONFIG });
   const [setup, setSetup] = useState(null);
@@ -66,11 +70,11 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       );
       setSetup(data);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load scripts');
+      toast.error(err.response?.data?.error || t('chr.scriptsFailed'));
     } finally {
       setLoadingSetup(false);
     }
-  }, [locationId, router?.id]);
+  }, [locationId, router?.id, t]);
 
   useEffect(() => {
     if (!open || !router) return;
@@ -116,10 +120,10 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
     try {
       await api.patch(`/api/owner/locations/${locationId}/routers/${router.id}`, { chrConfig });
       await loadSetup(chrConfig);
-      toast.success('Network settings saved');
+      toast.success(t('chr.networkSaved'));
       setStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save network settings');
+      toast.error(err.response?.data?.error || t('chr.networkSaveFailed'));
     } finally {
       setSavingConfig(false);
     }
@@ -129,7 +133,7 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success('Copied to clipboard');
+    toast.success(t('toast.copied'));
   }
 
   function handleClose() {
@@ -140,23 +144,24 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
   if (!router) return null;
 
   const previewUrl = setup?.previewPortalUrl || router.previewPortalUrl;
+  const scriptLoadingLabel = t('chr.loadingScript');
 
   return (
-    <Modal open={open} onClose={handleClose} title="MikroTik CHR onboarding" size="lg">
+    <Modal open={open} onClose={handleClose} title={t('chr.title')} size="lg">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Cloud className="w-5 h-5 text-brand" />
           <p className="font-semibold text-navy">{router.name}</p>
         </div>
         <div className="flex flex-wrap gap-1">
-          {STEPS.map((s, i) => (
+          {STEP_IDS.map((id, i) => (
             <span
-              key={s.id}
+              key={id}
               className={`text-xs px-2 py-1 rounded ${
                 i === step ? 'bg-brand text-white' : i < step ? 'bg-signal-muted text-signal' : 'bg-surface-muted text-navy/50 border border-gray-200'
               }`}
             >
-              {i + 1}. {s.title}
+              {i + 1}. {t(STEP_TITLE_KEYS[id])}
             </span>
           ))}
         </div>
@@ -164,28 +169,33 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
 
       {step === 0 && (
         <div className="space-y-4 text-sm text-navy/70">
-          <p>Before you start, confirm your CHR environment:</p>
+          <p>{t('chr.prereqIntro')}</p>
           <ul className="list-disc pl-5 space-y-2">
-            <li>RouterOS license includes <strong>Hotspot</strong> (Level 4+ on CHR).</li>
-            <li>CHR can reach the SpaiHub API over HTTPS (outbound port 443).</li>
-            <li>Cloud firewall / security group allows egress to the internet.</li>
-            <li>CHR has no built-in Wi‑Fi — connect an AP or switch to the LAN bridge.</li>
+            <li>
+              <Trans i18nKey="chr.prereq1" ns="owner" components={{ strong: <strong /> }} />
+            </li>
+            <li>{t('chr.prereq2')}</li>
+            <li>{t('chr.prereq3')}</li>
+            <li>{t('chr.prereq4')}</li>
           </ul>
           <p>
-            See{' '}
-            <a
-              href="https://help.mikrotik.com/docs/display/ROS/Cloud+Hosted+Router"
-              target="_blank"
-              rel="noreferrer"
-              className="text-brand hover:underline"
-            >
-              MikroTik CHR documentation
-            </a>{' '}
-            for VM setup.
+            <Trans
+              i18nKey="chr.seeDocs"
+              ns="owner"
+              components={{
+                docs: (
+                  <a
+                    href="https://help.mikrotik.com/docs/display/ROS/Cloud+Hosted+Router"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand hover:underline"
+                  />
+                ),
+              }}
+            />
           </p>
           <p className="text-amber-700 bg-amber-50 rounded-lg p-3 text-xs">
-            Run scripts in order on a fresh CHR or backup your config first. Verify interface names with{' '}
-            <code className="font-mono">/interface print</code>.
+            <Trans i18nKey="chr.warning" ns="owner" components={{ code: <code className="font-mono" /> }} />
           </p>
         </div>
       )}
@@ -193,41 +203,41 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       {step === 1 && (
         <div className="space-y-4">
           <p className="text-sm text-navy/60">
-            Default layout: WAN on ether1, LAN/AP on ether2, hotspot bridge at 192.168.88.0/24.
+            {t('chr.networkIntro')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="WAN interface"
+              label={t('chr.wanIf')}
               value={chrConfig.wanInterface}
               onChange={(e) => setChrConfig({ ...chrConfig, wanInterface: e.target.value })}
             />
             <Input
-              label="LAN interface"
+              label={t('chr.lanIf')}
               value={chrConfig.lanInterface}
               onChange={(e) => setChrConfig({ ...chrConfig, lanInterface: e.target.value })}
             />
             <Input
-              label="Bridge name"
+              label={t('chr.bridge')}
               value={chrConfig.bridgeName}
               onChange={(e) => setChrConfig({ ...chrConfig, bridgeName: e.target.value })}
             />
             <Input
-              label="Hotspot name"
+              label={t('chr.hotspotName')}
               value={chrConfig.hotspotName}
               onChange={(e) => setChrConfig({ ...chrConfig, hotspotName: e.target.value })}
             />
             <Input
-              label="Local network (CIDR)"
+              label={t('chr.cidr')}
               value={chrConfig.localNetwork}
               onChange={(e) => setChrConfig({ ...chrConfig, localNetwork: e.target.value })}
             />
             <Input
-              label="Gateway IP"
+              label={t('chr.gateway')}
               value={chrConfig.gatewayIp}
               onChange={(e) => setChrConfig({ ...chrConfig, gatewayIp: e.target.value })}
             />
             <Input
-              label="DHCP pool"
+              label={t('chr.dhcp')}
               className="sm:col-span-2"
               value={chrConfig.dhcpPool}
               onChange={(e) => setChrConfig({ ...chrConfig, dhcpPool: e.target.value })}
@@ -239,12 +249,12 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       {step === 2 && (
         <div className="space-y-3">
           <p className="text-sm text-navy/60">
-            Paste this into the MikroTik terminal first. It creates bridge, DHCP, hotspot, and NAT.
+            {t('chr.bootstrapIntro')}
           </p>
           {loadingSetup ? (
             <div className="flex justify-center py-8"><Loader className="w-6 h-6 animate-spin text-brand" /></div>
           ) : (
-            <ScriptBlock script={setup?.chrBootstrapScript} onCopy={copyScript} copied={copied} />
+            <ScriptBlock script={setup?.chrBootstrapScript} onCopy={copyScript} copied={copied} loadingLabel={scriptLoadingLabel} />
           )}
         </div>
       )}
@@ -252,18 +262,18 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       {step === 3 && (
         <div className="space-y-3">
           <p className="text-sm text-navy/60">
-            Run after bootstrap. Adds walled garden, SpaiHub profiles, and downloads <code className="text-xs">hotspot/login.html</code> to redirect clients to the captive portal.
+            <Trans i18nKey="chr.hotspotIntro" ns="owner" components={{ code: <code className="text-xs" /> }} />
           </p>
-          <ScriptBlock script={setup?.hotspotSetupScript} onCopy={copyScript} copied={copied} />
+          <ScriptBlock script={setup?.hotspotSetupScript} onCopy={copyScript} copied={copied} loadingLabel={scriptLoadingLabel} />
         </div>
       )}
 
       {step === 4 && (
         <div className="space-y-3">
           <p className="text-sm text-navy/60">
-            Run last. Starts heartbeat and command polling so SpaiHub can grant access after payment.
+            {t('chr.connectIntro')}
           </p>
-          <ScriptBlock script={setup?.connectionScript} onCopy={copyScript} copied={copied} />
+          <ScriptBlock script={setup?.connectionScript} onCopy={copyScript} copied={copied} loadingLabel={scriptLoadingLabel} />
         </div>
       )}
 
@@ -272,21 +282,23 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
           {polling && !onlineStatus?.isOnline ? (
             <>
               <Loader className="w-10 h-10 animate-spin text-brand mx-auto" />
-              <p className="font-medium text-navy mt-4">Waiting for router heartbeat...</p>
+              <p className="font-medium text-navy mt-4">{t('chr.waiting')}</p>
               <p className="text-sm text-navy/50 mt-2">
-                After pasting all three scripts, the router should appear online within 1–2 minutes.
+                {t('chr.waitingHint')}
               </p>
             </>
           ) : onlineStatus?.isOnline ? (
-            <p className="text-emerald-600 font-medium">Router is online!</p>
+            <p className="text-emerald-600 font-medium">{t('chr.online')}</p>
           ) : (
             <>
-              <p className="text-navy/70 text-sm">Not online yet. Check:</p>
+              <p className="text-navy/70 text-sm">{t('chr.notOnline')}</p>
               <ul className="text-left text-sm text-navy/60 list-disc pl-5 space-y-1 max-w-md mx-auto">
-                <li>All three scripts pasted without errors</li>
-                <li>Schedulers <code className="font-mono">spaihub-heartbeat</code> and <code className="font-mono">spaihub-commands</code> exist</li>
-                <li>CHR can reach your SpaiHub API over HTTPS</li>
-                <li>Walled garden includes portal and API hosts from script 2</li>
+                <li>{t('chr.check1')}</li>
+                <li>
+                  <Trans i18nKey="chr.check2" ns="owner" components={{ code: <code className="font-mono" /> }} />
+                </li>
+                <li>{t('chr.check3')}</li>
+                <li>{t('chr.check4')}</li>
               </ul>
             </>
           )}
@@ -296,8 +308,8 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
       {step === 6 && (
         <div className="space-y-4 text-center py-4">
           <Check className="w-12 h-12 text-emerald-500 mx-auto" />
-          <p className="font-semibold text-navy">CHR is connected to SpaiHub</p>
-          <p className="text-sm text-navy/60">Add packages at this location, then test the captive portal.</p>
+          <p className="font-semibold text-navy">{t('chr.connected')}</p>
+          <p className="text-sm text-navy/60">{t('chr.connectedHint')}</p>
           {previewUrl && (
             <a
               href={previewUrl}
@@ -305,7 +317,7 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-brand font-medium hover:underline"
             >
-              <ExternalLink className="w-4 h-4" /> Preview captive portal
+              <ExternalLink className="w-4 h-4" /> {t('chr.previewPortal')}
             </a>
           )}
         </div>
@@ -318,29 +330,29 @@ export default function ChrOnboardingWizard({ open, onClose, locationId, router,
           className="gap-1"
         >
           <ChevronLeft className="w-4 h-4" />
-          {step === 0 ? 'Close' : 'Back'}
+          {step === 0 ? tc('actions.close') : tc('actions.back')}
         </Button>
 
         {step === 1 && (
           <Button onClick={saveNetworkConfig} disabled={savingConfig}>
-            {savingConfig ? 'Saving...' : 'Save & continue'}
+            {savingConfig ? tc('actions.saving') : t('chr.saveContinue')}
           </Button>
         )}
 
         {step >= 0 && step <= 4 && step !== 1 && (
           <Button onClick={() => setStep(step + 1)} className="gap-1">
-            Next <ChevronRight className="w-4 h-4" />
+            {tc('actions.next')} <ChevronRight className="w-4 h-4" />
           </Button>
         )}
 
         {step === 5 && !onlineStatus?.isOnline && (
           <Button onClick={() => setStep(4)} variant="secondary">
-            Re-check scripts
+            {t('chr.recheck')}
           </Button>
         )}
 
         {step === 6 && (
-          <Button onClick={handleClose}>Done</Button>
+          <Button onClick={handleClose}>{t('chr.done')}</Button>
         )}
       </div>
     </Modal>

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Pagination, StatusBadge, EmptyState, Skeleton, Button } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminOwners() {
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const [owners, setOwners] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
@@ -19,7 +22,7 @@ export default function AdminOwners() {
       setOwners(data.owners);
       setPagination(data.pagination);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load owners');
+      setError(err.response?.data?.error || t('owners.loadError'));
       setOwners([]);
     } finally {
       setLoading(false);
@@ -31,10 +34,10 @@ export default function AdminOwners() {
   async function activateOwner(id) {
     try {
       await api.post(`/api/admin/owners/${id}/activate`);
-      toast.success('Owner activated');
+      toast.success(t('owners.activated'));
       load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to activate owner');
+      toast.error(err.response?.data?.error || t('owners.activateFailed'));
     }
   }
 
@@ -42,36 +45,36 @@ export default function AdminOwners() {
     const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
       await api.patch(`/api/admin/owners/${id}/status`, { status: newStatus });
-      toast.success(`Owner ${newStatus.toLowerCase()}`);
+      toast.success(newStatus === 'ACTIVE' ? t('owners.activated') : t('owners.suspended'));
       load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update owner status');
+      toast.error(err.response?.data?.error || t('owners.statusFailed'));
     }
   }
 
   return (
     <AdminGuard>
-      <AdminLayout title="Owners">
+      <AdminLayout title={t('owners.title')} description={t('owners.description')}>
         {error ? (
           <EmptyState
-            title="Could not load owners"
+            title={t('owners.couldNotLoad')}
             description={error}
-            action={<Button onClick={() => load(page)}>Retry</Button>}
+            action={<Button onClick={() => load(page)}>{tc('actions.retry')}</Button>}
           />
         ) : (
         <div className="table-shell overflow-x-auto">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Locations</th>
-                <th>Transactions</th>
-                <th>Revenue</th>
-                <th>Wallet</th>
-                <th>Joined</th>
-                <th className="sticky-actions">Actions</th>
+                <th>{t('cols.name')}</th>
+                <th>{t('cols.email')}</th>
+                <th>{t('cols.status')}</th>
+                <th>{t('cols.locations')}</th>
+                <th>{t('cols.transactions')}</th>
+                <th>{t('cols.revenue')}</th>
+                <th>{t('cols.wallet')}</th>
+                <th>{t('cols.joined')}</th>
+                <th className="sticky-actions">{t('cols.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,7 +87,7 @@ export default function AdminOwners() {
               ) : owners.length === 0 ? (
                 <tr>
                   <td colSpan={9}>
-                    <EmptyState title="No owners yet" description="Registered hotspot owners will appear here." />
+                    <EmptyState title={t('owners.emptyTitle')} description={t('owners.emptyBody')} />
                   </td>
                 </tr>
               ) : (
@@ -106,7 +109,7 @@ export default function AdminOwners() {
                             onClick={() => activateOwner(o.id)}
                             className="admin-action-success"
                           >
-                            Activate
+                            {t('actions.activate')}
                           </button>
                         )}
                         {o.status !== 'PENDING' && (
@@ -115,7 +118,7 @@ export default function AdminOwners() {
                             onClick={() => toggleStatus(o.id, o.status)}
                             className={o.status === 'ACTIVE' ? 'admin-action-danger' : 'admin-action-success'}
                           >
-                            {o.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                            {o.status === 'ACTIVE' ? t('actions.suspend') : t('actions.activate')}
                           </button>
                         )}
                       </div>

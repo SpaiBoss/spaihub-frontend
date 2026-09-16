@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import Seo from '../../components/Seo';
+import { LocaleLink } from '../../components/LocaleLink';
 import {
   Smartphone,
   Ticket,
@@ -18,118 +20,66 @@ import {
 } from '../../components/marketing/MarketingPrimitives';
 import { usePublicConfig, whatsappUrl } from '../../hooks/usePublicConfig';
 
-const GROUPS = [
-  {
-    title: 'Sell access',
-    items: [
-      {
-        title: 'Campay Mobile Money',
-        body: 'MTN and Orange collect on the captive portal. Username and PIN appear when Campay confirms.',
-        icon: Smartphone,
-      },
-      {
-        title: 'Voucher batches',
-        body: 'Generate codes with PINs, export PDF layouts, revoke unused or redeemed stock when needed.',
-        icon: Ticket,
-      },
-      {
-        title: 'Time and data packages',
-        body: 'Browse periods or download caps, upload speed for owners, family shared-device limits.',
-        icon: Package,
-      },
-    ],
-  },
-  {
-    title: 'Run the network',
-    items: [
-      {
-        title: 'MikroTik heartbeat',
-        body: 'Know when a location is online, degraded, or offline from the owner dashboard.',
-        icon: Activity,
-      },
-      {
-        title: 'Command grants and kicks',
-        body: 'Access is provisioned and expired sessions are kicked through router schedulers.',
-        icon: Terminal,
-      },
-      {
-        title: 'Portal branding',
-        body: 'Logo, accent color, and welcome text so the captive page matches your site name.',
-        icon: Palette,
-      },
-    ],
-  },
-  {
-    title: 'Get paid cleanly',
-    items: [
-      {
-        title: 'Owner wallet',
-        body: 'MoMo sales credit your balance after the platform fee. Withdraw to MoMo when you need cash.',
-        icon: Wallet,
-      },
-      {
-        title: 'Payment recovery',
-        body: 'Pending payments survive reloads; cancel checks Campay first so orphan SUCCESS does not leak.',
-        icon: RefreshCw,
-      },
-      {
-        title: 'Admin reconcile',
-        body: 'Platform tools to verify Campay status on stuck payments and withdrawals.',
-        icon: ShieldCheck,
-      },
-    ],
-  },
-];
+const SELL_ICONS = [Smartphone, Ticket, Package];
+const RUN_ICONS = [Activity, Terminal, Palette];
+const PAID_ICONS = [Wallet, RefreshCw, ShieldCheck];
+
+function mapItems(t, key, icons, fee) {
+  const raw = t(key, { returnObjects: true });
+  if (!Array.isArray(raw)) return [];
+  return raw.map((_, i) => ({
+    title: t(`${key}.${i}.title`),
+    body: t(`${key}.${i}.body`, { fee }),
+    icon: icons[i],
+  }));
+}
 
 export default function Features() {
+  const { t } = useTranslation('marketing');
   const { platformFeePercent, contactWhatsApp } = usePublicConfig();
-  const wa = whatsappUrl(contactWhatsApp, 'Hi — I have a question about Spai-Hub features.');
+  const wa = whatsappUrl(contactWhatsApp, t('waLearn'));
+  const fee = platformFeePercent;
 
-  const groups = GROUPS.map((group) => ({
-    ...group,
-    items: group.items.map((item) =>
-      item.title === 'Owner wallet'
-        ? {
-            ...item,
-            body: `MoMo sales credit your balance after the ${platformFeePercent}% platform fee. Withdraw to MoMo when you need cash.`,
-          }
-        : item
-    ),
-  }));
+  const groups = [
+    { title: t('featuresPage.sell'), items: mapItems(t, 'featuresPage.sellItems', SELL_ICONS, fee) },
+    { title: t('featuresPage.run'), items: mapItems(t, 'featuresPage.runItems', RUN_ICONS, fee) },
+    { title: t('featuresPage.paid'), items: mapItems(t, 'featuresPage.paidItems', PAID_ICONS, fee) },
+  ];
 
   return (
     <>
+      <Seo title={t('featuresPage.seoTitle')} description={t('featuresPage.seoDescription')} />
       <MarketingSection className="pt-14 sm:pt-20 pb-10">
         <MarketingHeading
-          eyebrow="Features"
-          title="Everything you need to sell hotspot internet."
-          subtitle="Payments, vouchers, MikroTik control, and payouts — without bolting on three other tools."
+          eyebrow={t('featuresPage.eyebrow')}
+          title={t('featuresPage.title')}
+          subtitle={t('featuresPage.subtitle')}
         />
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link
+          <LocaleLink
             to="/for/mobile-money"
             className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
           >
-            Mobile Money →
-          </Link>
-          <Link
+            {t('common:nav.mobileMoney')} →
+          </LocaleLink>
+          <LocaleLink
             to="/for/vouchers"
             className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
           >
-            Vouchers →
-          </Link>
-          <Link
+            {t('common:nav.vouchers')} →
+          </LocaleLink>
+          <LocaleLink
             to="/for/mikrotik"
             className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
           >
-            MikroTik →
-          </Link>
-          <Link
+            {t('common:nav.mikrotik')} →
+          </LocaleLink>
+          <LocaleLink
             to="/for/contributors"
             className="font-mono text-xs tracking-wide text-brand font-medium hover:text-brand-dark transition-colors"
           >
-            Contributors →
-          </Link>
+            {t('common:nav.contributors')} →
+          </LocaleLink>
         </div>
       </MarketingSection>
 
@@ -140,8 +90,8 @@ export default function Features() {
       ))}
 
       <FinalCta
-        title="See it on your own Hex."
-        subtitle="Create a free account, connect your MikroTik, and start selling."
+        title={t('featuresPage.ctaTitle')}
+        subtitle={t('featuresPage.ctaSubtitle')}
         whatsappHref={wa}
       />
     </>

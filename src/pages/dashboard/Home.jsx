@@ -15,6 +15,7 @@ import {
   Cell,
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Card, EmptyState, Skeleton, StatCard, StatusBadge } from '../../components/ui';
 import AccountingExportBar from '../../components/AccountingExportBar';
@@ -28,6 +29,7 @@ import {
 } from '../../components/charts/ChartPrimitives';
 
 export default function Home() {
+  const { t } = useTranslation('owner');
   const [stats, setStats] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [chart, setChart] = useState([]);
@@ -53,12 +55,12 @@ export default function Home() {
           setAnalytics(analyticsRes.data);
         } catch {
           setAnalytics({ revenueByLocation: [], paymentMix: { momo: 0, voucher: 0 }, vouchers: null });
-          toast.error('Some analytics could not be loaded');
+          toast.error(t('home.analyticsWarn'));
         }
       })
-      .catch(() => setError('Failed to load dashboard data. Try signing in again.'))
+      .catch(() => setError(t('home.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const trend =
     stats && stats.yesterdayRevenue > 0
@@ -71,11 +73,11 @@ export default function Home() {
     () =>
       analytics
         ? [
-            { name: 'Mobile Money', value: analytics.paymentMix.momo },
-            { name: 'Vouchers', value: analytics.paymentMix.voucher },
+            { name: t('home.momo'), value: analytics.paymentMix.momo },
+            { name: t('home.vouchers'), value: analytics.paymentMix.voucher },
           ].filter((item) => item.value > 0)
         : [],
-    [analytics]
+    [analytics, t]
   );
 
   const locationChart = useMemo(
@@ -86,11 +88,11 @@ export default function Home() {
   const voucherChart = useMemo(() => {
     if (!analytics?.vouchers) return [];
     return [
-      { name: 'Unused', value: analytics.vouchers.unused },
-      { name: 'Redeemed', value: analytics.vouchers.redeemed },
-      { name: 'Expired', value: analytics.vouchers.expired },
+      { name: t('home.unused'), value: analytics.vouchers.unused },
+      { name: t('home.redeemed'), value: analytics.vouchers.redeemed },
+      { name: t('home.expired'), value: analytics.vouchers.expired },
     ].filter((v) => v.value > 0);
-  }, [analytics]);
+  }, [analytics, t]);
 
   if (loading) {
     return (
@@ -108,7 +110,7 @@ export default function Home() {
   if (error || !stats) {
     return (
       <Card>
-        <EmptyState title="Unable to load dashboard" description={error || 'No dashboard data available.'} />
+        <EmptyState title={t('home.loadError')} description={error || t('home.noData')} />
       </Card>
     );
   }
@@ -121,10 +123,9 @@ export default function Home() {
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3 items-start">
           <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-semibold text-amber-900">Update your router connection script</p>
+            <p className="font-semibold text-amber-900">{t('home.scriptBannerTitle')}</p>
             <p className="text-sm text-amber-800 mt-1">
-              Re-run the connection script from Locations → your router → Setup. The new script confirms
-              commands with SpaiHub so access grants and kicks are reliable.
+              {t('home.scriptBanner')}
             </p>
             <button
               type="button"
@@ -134,35 +135,35 @@ export default function Home() {
               }}
               className="mt-3 text-sm font-medium text-amber-900 underline"
             >
-              Dismiss
+              {t('home.dismiss')}
             </button>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Today's Revenue" value={formatXaf(stats.todayRevenue)} icon={TrendingUp} trend={trend} accent="green" />
-        <StatCard title="This Month" value={formatXaf(stats.monthRevenue)} icon={BarChart3} trend={stats.monthChangePercent} trendLabel="vs last month" accent="brand" />
-        <StatCard title="Active Sessions" value={stats.activeSessions} icon={Users} accent="navy" />
-        <StatCard title="Wallet Balance" value={formatXaf(stats.walletBalance)} icon={Wallet} accent="amber" />
+        <StatCard title={t('home.todayRevenue')} value={formatXaf(stats.todayRevenue)} icon={TrendingUp} trend={trend} trendLabel={t('home.vsYesterday')} accent="green" />
+        <StatCard title={t('home.thisMonth')} value={formatXaf(stats.monthRevenue)} icon={BarChart3} trend={stats.monthChangePercent} trendLabel={t('home.vsLastMonth')} accent="brand" />
+        <StatCard title={t('home.activeSessions')} value={stats.activeSessions} icon={Users} accent="navy" />
+        <StatCard title={t('home.walletBalance')} value={formatXaf(stats.walletBalance)} icon={Wallet} accent="amber" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card bodyClassName="p-3.5 sm:p-4">
-          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">All-time</p>
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">{t('home.allTime')}</p>
           <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.allTimeRevenue)}</p>
         </Card>
         <Card bodyClassName="p-3.5 sm:p-4">
-          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">Subscribers today</p>
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">{t('home.subscribersToday')}</p>
           <p className="text-lg sm:text-xl font-bold text-navy mt-2">{stats.uniqueSubscribersToday}</p>
-          <p className="text-xs text-navy/45 mt-1">{stats.transactionsToday} payments</p>
+          <p className="text-xs text-navy/45 mt-1">{t('home.paymentsToday', { count: stats.transactionsToday })}</p>
         </Card>
         <Card bodyClassName="p-3.5 sm:p-4">
-          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">MoMo month</p>
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">{t('home.momoMonth')}</p>
           <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.momoRevenueMonth)}</p>
         </Card>
         <Card bodyClassName="p-3.5 sm:p-4">
-          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">Voucher month</p>
+          <p className="text-[11px] sm:text-xs font-semibold text-navy/50 uppercase tracking-wide">{t('home.voucherMonth')}</p>
           <p className="text-lg sm:text-xl font-bold text-navy mt-2">{formatXaf(stats.voucherRevenueMonth)}</p>
         </Card>
       </div>
@@ -171,10 +172,10 @@ export default function Home() {
         <Card className="xl:col-span-2 overflow-hidden">
           <div className="flex items-start justify-between gap-4 mb-5">
             <div>
-              <h3 className="font-semibold text-navy">Revenue trend</h3>
-              <p className="text-xs text-navy/50 mt-1">Daily net earnings — last 30 days</p>
+              <h3 className="font-semibold text-navy">{t('home.revenueTrend')}</h3>
+              <p className="text-xs text-navy/50 mt-1">{t('home.revenueTrendHint')}</p>
             </div>
-            <span className="text-xs font-medium text-brand border border-brand/25 px-2 py-0.5 rounded">Live</span>
+            <span className="text-xs font-medium text-brand border border-brand/25 px-2 py-0.5 rounded">{t('home.live')}</span>
           </div>
           <div className="h-[220px] sm:h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -187,7 +188,7 @@ export default function Home() {
               <Area
                 type="monotone"
                 dataKey="amount"
-                name="Net earnings"
+                name={t('home.netEarnings')}
                 stroke="#0F766E"
                 strokeWidth={2}
                 fill="url(#brandArea)"
@@ -200,10 +201,10 @@ export default function Home() {
         </Card>
 
         <Card>
-          <h3 className="font-semibold text-navy">Payment mix</h3>
-          <p className="text-xs text-navy/50 mt-1 mb-4">Last 30 days by source</p>
+          <h3 className="font-semibold text-navy">{t('home.paymentMix')}</h3>
+          <p className="text-xs text-navy/50 mt-1 mb-4">{t('home.paymentMixHint')}</p>
           {paymentMix.length === 0 ? (
-            <p className="text-sm text-navy/50 text-center py-16">No revenue in this period</p>
+            <p className="text-sm text-navy/50 text-center py-16">{t('home.noRevenue')}</p>
           ) : (
             <>
               <ResponsiveContainer width="100%" height={190}>
@@ -242,10 +243,10 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
-          <h3 className="font-semibold text-navy mb-1">Revenue by location</h3>
-          <p className="text-xs text-navy/50 mb-5">Top locations — last 30 days</p>
+          <h3 className="font-semibold text-navy mb-1">{t('home.revenueByLocation')}</h3>
+          <p className="text-xs text-navy/50 mb-5">{t('home.revenueByLocationHint')}</p>
           {locationChart.length === 0 ? (
-            <p className="text-sm text-navy/50 text-center py-8">No location revenue in the last 30 days</p>
+            <p className="text-sm text-navy/50 text-center py-8">{t('home.noLocationRevenue')}</p>
           ) : (
             <ResponsiveContainer width="100%" height={Math.max(220, locationChart.length * 42)}>
               <BarChart data={locationChart} layout="vertical" margin={{ left: 8, right: 16 }}>
@@ -254,7 +255,7 @@ export default function Home() {
                 <XAxis type="number" {...CHART_AXIS} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                 <YAxis type="category" dataKey="name" {...CHART_AXIS} width={110} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="revenue" name="Net earnings" fill="url(#brandBar)" radius={[0, 8, 8, 0]} barSize={18} />
+                <Bar dataKey="revenue" name={t('home.netEarnings')} fill="url(#brandBar)" radius={[0, 8, 8, 0]} barSize={18} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -263,9 +264,9 @@ export default function Home() {
         <Card>
           <div className="flex items-center gap-2 mb-1">
             <Ticket className="w-4 h-4 text-brand" />
-            <h3 className="font-semibold text-navy">Voucher performance</h3>
+            <h3 className="font-semibold text-navy">{t('home.voucherPerf')}</h3>
           </div>
-          <p className="text-xs text-navy/50 mb-4">Inventory and redemption</p>
+          <p className="text-xs text-navy/50 mb-4">{t('home.voucherPerfHint')}</p>
           {analytics?.vouchers ? (
             <div className="space-y-4">
               {voucherChart.length > 0 && (
@@ -282,10 +283,10 @@ export default function Home() {
               )}
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Unused', value: analytics.vouchers.unused, color: 'text-brand' },
-                  { label: 'Redeemed', value: analytics.vouchers.redeemed, color: 'text-emerald-600' },
-                  { label: 'Expired', value: analytics.vouchers.expired, color: 'text-amber-600' },
-                  { label: 'Redemption rate', value: `${analytics.vouchers.redemptionRate}%`, color: 'text-navy' },
+                  { label: t('home.unused'), value: analytics.vouchers.unused, color: 'text-brand' },
+                  { label: t('home.redeemed'), value: analytics.vouchers.redeemed, color: 'text-emerald-600' },
+                  { label: t('home.expired'), value: analytics.vouchers.expired, color: 'text-amber-600' },
+                  { label: t('home.redemptionRate'), value: `${analytics.vouchers.redemptionRate}%`, color: 'text-navy' },
                 ].map((item) => (
                   <div key={item.label} className="rounded-xl bg-surface-muted p-3">
                     <p className="text-[11px] font-semibold text-navy/45 uppercase">{item.label}</p>
@@ -295,7 +296,7 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-navy/50">No voucher data yet</p>
+            <p className="text-sm text-navy/50">{t('home.noVoucherData')}</p>
           )}
         </Card>
       </div>
@@ -303,11 +304,11 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <div className="mb-5">
-            <h3 className="font-semibold text-navy">Router status</h3>
-            <p className="text-xs text-navy/50 mt-1">By location</p>
+            <h3 className="font-semibold text-navy">{t('home.routerStatus')}</h3>
+            <p className="text-xs text-navy/50 mt-1">{t('home.byLocation')}</p>
           </div>
           {routers.length === 0 ? (
-            <p className="text-sm text-navy/50 text-center py-6">No routers configured yet</p>
+            <p className="text-sm text-navy/50 text-center py-6">{t('home.noRouters')}</p>
           ) : (
             <div className="space-y-1">
               {routers.map((r) => (
@@ -319,7 +320,7 @@ export default function Home() {
                   <div className="text-right">
                     <StatusBadge status={r.status} />
                     <p className="text-navy/40 text-xs mt-1">
-                      {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : 'Never seen'}
+                      {r.lastSeenAt ? new Date(r.lastSeenAt).toLocaleString() : t('home.neverSeen')}
                     </p>
                   </div>
                 </div>
@@ -330,18 +331,18 @@ export default function Home() {
 
         <Card>
           <div className="mb-5">
-            <h3 className="font-semibold text-navy">Top packages today</h3>
+            <h3 className="font-semibold text-navy">{t('home.topPackages')}</h3>
           </div>
           {stats.topPackages.length === 0 ? (
-            <p className="text-sm text-navy/50 text-center py-6">No sales today yet</p>
+            <p className="text-sm text-navy/50 text-center py-6">{t('home.noSales')}</p>
           ) : (
             <ResponsiveContainer width="100%" height={Math.max(180, stats.topPackages.length * 48)}>
               <BarChart data={stats.topPackages.map((p) => ({ name: p.name, sales: p.count }))} layout="vertical" margin={{ left: 8, right: 16 }}>
                 <CartesianGrid strokeDasharray="4 4" stroke="#eef2f6" horizontal={false} />
                 <XAxis type="number" {...CHART_AXIS} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" {...CHART_AXIS} width={100} />
-                <Tooltip content={<ChartTooltip formatter={(v) => `${v} sales`} />} />
-                <Bar dataKey="sales" name="Sales" fill="#0E141B" radius={[0, 4, 4, 0]} barSize={16} />
+                <Tooltip content={<ChartTooltip formatter={(v) => t('home.salesCount', { count: v })} />} />
+                <Bar dataKey="sales" name={t('home.sales')} fill="#0E141B" radius={[0, 4, 4, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           )}

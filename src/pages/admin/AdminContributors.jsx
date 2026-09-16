@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Pagination, StatusBadge, EmptyState, Skeleton, Button } from '../../components/ui';
 import { AdminGuard, AdminLayout } from './AdminLogin';
 
 export default function AdminContributors() {
+  const { t } = useTranslation('admin');
+  const { t: tc } = useTranslation('common');
   const [contributors, setContributors] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [page, setPage] = useState(1);
@@ -20,7 +23,7 @@ export default function AdminContributors() {
       setContributors(data.contributors);
       setPagination(data.pagination);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load');
+      setError(err.response?.data?.error || t('contributors.loadError'));
       setContributors([]);
     } finally {
       setLoading(false);
@@ -34,10 +37,10 @@ export default function AdminContributors() {
   async function activate(id) {
     try {
       await api.post(`/api/admin/contributors/${id}/activate`);
-      toast.success('Contributor activated');
+      toast.success(t('contributors.activated'));
       load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed');
+      toast.error(err.response?.data?.error || t('contributors.failed'));
     }
   }
 
@@ -45,39 +48,39 @@ export default function AdminContributors() {
     const status = current === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
       await api.patch(`/api/admin/contributors/${id}/status`, { status });
-      toast.success(`Contributor ${status.toLowerCase()}`);
+      toast.success(status === 'ACTIVE' ? t('contributors.activated') : t('contributors.suspended'));
       load(page);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed');
+      toast.error(err.response?.data?.error || t('contributors.failed'));
     }
   }
 
   return (
     <AdminGuard>
-      <AdminLayout title="Contributors" description="Approve accounts and manage uplink partners">
+      <AdminLayout title={t('contributors.title')} description={t('contributors.description')}>
         {loading ? (
           <Skeleton className="h-48 rounded-xl" />
         ) : error ? (
-          <EmptyState title="Could not load contributors" description={error} action={<Button onClick={() => load(page)}>Retry</Button>} />
+          <EmptyState title={t('contributors.couldNotLoad')} description={error} action={<Button onClick={() => load(page)}>{tc('actions.retry')}</Button>} />
         ) : (
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-500 border-b bg-gray-50">
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Verified</th>
-                  <th className="p-3">Balance</th>
-                  <th className="p-3">Links</th>
-                  <th className="p-3">Actions</th>
+                  <th className="p-3">{t('cols.name')}</th>
+                  <th className="p-3">{t('cols.email')}</th>
+                  <th className="p-3">{t('cols.status')}</th>
+                  <th className="p-3">{t('cols.verified')}</th>
+                  <th className="p-3">{t('cols.balance')}</th>
+                  <th className="p-3">{t('cols.links')}</th>
+                  <th className="p-3">{t('cols.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {contributors.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-8">
-                      <EmptyState title="No contributors yet" />
+                      <EmptyState title={t('contributors.empty')} />
                     </td>
                   </tr>
                 ) : (
@@ -88,7 +91,7 @@ export default function AdminContributors() {
                       <td className="p-3">
                         <StatusBadge status={c.status} />
                       </td>
-                      <td className="p-3">{c.emailVerified ? 'Yes' : 'No'}</td>
+                      <td className="p-3">{c.emailVerified ? t('yes') : t('no')}</td>
                       <td className="p-3">{c.walletBalance.toLocaleString()} XAF</td>
                       <td className="p-3">{c.linkCount}</td>
                       <td className="p-3">
@@ -99,7 +102,7 @@ export default function AdminContributors() {
                               onClick={() => activate(c.id)}
                               className="text-xs px-3 py-1 rounded-lg bg-green-100 text-green-700"
                             >
-                              Activate
+                              {t('actions.activate')}
                             </button>
                           )}
                           {c.status !== 'PENDING' && (
@@ -110,7 +113,7 @@ export default function AdminContributors() {
                                 c.status === 'ACTIVE' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                               }`}
                             >
-                              {c.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                              {c.status === 'ACTIVE' ? t('actions.suspend') : t('actions.activate')}
                             </button>
                           )}
                         </div>
@@ -131,9 +134,9 @@ export default function AdminContributors() {
           </div>
         )}
         <p className="mt-4 text-sm text-navy/50">
-          Manage physical links on{' '}
+          {t('contributors.manageLinks')}{' '}
           <Link to="/admin/contributor-links" className="text-brand font-medium">
-            Contributor links
+            {t('contributors.linksPage')}
           </Link>
           .
         </p>

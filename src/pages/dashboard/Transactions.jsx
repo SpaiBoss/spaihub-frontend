@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Pagination, StatusBadge, Button, TableShell, EmptyState, Skeleton } from '../../components/ui';
 
 export default function Transactions() {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [data, setData] = useState({ transactions: [], pagination: {} });
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,11 +32,11 @@ export default function Transactions() {
     api.get(`/api/owner/transactions?${params}`)
       .then((res) => setData(res.data))
       .catch((err) => {
-        setError(err.response?.data?.error || 'Failed to load transactions');
+        setError(err.response?.data?.error || t('tx.loadFailed'));
         setData({ transactions: [], pagination: {} });
       })
       .finally(() => setLoading(false));
-  }, [filters]);
+  }, [filters, t]);
 
   async function exportCsv() {
     try {
@@ -50,9 +53,9 @@ export default function Transactions() {
       a.download = 'transactions.csv';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('CSV exported');
+      toast.success(t('tx.csv'));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Export failed');
+      toast.error(err.response?.data?.error || tc('errors.exportFailed'));
     }
   }
 
@@ -64,7 +67,7 @@ export default function Transactions() {
           onChange={(e) => setFilters({ ...filters, locationId: e.target.value, page: 1 })}
           className="select-field w-full sm:w-auto sm:min-w-[160px] py-2.5 min-h-[44px]"
         >
-          <option value="">All locations</option>
+          <option value="">{t('tx.allLocations')}</option>
           {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
         <select
@@ -72,10 +75,10 @@ export default function Transactions() {
           onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
           className="select-field w-full sm:w-auto sm:min-w-[140px] py-2.5 min-h-[44px]"
         >
-          <option value="">All statuses</option>
-          <option value="SUCCESS">Success</option>
-          <option value="PENDING">Pending</option>
-          <option value="FAILED">Failed</option>
+          <option value="">{t('tx.allStatuses')}</option>
+          <option value="SUCCESS">{tc('status.SUCCESS')}</option>
+          <option value="PENDING">{tc('status.PENDING')}</option>
+          <option value="FAILED">{tc('status.FAILED')}</option>
         </select>
         <input
           type="date"
@@ -90,16 +93,16 @@ export default function Transactions() {
           className="input-field w-full sm:w-auto py-2.5 min-h-[44px]"
         />
         <Button variant="secondary" onClick={exportCsv} className="gap-2 w-full sm:w-auto sm:ml-auto min-h-[44px]">
-          <Download className="w-4 h-4" /> Export CSV
+          <Download className="w-4 h-4" /> {tc('actions.export')}
         </Button>
       </div>
 
       {error ? (
         <EmptyState
-          title="Could not load transactions"
+          title={t('tx.loadTitle')}
           description={error}
           action={
-            <Button onClick={() => setFilters({ ...filters })}>Retry</Button>
+            <Button onClick={() => setFilters({ ...filters })}>{tc('actions.retry')}</Button>
           }
         />
       ) : (
@@ -108,7 +111,7 @@ export default function Transactions() {
         {loading ? (
           [...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)
         ) : data.transactions.length === 0 ? (
-          <EmptyState title="No transactions yet" description="Payments from your captive portal will appear here." />
+          <EmptyState title={t('tx.emptyTitle')} description={t('tx.emptyBody')} />
         ) : (
           data.transactions.map((tx) => (
             <div key={tx.id} className="card p-4">
@@ -116,7 +119,7 @@ export default function Transactions() {
                 <div className="min-w-0">
                   <p className="font-semibold text-navy">{tx.amountXaf.toLocaleString()} XAF</p>
                   <p className="text-xs text-navy/50 mt-0.5">
-                    You keep {tx.ownerCreditXaf.toLocaleString()} XAF
+                    {t('tx.youKeep', { amount: tx.ownerCreditXaf.toLocaleString() })}
                   </p>
                 </div>
                 <StatusBadge status={tx.status} />
@@ -136,13 +139,13 @@ export default function Transactions() {
         <table>
           <thead>
             <tr>
-              <th>Date/Time</th>
-              <th>Phone</th>
-              <th>Location</th>
-              <th>Package</th>
-              <th>Amount</th>
-              <th>Your Share</th>
-              <th>Status</th>
+              <th>{t('tx.dateTime')}</th>
+              <th>{t('tx.phone')}</th>
+              <th>{t('tx.location')}</th>
+              <th>{t('tx.package')}</th>
+              <th>{t('tx.amount')}</th>
+              <th>{t('tx.yourShare')}</th>
+              <th>{t('tx.status')}</th>
             </tr>
           </thead>
           <tbody>
@@ -155,7 +158,7 @@ export default function Transactions() {
             ) : data.transactions.length === 0 ? (
               <tr>
                 <td colSpan={7}>
-                  <EmptyState title="No transactions yet" description="Payments from your captive portal will appear here." />
+                  <EmptyState title={t('tx.emptyTitle')} description={t('tx.emptyBody')} />
                 </td>
               </tr>
             ) : (

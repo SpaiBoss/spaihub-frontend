@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useContributorAuth } from '../../context/ContributorAuthContext';
 import { Button, Input, Skeleton, Card } from '../../components/ui';
 
 export default function ContributorSettings() {
+  const { t } = useTranslation('contributor');
+  const { t: tc } = useTranslation('common');
   const { contributor, refreshProfile } = useContributorAuth();
   const [name, setName] = useState('');
   const [momoPhone, setMomoPhone] = useState('');
@@ -23,9 +26,9 @@ export default function ContributorSettings() {
     try {
       await api.patch('/api/contributor/me', { name, momoPhone });
       await refreshProfile();
-      toast.success('Saved');
+      toast.success(t('settings.saved'));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Save failed');
+      toast.error(err.response?.data?.error || tc('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -36,23 +39,23 @@ export default function ContributorSettings() {
   return (
     <div className="space-y-4 max-w-lg">
       <div>
-        <h1 className="text-xl font-semibold text-navy">Settings</h1>
-        <p className="text-sm text-navy/50 mt-1">Profile and payout phone</p>
+        <h1 className="text-xl font-semibold text-navy">{t('settings.title')}</h1>
+        <p className="text-sm text-navy/50 mt-1">{t('settings.subtitle')}</p>
       </div>
       <Card className="p-6">
         <form onSubmit={handleSave} className="space-y-4">
           <p className="text-sm text-navy/55">
-            Email: <span className="font-medium text-navy">{contributor.email}</span>
+            {t('settings.email')}: <span className="font-medium text-navy">{contributor.email}</span>
           </p>
-          <Input label="Display name" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input label={t('settings.name')} value={name} onChange={(e) => setName(e.target.value)} required />
           <Input
-            label="MoMo phone"
+            label={t('settings.momo')}
             value={momoPhone}
             onChange={(e) => setMomoPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-            placeholder="6XXXXXXXX"
+            placeholder={t('settings.phonePh')}
           />
           <Button type="submit" disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? tc('actions.saving') : tc('actions.save')}
           </Button>
         </form>
       </Card>

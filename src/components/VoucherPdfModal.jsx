@@ -1,16 +1,12 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Modal, Button } from './ui';
 
-const LAYOUT_OPTIONS = [
-  { value: 2, label: '2 per page', hint: 'Large tickets — best for handouts' },
-  { value: 4, label: '4 per page', hint: '2 × 2 grid' },
-  { value: 6, label: '6 per page', hint: '2 × 3 grid (recommended)' },
-  { value: 8, label: '8 per page', hint: '2 × 4 grid' },
-  { value: 10, label: '10 per page', hint: '2 × 5 grid' },
-  { value: 12, label: '12 per page', hint: '3 × 4 grid — most compact' },
-];
+const LAYOUT_VALUES = [2, 4, 6, 8, 10, 12];
 
 export default function VoucherPdfModal({ open, onClose, onExport, filters, branding, loading: externalLoading }) {
+  const { t } = useTranslation('owner');
+  const { t: tc } = useTranslation('common');
   const [perPage, setPerPage] = useState(6);
   const [loading, setLoading] = useState(false);
 
@@ -24,78 +20,92 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, bran
     }
   }
 
-  const filterParts = [
-    filters.status ? filters.status.toLowerCase() : 'all statuses',
-    filters.locationId ? 'selected location' : 'all locations',
-  ];
+  const statusLabel = filters.status ? tc(`status.${filters.status}`) : t('vouchers.includedAllStatuses');
+  const locationLabel = filters.locationId
+    ? t('vouchers.includedSelectedLocation')
+    : t('vouchers.includedAllLocations');
 
-  const brandLabel = branding?.brandName || 'Your hotspot brand';
+  const brandLabel = branding?.brandName || t('vouchers.hotspotBrand');
   const accent = branding?.accentColor || '#0F766E';
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Export print-ready PDF"
-      description="Owner-branded A4 voucher sheets with cut guides and WiFi PINs."
+      title={t('vouchers.pdfTitle')}
+      description={t('vouchers.pdfDesc')}
     >
       <div className="space-y-5">
         <div
           className="rounded-xl border p-4 text-sm"
           style={{ borderColor: `${accent}33`, backgroundColor: `${accent}08` }}
         >
-          <p className="font-semibold text-navy mb-1">Branding preview</p>
+          <p className="font-semibold text-navy mb-1">{t('vouchers.brandingPreview')}</p>
           <p className="text-navy/70">
-            Tickets will use <span className="font-semibold text-navy">{brandLabel}</span>
-            {branding?.logoUrl ? ' with your uploaded logo' : ''}
-            {branding?.accentColor ? ' and your accent color' : ''}.
+            <Trans
+              i18nKey="vouchers.ticketsWillUse"
+              ns="owner"
+              values={{
+                name: brandLabel,
+                logo: branding?.logoUrl ? t('vouchers.withLogo') : '',
+                accent: branding?.accentColor ? t('vouchers.andAccent') : '',
+              }}
+              components={{ brand: <span className="font-semibold text-navy" /> }}
+            />
           </p>
           <p className="text-xs text-navy/50 mt-2">
-            Customize branding in Settings → Portal branding.
+            {t('vouchers.customizeBranding')}
           </p>
         </div>
 
         <div className="rounded-xl bg-surface-muted border border-gray-100 p-4 text-sm text-navy/70">
-          <p className="font-medium text-navy mb-1">Included vouchers</p>
+          <p className="font-medium text-navy mb-1">{t('vouchers.included')}</p>
           <p>
-            Exporting <span className="font-semibold">{filterParts[0]}</span> at{' '}
-            <span className="font-semibold">{filterParts[1]}</span>. Up to 500 vouchers per PDF.
+            <Trans
+              i18nKey="vouchers.exportingIncluded"
+              ns="owner"
+              values={{ status: statusLabel, location: locationLabel }}
+              components={{
+                status: <span className="font-semibold" />,
+                location: <span className="font-semibold" />,
+              }}
+            />
           </p>
           <p className="text-xs text-navy/50 mt-2">
-            Tip: filter to <strong>Unused</strong> before printing fresh codes.
+            <Trans i18nKey="vouchers.pdfTip" ns="owner" components={{ strong: <strong /> }} />
           </p>
         </div>
 
         <div>
-          <label className="label-field">Vouchers per A4 page</label>
+          <label className="label-field">{t('vouchers.perPage')}</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {LAYOUT_OPTIONS.map((opt) => (
+            {LAYOUT_VALUES.map((value) => (
               <button
-                key={opt.value}
+                key={value}
                 type="button"
-                onClick={() => setPerPage(opt.value)}
+                onClick={() => setPerPage(value)}
                 className={`text-left p-3 rounded-xl border-2 transition-all ${
-                  perPage === opt.value
+                  perPage === value
                     ? 'border-brand bg-brand/5'
                     : 'border-gray-100 hover:border-gray-200'
                 }`}
               >
-                <p className="text-sm font-bold text-navy">{opt.label}</p>
-                <p className="text-xs text-navy/50 mt-0.5">{opt.hint}</p>
+                <p className="text-sm font-bold text-navy">{t(`vouchers.layout${value}`)}</p>
+                <p className="text-xs text-navy/50 mt-0.5">{t(`vouchers.layout${value}Hint`)}</p>
               </button>
             ))}
           </div>
         </div>
 
         <div className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-navy/60 space-y-1">
-          <p className="font-semibold text-navy">Each ticket includes</p>
-          <p>Your logo or brand name · location · package · voucher code · WiFi PIN · redeem instructions</p>
-          <p className="text-navy/45">Footer: Powered by www.spaitrace.com</p>
+          <p className="font-semibold text-navy">{t('vouchers.eachTicket')}</p>
+          <p>{t('vouchers.ticketContents')}</p>
+          <p className="text-navy/45">{t('vouchers.footerCredit', { credit: tc('poweredBy') })}</p>
         </div>
 
         <div className="flex gap-3 pt-1">
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button
             type="button"
@@ -103,7 +113,7 @@ export default function VoucherPdfModal({ open, onClose, onExport, filters, bran
             disabled={loading || externalLoading}
             className="flex-1"
           >
-            {loading ? 'Generating PDF...' : 'Download PDF'}
+            {loading ? t('vouchers.generatingPdf') : t('vouchers.downloadPdf')}
           </Button>
         </div>
       </div>

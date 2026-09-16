@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
 import { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import Reveal from './Reveal';
+import { LocaleLink } from '../LocaleLink';
 
 /**
  * Full-bleed sculptural 3D ribbon curl between color bands.
@@ -144,50 +145,52 @@ export function MarketingHeading({ eyebrow, title, subtitle, align = 'left', lig
 
 export function MarketingCtaGroup({
   primaryTo = '/register',
-  primaryLabel = 'Start free',
+  primaryLabel,
   secondaryTo = '/login',
-  secondaryLabel = 'Sign in',
+  secondaryLabel,
   className = '',
 }) {
+  const { t } = useTranslation('common');
   return (
     <div className={`flex flex-wrap items-center gap-3 ${className}`}>
-      <Link
+      <LocaleLink
         to={primaryTo}
         className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-brand-dark hover:translate-y-[-1px]"
       >
-        {primaryLabel}
-      </Link>
-      <Link
+        {primaryLabel || t('nav.startFree')}
+      </LocaleLink>
+      <LocaleLink
         to={secondaryTo}
         className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition-all duration-200 hover:border-white/40 hover:bg-white/[0.06]"
       >
-        {secondaryLabel}
-      </Link>
+        {secondaryLabel || t('nav.signIn')}
+      </LocaleLink>
     </div>
   );
 }
 
 export function MarketingCtaGroupLight({
   primaryTo = '/register',
-  primaryLabel = 'Start free',
+  primaryLabel,
   secondaryTo = '/login',
-  secondaryLabel = 'Sign in',
+  secondaryLabel,
   className = '',
 }) {
+  const { t } = useTranslation('common');
   return (
     <div className={`flex flex-wrap items-center gap-3 ${className}`}>
-      <Link
+      <LocaleLink
         to={primaryTo}
         className="inline-flex items-center justify-center rounded-lg bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-brand-dark hover:translate-y-[-1px]"
       >
-        {primaryLabel}
-      </Link>
-      <Link
+        {primaryLabel || t('nav.startFree')}
+      </LocaleLink>
+      <LocaleLink
         to={secondaryTo}
         className="inline-flex items-center justify-center rounded-lg border border-navy/15 bg-transparent px-6 py-3.5 text-sm font-semibold text-navy transition-all duration-200 hover:border-navy/30 hover:bg-navy/[0.03]"
       >
-        {secondaryLabel}
-      </Link>
+        {secondaryLabel || t('nav.signIn')}
+      </LocaleLink>
     </div>
   );
 }
@@ -399,10 +402,12 @@ export function FinalCta({
   subtitle,
   whatsappHref,
   primaryTo = '/register',
-  primaryLabel = 'Start free',
+  primaryLabel,
   secondaryTo = '/login',
-  secondaryLabel = 'Sign in',
+  secondaryLabel,
 }) {
+  const { t } = useTranslation('common');
+  const { t: tm } = useTranslation('marketing');
   return (
     <section className="relative overflow-hidden bg-navy px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
       <div
@@ -415,7 +420,7 @@ export function FinalCta({
       />
       <div className="relative mx-auto max-w-6xl">
         <Reveal className="max-w-2xl">
-          <p className="mkt-eyebrow text-brand-light/80 mb-5">Deploy</p>
+          <p className="mkt-eyebrow text-brand-light/80 mb-5">{tm('finalCtaEyebrow')}</p>
           <h2 className="mkt-display text-3xl sm:text-4xl lg:text-5xl text-white">{title}</h2>
           <p className="mt-5 text-base sm:text-lg text-white/55 leading-relaxed">{subtitle}</p>
           <MarketingCtaGroup
@@ -432,7 +437,7 @@ export function FinalCta({
               rel="noopener noreferrer"
               className="mt-5 inline-flex text-sm font-semibold text-brand-light hover:text-white transition-colors duration-200"
             >
-              Chat on WhatsApp →
+              {t('actions.chatWhatsapp')}
             </a>
           )}
         </Reveal>
