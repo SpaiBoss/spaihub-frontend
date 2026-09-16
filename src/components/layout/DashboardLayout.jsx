@@ -113,9 +113,6 @@ export default function DashboardLayout() {
             <p className="text-white/45 text-xs truncate">{currentOwner?.email}</p>
           </div>
         </div>
-        <div className="mt-3 text-white">
-          <LanguageToggle compact className="w-full justify-center text-white" />
-        </div>
         <button
           type="button"
           onClick={handleLogout}
@@ -157,10 +154,11 @@ export default function DashboardLayout() {
               <p className="text-xs text-navy/50 hidden sm:block truncate">{meta.description}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <LanguageToggle compact className="text-navy" />
             <LocaleLink
               to={helpHref('owners', lang)}
-              className="hidden sm:inline-flex px-3 py-2 text-sm font-medium text-navy/55 hover:text-navy"
+              className="inline-flex px-3 py-2 text-sm font-medium text-navy/55 hover:text-navy"
             >
               {tc('nav.help')}
             </LocaleLink>

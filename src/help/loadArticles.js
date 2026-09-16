@@ -100,7 +100,7 @@ function parseFiles(files, lang) {
       do_not_say: data.do_not_say || [],
       related: data.related || [],
       updatedAt: data.updatedAt || '',
-      minutes: data.minutes || 5,
+      minutes: Number.parseInt(String(data.minutes ?? ''), 10) || 5,
       body: content.trim(),
       lang,
     };

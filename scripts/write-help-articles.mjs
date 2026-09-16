@@ -2,6 +2,11 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+console.error(
+  'Refusing to run: Help articles in src/help/articles are hand-written reference docs. This script would overwrite them with stubs. Edit the markdown files directly (EN + FR).',
+);
+process.exit(1);
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '../src/help/articles');
 mkdirSync(join(root, 'en'), { recursive: true });
 mkdirSync(join(root, 'fr'), { recursive: true });

@@ -108,7 +108,7 @@
     "dataBased": "Au volume",
     "noSessions": "Aucune session active sur ce site.",
     "noSessionsHint": "Après avoir recollé le script de connexion, le statut « Sur le routeur » apparaît ici. Une seule MAC vue peut encore être une passerelle NAT.",
-    "onRouterHint": "« Sur le routeur » signifie que le login est dans les hôtes actifs MikroTik. Une seule MAC peut rester un Pixlink / hotspot téléphone qui partage avec plusieurs appareils.",
+    "onRouterHint": "« Sur le routeur » signifie que le login est dans les hôtes actifs MikroTik. Une seule MAC peut rester un répéteur bon marché, un hotspot téléphone ou un routeur personnel qui partage avec plusieurs appareils.",
     "device": "Appareil",
     "package": "Forfait",
     "router": "Routeur",

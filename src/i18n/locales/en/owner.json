@@ -108,7 +108,7 @@
     "dataBased": "Data-based",
     "noSessions": "No active sessions at this location.",
     "noSessionsHint": "After re-pasting the router connection script, live “On router” status appears here. One seen MAC can still be a NAT gateway.",
-    "onRouterHint": "“On router” means the login is in MikroTik active hosts. A single MAC may still be a Pixlink/phone hotspot sharing with many devices.",
+    "onRouterHint": "“On router” means the login is in MikroTik active hosts. A single MAC may still be a cheap extender, phone hotspot, or personal router sharing with many devices.",
     "device": "Device",
     "package": "Package",
     "router": "Router",

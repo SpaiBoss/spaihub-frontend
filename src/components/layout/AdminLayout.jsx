@@ -1,6 +1,9 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import BrandLogo from '../BrandLogo';
 import LanguageToggle from '../LanguageToggle';
+import { LocaleLink } from '../LocaleLink';
+import { helpHref } from '../../i18n/paths';
+import { useLocale } from '../../i18n/useLocale';
 import { useTranslation } from 'react-i18next';
 
 export function AdminGuard({ children }) {
@@ -46,6 +49,7 @@ export function AdminLayout({ children, title, description }) {
   const location = useLocation();
   const { t } = useTranslation('admin');
   const { t: tc } = useTranslation('common');
+  const { lang } = useLocale();
   const onContributorSection = location.pathname.startsWith('/admin/contributor');
 
   const PRIMARY_LINKS = [
@@ -78,6 +82,12 @@ export function AdminLayout({ children, title, description }) {
         </div>
         <div className="flex items-center gap-3">
           <LanguageToggle compact className="text-white" />
+          <LocaleLink
+            to={helpHref('', lang)}
+            className="text-sm text-white/60 hover:text-white font-medium transition-colors shrink-0"
+          >
+            {tc('nav.help')}
+          </LocaleLink>
           <button
             type="button"
             onClick={logout}
