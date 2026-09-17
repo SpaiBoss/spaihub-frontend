@@ -9,7 +9,7 @@ intents: ["reference", "reference-vouchers", "pdf", "sync"]
 buttons: ["Generate vouchers", "Sync unused to router", "PDF", "CSV", "Copy", "Revoke", "Copy all codes", "Download PDF"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.vouchers", "tip.voucher-not-wallet"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 12
 ---
 
@@ -62,7 +62,7 @@ Header button and empty-state action. Modal title **Generate vouchers**. Descrip
 Fields:
 
 - **Location** — required. Placeholder **Select location**.
-- **Package** — required. Placeholder **Select package**. Only **Active** packages. If the site has none: **This location has no active packages. Create one under Locations first.**
+- **Package** — required. Placeholder **Select package**. Only **Active** packages. If the site has none: **This location has no active packages. Create one under Locations first.** Deactivated SKUs reappear here after **Activate**.
 - **Quantity** — 1–500. Hint: **Generate 1–500 unique codes at once.**
 - **Batch label (optional)** — placeholder **e.g. March Promo, Event 2026**.
 - **Set redeem-by expiry** checkbox. When on: number + **minutes** / **hours** / **days**. Hint: **Codes must be redeemed before this period ends.**

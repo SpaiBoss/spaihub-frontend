@@ -9,7 +9,7 @@ intents: ["reference", "reference-locations", "router", "package", "chr"]
 buttons: ["Add Location", "Suspend", "Activate", "Edit location", "Add Router", "Setup script", "Setup CHR", "Preview portal", "Remove", "Add Package", "Deactivate", "Kick", "Save access policy", "Create", "Add CHR & open wizard"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.location", "own.tut.hex-existing", "own.tut.time-package", "own.ref.sessions", "own.ref.access-policy"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 14
 ---
 
@@ -157,7 +157,7 @@ You confirm license (Hotspot, Level 4+), HTTPS egress, and that CHR has no Wi‑
 
 ### **Preview portal**
 
-Opens a new tab on the guest captive page for that router token. **No live Hex is required.** **Last Seen: Never** is fine. You need at least one **Active** package or the guest page says no packages are available.
+Opens a new tab on the guest captive page for that router token. **No live Hex is required.** **Last Seen: Never** is fine. You need at least one **Active** package or the guest page says no packages are available. A deactivated SKU stays on the owner table; tap **Activate** to sell it again.
 
 ### **Remove**
 
@@ -196,7 +196,7 @@ Columns: **Name**, **Type**, **Details**, **Price**, **Status**, **Actions**.
 
 **Status**: **Active** or **Suspended** (deactivated).
 
-**Edit** reopens the modal. **Deactivate** (active rows only) toast **Package deactivated** or **Failed to deactivate package**. Deactivated packages disappear from the portal and from new voucher generation.
+**Edit** is always available, including on deactivated rows. **Deactivate** (active rows) toast **Package deactivated** or **Failed to deactivate package**. **Activate** (suspended rows) toast **Package activated** or **Failed to activate package**. Deactivated packages disappear from the portal and from new voucher generation until you **Activate** them again. Live sessions on that SKU continue until they expire or you **Kick**.
 
 Walkthroughs: [Create a time package](/help/create-time-package), [Create a family package](/help/create-family-package).
 

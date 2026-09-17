@@ -6,10 +6,10 @@ description: "Sell browse time in XAF with an owner-only gigabyte cap. Guests se
 role: ["owner"]
 section: tutorials
 intents: ["package", "fair use", "time", "time-based", "1 hour", "hidden cap"]
-buttons: ["Add Package", "Fair use data limit (hidden from subscribers)"]
+buttons: ["Add Package", "Fair use data limit (hidden from subscribers)", "Deactivate", "Activate"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.fair-use-hidden", "own.tut.family-package"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
@@ -56,7 +56,7 @@ _Screenshot slot: Add Package time-based with fair use 2 GB (staging)._
 - **Preview portal**: package line like **1 hour browse · Unlimited data**. Guest page **Unlimited data for this browse period**. No remaining-GB meter for them.
 - After a real session hits the cap: MikroTik drops the user; portal/login can show **Fair use limit reached**.
 
-**Deactivate** hides the package from new sales without inventing a delete of history.
+**Deactivate** hides the package from new sales without inventing a delete of history. **Activate** on the same row puts it back on the portal and voucher form.
 
 ## If it fails
 
@@ -74,4 +74,4 @@ _Screenshot slot: Add Package time-based with fair use 2 GB (staging)._
 
 Next hardware-free check: [Preview the captive portal](/help/preview-captive-portal). Next live check: [test MoMo](/help/test-momo-online) once the router is **ONLINE**.
 
-A 1-hour corridor SKU at 200–500 XAF with fair use on at 2 GB is the usual first product in Douala and Yaoundé shops. Raise the hidden cap only if your WAN is fat and you still do not want to tell guests a leftover number. Uncheck fair use only if you accept one login eating the uplink for the whole **Browse duration**. **Deactivate** the SKU if you need it off the portal without a speech at the counter.
+A 1-hour corridor SKU at 200–500 XAF with fair use on at 2 GB is the usual first product in Douala and Yaoundé shops. Raise the hidden cap only if your WAN is fat and you still do not want to tell guests a leftover number. Uncheck fair use only if you accept one login eating the uplink for the whole **Browse duration**. **Deactivate** the SKU if you need it off the portal without a speech at the counter. **Activate** when you want that price back on the guest page.

@@ -9,7 +9,7 @@ intents: ["reference", "reference-locations", "router", "package", "chr"]
 buttons: ["Ajouter un site", "Suspendre", "Activer", "Modifier le site", "Ajouter un routeur", "Script de setup", "Setup CHR", "Prévisualiser le portail", "Retirer", "Ajouter un forfait", "Désactiver", "Expulser", "Enregistrer la politique", "Créer", "Ajouter le CHR et ouvrir l’assistant"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.location", "own.tut.hex-existing", "own.tut.time-package", "own.ref.sessions", "own.ref.access-policy"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 14
 ---
 
@@ -157,7 +157,7 @@ Vous confirmez la licence (Hotspot, niveau 4+), la sortie HTTPS, et que le CHR n
 
 ### **Prévisualiser le portail**
 
-Ouvre un nouvel onglet sur la page captive invité pour le jeton de ce routeur. **Aucun Hex en direct n’est requis.** **Dernier contact : Jamais** convient. Il vous faut au moins un forfait **Actif**, sinon la page invité dit qu’aucun forfait n’est disponible.
+Ouvre un nouvel onglet sur la page captive invité pour le jeton de ce routeur. **Aucun Hex en direct n’est requis.** **Dernier contact : Jamais** convient. Il vous faut au moins un forfait **Actif**, sinon la page invité dit qu’aucun forfait n’est disponible. Un SKU désactivé reste dans le tableau propriétaire ; appuie sur **Activer** pour le revendre.
 
 ### **Retirer**
 
@@ -196,7 +196,7 @@ Colonnes : **Nom**, **Type**, **Détails**, **Prix**, **Statut**, **Actions**.
 
 **Statut** : **Actif** ou **Suspendu** (désactivé).
 
-**Modifier** rouvre la modale. **Désactiver** (lignes actives seulement) toast **Forfait désactivé** ou **Impossible de désactiver le forfait**. Les forfaits désactivés disparaissent du portail et de la génération de nouveaux bons.
+**Modifier** est toujours disponible, y compris sur les lignes désactivées. **Désactiver** (lignes actives) toast **Forfait désactivé** ou **Impossible de désactiver le forfait**. **Activer** (lignes suspendues) toast **Forfait activé** ou **Impossible d’activer le forfait**. Les forfaits désactivés disparaissent du portail et de la génération de nouveaux bons jusqu’à ce que tu les **Activer** à nouveau. Les sessions live sur ce SKU continuent jusqu’à expiration ou jusqu’à **Expulser**.
 
 Parcours : [Créer un forfait 1 heure avec plafond caché](/fr/help/create-time-package), [Créer un forfait famille (2–4 appareils)](/fr/help/create-family-package).
 

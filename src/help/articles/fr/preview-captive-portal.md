@@ -9,7 +9,7 @@ intents: ["preview", "portal", "captive portal", "preview portal", "no hardware"
 buttons: ["Ajouter un routeur", "Prévisualiser le portail"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.time-package", "tip.preview-first"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 8
 ---
 
@@ -62,7 +62,7 @@ Sens du statut, pour plus tard : **En ligne** veut dire un heartbeat dans les 2 
 
 **Nouvel onglet vide ou « Routeur introuvable ».** Réessaie depuis la même ligne. Ne colle pas des URL au hasard de vieux chats. Si tu as **Retirer** le routeur, l’ancien lien preview meurt.
 
-**Pas de forfaits sur la page.** Ajoute un forfait actif sous **Forfaits** → **Ajouter un forfait**. Les forfaits **Désactiver** ne se vendent pas.
+**Pas de forfaits sur la page.** Ajoute un forfait actif sous **Forfaits** → **Ajouter un forfait**. Les forfaits désactivés ne se vendent pas — appuie sur **Activer** sur la ligne propriétaire pour les remettre.
 
 **Ça a l’air sans marque.** **Paramètres** → **Marque du portail** → **Enregistrer la marque**. Règles logo : PNG, JPEG, ou WebP, 512 Ko ou moins. Voir [Marquer le portail captif](/fr/help/brand-the-portal).
 

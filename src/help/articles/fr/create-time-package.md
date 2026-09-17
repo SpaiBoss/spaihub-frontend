@@ -6,10 +6,10 @@ description: "Vends du temps de navigation en XAF avec un plafond gigaoctets cô
 role: ["owner"]
 section: tutorials
 intents: ["package", "fair use", "time", "time-based", "1 hour", "hidden cap"]
-buttons: ["Ajouter un forfait", "Plafond d’usage (caché aux abonnés)"]
+buttons: ["Ajouter un forfait", "Plafond d’usage (caché aux abonnés)", "Désactiver", "Activer"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.fair-use-hidden", "own.tut.family-package"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
@@ -56,7 +56,7 @@ _Emplacement capture : Ajouter un forfait Au temps avec plafond d’usage 2 Go (
 - **Prévisualiser le portail** : ligne de forfait du genre **1 heure de navigation · Data illimitée**. Page invité **Data illimitée pendant cette période**. Pas de compteur de Go restants pour eux.
 - Après qu’une vraie session tape le plafond : MikroTik coupe l’utilisateur ; le portail/login peut montrer **Plafond d’usage atteint**.
 
-**Désactiver** cache le forfait des nouvelles ventes sans inventer une suppression d’historique.
+**Désactiver** cache le forfait des nouvelles ventes sans inventer une suppression d’historique. **Activer** sur la même ligne le remet sur le portail et le formulaire de bons.
 
 ## Si ça échoue
 
@@ -74,4 +74,4 @@ _Emplacement capture : Ajouter un forfait Au temps avec plafond d’usage 2 Go (
 
 Prochaine vérif sans matériel : [Prévisualiser le portail captif](/fr/help/preview-captive-portal). Prochaine vérif live : [test MoMo](/fr/help/test-momo-online) une fois le routeur **En ligne**.
 
-Un SKU corridor 1 heure à 200–500 XAF avec plafond d’usage à 2 Go, c’est le premier produit habituel dans les boutiques de Douala et Yaoundé. Monte le plafond caché seulement si ton WAN est gras et que tu ne veux toujours pas dire un numéro restant aux invités. Décoche le plafond d’usage seulement si tu acceptes qu’un login mange la liaison pendant toute la **Durée de navigation**. **Désactiver** le SKU si tu dois le sortir du portail sans discours au comptoir.
+Un SKU corridor 1 heure à 200–500 XAF avec plafond d’usage à 2 Go, c’est le premier produit habituel dans les boutiques de Douala et Yaoundé. Monte le plafond caché seulement si ton WAN est gras et que tu ne veux toujours pas dire un numéro restant aux invités. Décoche le plafond d’usage seulement si tu acceptes qu’un login mange la liaison pendant toute la **Durée de navigation**. **Désactiver** le SKU si tu dois le sortir du portail sans discours au comptoir. **Activer** quand tu veux ce tarif de nouveau sur la page invité.

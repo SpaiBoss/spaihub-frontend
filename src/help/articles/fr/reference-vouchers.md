@@ -9,7 +9,7 @@ intents: ["reference", "reference-vouchers", "pdf", "sync"]
 buttons: ["Générer des bons", "Synchroniser les inutilisés vers le routeur", "PDF", "CSV", "Copier", "Révoquer", "Copier tous les codes", "Télécharger le PDF"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.vouchers", "tip.voucher-not-wallet"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 12
 ---
 
@@ -62,7 +62,7 @@ Bouton d’en-tête et action d’état vide. Titre de modale **Générer des bo
 Champs :
 
 - **Site** — obligatoire. Placeholder **Choisir un site**.
-- **Forfait** — obligatoire. Placeholder **Choisir un forfait**. Seulement les forfaits **Actif**. Si le site n’en a aucun : **Ce site n’a pas de forfait actif. Créez-en un d’abord dans Sites.**
+- **Forfait** — obligatoire. Placeholder **Choisir un forfait**. Seulement les forfaits **Actif**. Si le site n’en a aucun : **Ce site n’a pas de forfait actif. Créez-en un d’abord dans Sites.** Les SKU désactivés réapparaissent ici après **Activer**.
 - **Quantité** — 1–500. Indication : **Générez 1 à 500 codes uniques d’un coup.**
 - **Libellé du lot (optionnel)** — placeholder **ex. Promo mars, Événement 2026**.
 - Case **Fixer une date limite d’utilisation**. Quand elle est cochée : nombre + **minutes** / **heures** / **jours**. Indication : **Les codes doivent être utilisés avant la fin de ce délai.**

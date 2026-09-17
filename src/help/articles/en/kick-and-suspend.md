@@ -6,16 +6,16 @@ description: "Cut one login in about 15 seconds, or suspend the whole site to st
 role: ["owner"]
 section: tutorials
 intents: ["kick", "suspend", "activate", "ban", "end session"]
-buttons: ["Kick", "Suspend"]
+buttons: ["Kick", "Suspend", "Activate", "Deactivate"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.ref.sessions", "own.ref.locations"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
 Two different hammers. **Kick** is one live session — the phone that is hogging the Hex at 21:00. **Suspend** is the whole **location**: new portal purchases stop, and live sessions are kicked. Use **Suspend** when the shop is closed, the router is in the repair bag, or you must freeze a site without deleting history.
 
-**Activate** turns the site back on. **Deactivate** on a **package** is yet another hammer — it hides one SKU, not the shop.
+**Activate** turns the site back on. **Deactivate** on a **package** is yet another hammer — it hides one SKU, not the shop. **Activate** on that same package row puts the SKU back on the portal.
 
 Kick is not instant magic from the cloud to the radio. SpaiHub queues a MikroTik kick. The **spaihub-commands** scheduler (Script 2, every **15 seconds**) must be running. Toast copy: **Session ended — device should disconnect within 15 seconds**.
 
@@ -65,7 +65,7 @@ _Screenshot slot: Sessions Kick and location Suspend (staging)._
 
 **Kick does nothing.** Commands scheduler missing or router **OFFLINE**. Paste Script 2. Do not reboot the Hex as a first reflex during peak — that does mass-kick.
 
-**I wanted to stop one package.** **Deactivate** on **Packages**, not **Suspend** the location.
+**I wanted to stop one package.** **Deactivate** on **Packages**, not **Suspend** the location. **Activate** on that row when the SKU should sell again.
 
 **Suspended but people still online.** Wait the command poll (~15s) and any in-flight sessions. If still on, check you suspended the **correct** location — Akwa vs Bastos mix-ups are common.
 
@@ -73,7 +73,7 @@ _Screenshot slot: Sessions Kick and location Suspend (staging)._
 
 **Kicked a NAT MAC and the whole house screamed.** Expected. Sell [family packages](/help/create-family-package) and explain cheap-extender router mode. You cannot Kick “just the nephew” behind NAT.
 
-**Looked for a ban list bell.** Not in this build. Kick + Suspend + package deactivate are the tools.
+**Looked for a ban list bell.** Not in this build. Kick + Suspend + package **Deactivate** / **Activate** are the tools.
 
 **Activate does nothing.** You may already be active, or you tapped on the wrong site. Confirm the row label. If the portal still refuses pay, check router **OFFLINE** — that is a different block than suspend.
 

@@ -6,10 +6,10 @@ description: "Sell a visible download allowance that must be used before it expi
 role: ["owner"]
 section: tutorials
 intents: ["data package", "download", "data-based", "quota", "allowance"]
-buttons: ["Data-based", "Download allowance"]
+buttons: ["Data-based", "Download allowance", "Deactivate", "Activate"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.speed-vs-quota", "own.tut.time-package"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
@@ -55,7 +55,7 @@ _Screenshot slot: Data-based package with Download allowance and Must be used wi
 - Owner **Details**: allowance plus expiry, not “unlimited data”.
 - **Preview portal**: **{{cap}} download · expires in {{duration}}**. After pay, **Download allowance: {{cap}}**.
 - When bytes are gone, the session ends even if the expiry clock had time left. When the clock ends, leftover bytes are gone.
-- **Deactivate** stops new sales of this SKU.
+- **Deactivate** stops new sales of this SKU. **Activate** resumes them.
 
 Time packages nearby can still say **Unlimited data**. That is a different product. Do not mix explanations at the counter.
 
@@ -71,7 +71,7 @@ Time packages nearby can still say **Unlimited data**. That is a different produ
 
 **Want hidden GB on a time plan instead.** That is **Fair use data limit (hidden from subscribers)** on **Time-based**, default on at 2 GB for new packages. Never read remaining fair-use GB to guests.
 
-**Package still listed after Deactivate.** It should stop appearing for new portal purchases. Old sessions continue until they expire or you **Kick**.
+**Package still listed after Deactivate.** Expected on the owner table — so you can **Edit** or **Activate**. It should stop appearing for new portal purchases. Old sessions continue until they expire or you **Kick**.
 
 **Expiry felt “unfair”.** **Must be used within** is the clock you printed. A 1 GB pack that **Must be used within** 3 hours is a commute SKU; 7 **days** is a weekly. Say the clock at the counter. SpaiHub will not extend leftover bytes because someone went to village.
 

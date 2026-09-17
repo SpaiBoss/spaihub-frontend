@@ -459,6 +459,8 @@
     "pkgUpdated": "Package updated",
     "pkgCreated": "Package created",
     "pkgSaveFailed": "Failed to save package",
+    "pkgActivated": "Package activated",
+    "pkgActivateFailed": "Failed to activate package",
     "pkgDeactivated": "Package deactivated",
     "pkgDeactivateFailed": "Failed to deactivate package",
     "copied": "Copied to clipboard",

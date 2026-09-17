@@ -9,7 +9,7 @@ intents: ["voucher", "pdf", "sync", "print", "prepaid codes"]
 buttons: ["Generate vouchers", "Print PDF", "Sync unused to router"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.voucher-not-wallet", "tip.sync-vouchers"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 12
 ---
 
@@ -56,7 +56,7 @@ _Screenshot slot: Generate vouchers form and Print PDF layout (staging)._
 
 ## If it fails
 
-**This location has no active packages.** Create one under **Locations** first.
+**This location has no active packages.** Create one under **Locations** first, or **Activate** a deactivated SKU on that site.
 
 **PDF export failed.** Retry; filter fewer than 500; check branding logo size (512 KB) if tickets look odd.
 

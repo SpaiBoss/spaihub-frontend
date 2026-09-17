@@ -9,7 +9,7 @@ intents: ["preview", "portal", "captive portal", "preview portal", "no hardware"
 buttons: ["Add Router", "Preview portal"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.tut.time-package", "tip.preview-first"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 8
 ---
 
@@ -62,7 +62,7 @@ Status meaning, for later: **ONLINE** means a heartbeat in the last 2 minutes; *
 
 **New tab is blank or “Router not found”.** Try again from the same row. Do not paste random URLs from old chats. If you **Remove**d the router, the old preview link dies.
 
-**No packages on the page.** Add an active package under **Packages** → **Add Package**. Deactivated packages do not sell.
+**No packages on the page.** Add an active package under **Packages** → **Add Package**. Deactivated packages do not sell — tap **Activate** on the owner row to put them back.
 
 **Looks unbranded.** **Settings** → **Portal branding** → **Save branding**. Logo rules: PNG, JPEG, or WebP, 512 KB or smaller. See [Brand the captive portal](/help/brand-the-portal).
 

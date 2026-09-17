@@ -6,16 +6,16 @@ description: "Coupe un login en environ 15 secondes, ou suspends tout le site po
 role: ["owner"]
 section: tutorials
 intents: ["kick", "suspend", "activate", "ban", "end session"]
-buttons: ["Expulser", "Suspendre"]
+buttons: ["Expulser", "Suspendre", "Activer", "Désactiver"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["own.ref.sessions", "own.ref.locations"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
 Deux marteaux différents. **Expulser** c’est une session live — le téléphone qui hog le Hex à 21 h. **Suspendre** c’est tout le **site** : les nouveaux achats portail s’arrêtent, et les sessions live sont expulsées. Utilise **Suspendre** quand la boutique ferme, le routeur est dans le sac de réparation, ou tu dois geler un site sans supprimer l’historique.
 
-**Activer** rallume le site. **Désactiver** sur un **forfait** c’est encore un autre marteau — ça cache un SKU, pas la boutique.
+**Activer** rallume le site. **Désactiver** sur un **forfait** c’est encore un autre marteau — ça cache un SKU, pas la boutique. **Activer** sur la même ligne de forfait remet le SKU sur le portail.
 
 Expulser n’est pas de la magie instantanée du cloud vers la radio. SpaiHub met un kick MikroTik en file. Le planificateur **spaihub-commands** (script 2, toutes les **15 secondes**) doit tourner. Texte du toast : **Session terminée — déconnexion sous 15 secondes**.
 
@@ -65,7 +65,7 @@ _Emplacement capture : Sessions Expulser et site Suspendre (staging)._
 
 **Expulser ne fait rien.** Planificateur commands manquant ou routeur **Hors ligne**. Colle le script 2. Ne reboote pas le Hex en premier réflexe aux heures de pointe — ça, ça expulse en masse.
 
-**Je voulais arrêter un forfait.** **Désactiver** sur **Forfaits**, pas **Suspendre** le site.
+**Je voulais arrêter un forfait.** **Désactiver** sur **Forfaits**, pas **Suspendre** le site. **Activer** sur cette ligne quand le SKU doit se vendre à nouveau.
 
 **Suspendu mais des gens encore en ligne.** Attends le poll de commande (~15 s) et les sessions en vol. Si encore là, vérifie que tu as suspendu le **bon** site — les mélanges Akwa vs Bastos sont courants.
 
@@ -73,7 +73,7 @@ _Emplacement capture : Sessions Expulser et site Suspendre (staging)._
 
 **Expulsé une MAC NAT et toute la maison a crié.** Attendu. Vends des [forfaits famille](/fr/help/create-family-package) et explique le mode routeur des répéteurs bon marché. Tu ne peux pas Expulser « juste le neveu » derrière le NAT.
 
-**Cherché une cloche liste de bans.** Pas dans cette version. Expulser + Suspendre + désactiver forfait sont les outils.
+**Cherché une cloche liste de bans.** Pas dans cette version. Expulser + Suspendre + **Désactiver** / **Activer** un forfait sont les outils.
 
 **Activer ne fait rien.** Tu es peut-être déjà actif, ou tu as tapé sur le mauvais site. Confirme le libellé de ligne. Si le portail refuse encore de payer, vérifie routeur **Hors ligne** — c’est un autre bloc que suspendre.
 

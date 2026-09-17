@@ -9,7 +9,7 @@ intents: ["voucher", "pdf", "sync", "print", "prepaid codes"]
 buttons: ["Générer des bons", "Imprimer PDF", "Synchroniser les inutilisés vers le routeur"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.voucher-not-wallet", "tip.sync-vouchers"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 12
 ---
 
@@ -56,7 +56,7 @@ _Emplacement capture : formulaire Générer des bons et mise en page Imprimer PD
 
 ## Si ça échoue
 
-**Ce site n’a pas de forfait actif.** Crées-en un d’abord sous **Sites**.
+**Ce site n’a pas de forfait actif.** Crées-en un d’abord sous **Sites**, ou **Activer** un SKU désactivé sur ce site.
 
 **Export PDF impossible.** Réessaie ; filtre moins de 500 ; vérifie la taille du logo de marque (512 Ko) si les tickets ont l’air bizarres.
 

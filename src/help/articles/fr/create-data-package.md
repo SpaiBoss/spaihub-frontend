@@ -6,10 +6,10 @@ description: "Vends un volume de téléchargement visible à consommer avant exp
 role: ["owner"]
 section: tutorials
 intents: ["data package", "download", "data-based", "quota", "allowance"]
-buttons: ["Au volume", "Volume de téléchargement"]
+buttons: ["Au volume", "Volume de téléchargement", "Désactiver", "Activer"]
 do_not_say: ["remaining fair-use GB to guests"]
 related: ["tip.speed-vs-quota", "own.tut.time-package"]
-updatedAt: 2026-09-16
+updatedAt: 2026-09-17
 minutes: 10
 ---
 
@@ -55,7 +55,7 @@ _Emplacement capture : forfait Au volume avec Volume de téléchargement et À c
 - **Détails** propriétaire : volume plus expiration, pas « data illimitée ».
 - **Prévisualiser le portail** : **{{cap}} de téléchargement · expire dans {{duration}}**. Après paiement, **Volume : {{cap}}**.
 - Quand les octets sont partis, la session finit même s’il restait du temps sur l’horloge. Quand l’horloge finit, les octets restants sont partis.
-- **Désactiver** arrête les nouvelles ventes de ce SKU.
+- **Désactiver** arrête les nouvelles ventes de ce SKU. **Activer** les reprend.
 
 Les forfaits au temps à côté peuvent encore dire **Data illimitée**. C’est un autre produit. Ne mélange pas les explications au comptoir.
 
@@ -71,7 +71,7 @@ Les forfaits au temps à côté peuvent encore dire **Data illimitée**. C’est
 
 **Tu veux des Go cachés sur un plan au temps à la place.** C’est **Plafond d’usage (caché aux abonnés)** sur **Au temps**, activé par défaut à 2 Go pour les nouveaux forfaits. Ne lis jamais les Go de plafond d’usage restants aux invités.
 
-**Le forfait est encore listé après Désactiver.** Il doit cesser d’apparaître pour les nouveaux achats portail. Les anciennes sessions continuent jusqu’à expiration ou jusqu’à **Expulser**.
+**Le forfait est encore listé après Désactiver.** Attendu dans le tableau propriétaire — pour **Modifier** ou **Activer**. Il doit cesser d’apparaître pour les nouveaux achats portail. Les anciennes sessions continuent jusqu’à expiration ou jusqu’à **Expulser**.
 
 **L’expiration a semblé « injuste ».** **À consommer dans** c’est l’horloge que tu as imprimée. Un pack 1 Go qui **À consommer dans** 3 heures c’est un SKU trajet ; 7 **jours** c’est un hebdo. Dis l’horloge au comptoir. SpaiHub n’étendra pas les octets restants parce que quelqu’un est allé au village.
 

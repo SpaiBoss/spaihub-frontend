@@ -214,13 +214,16 @@ export default function Locations() {
     }
   }
 
-  async function deactivatePackage(packageId) {
+  async function setPackageActive(packageId, isActive) {
     try {
-      await api.delete(`/api/owner/locations/${expanded}/packages/${packageId}`);
-      toast.success(t('toast.pkgDeactivated'));
+      await api.patch(`/api/owner/locations/${expanded}/packages/${packageId}/status`, { isActive });
+      toast.success(isActive ? t('toast.pkgActivated') : t('toast.pkgDeactivated'));
       expandLocation(expanded);
     } catch (err) {
-      toast.error(err.response?.data?.error || t('toast.pkgDeactivateFailed'));
+      toast.error(
+        err.response?.data?.error
+          || (isActive ? t('toast.pkgActivateFailed') : t('toast.pkgDeactivateFailed')),
+      );
     }
   }
 
@@ -617,24 +620,32 @@ export default function Locations() {
                             <td className="py-2 whitespace-nowrap">{p.priceXaf.toLocaleString()} XAF</td>
                             <td className="py-2"><StatusBadge status={p.isActive ? 'ACTIVE' : 'SUSPENDED'} /></td>
                             <td className="py-2 sticky-actions space-x-2 whitespace-nowrap">
-                              {p.isActive && (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      setEditingPackage(p);
-                                      setShowAddPackage(true);
-                                    }}
-                                    className="text-brand text-xs hover:text-brand/80"
-                                  >
-                                    {tc('actions.edit')}
-                                  </button>
-                                  <button
-                                    onClick={() => deactivatePackage(p.id)}
-                                    className="text-red-500 text-xs hover:text-red-700"
-                                  >
-                                    {t('locations.deactivate')}
-                                  </button>
-                                </>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingPackage(p);
+                                  setShowAddPackage(true);
+                                }}
+                                className="text-brand text-xs hover:text-brand/80"
+                              >
+                                {tc('actions.edit')}
+                              </button>
+                              {p.isActive ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setPackageActive(p.id, false)}
+                                  className="text-red-500 text-xs hover:text-red-700"
+                                >
+                                  {t('locations.deactivate')}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setPackageActive(p.id, true)}
+                                  className="text-brand text-xs hover:text-brand/80"
+                                >
+                                  {t('locations.activate')}
+                                </button>
                               )}
                             </td>
                           </tr>

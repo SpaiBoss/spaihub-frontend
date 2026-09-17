@@ -459,6 +459,8 @@
     "pkgUpdated": "Forfait mis à jour",
     "pkgCreated": "Forfait créé",
     "pkgSaveFailed": "Impossible d’enregistrer le forfait",
+    "pkgActivated": "Forfait activé",
+    "pkgActivateFailed": "Impossible d’activer le forfait",
     "pkgDeactivated": "Forfait désactivé",
     "pkgDeactivateFailed": "Impossible de désactiver le forfait",
     "copied": "Copié",
